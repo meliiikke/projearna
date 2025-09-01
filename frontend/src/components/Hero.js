@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Hero.css';
+
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
 
 const Hero = () => {
   const [heroContent, setHeroContent] = useState(null);
@@ -38,8 +40,9 @@ const Hero = () => {
         // First check if backend is running
         console.log('Checking backend health...');
         try {
-          const healthRes = await axios.get('/api/health');
-          console.log('Backend health check:', healthRes.data);
+          const healthRes = await fetch(`${API_BASE_URL}/api/health`);
+          const healthData = await healthRes.json();
+          console.log('Backend health check:', healthData);
         } catch (healthError) {
           console.error('Backend health check failed:', healthError);
           // Don't return, continue with hero features anyway
@@ -48,9 +51,11 @@ const Hero = () => {
         // Fetch hero slides (try both endpoints)
         let slidesRes = null;
         try {
-          slidesRes = await axios.get('/api/hero-slides/slides');
-          if (slidesRes.data && slidesRes.data.length > 0) {
-            setSliderData(slidesRes.data);
+          const slidesResponse = await fetch(`${API_BASE_URL}/api/hero-slides/slides`);
+          const slidesData = await slidesResponse.json();
+          if (slidesData && slidesData.length > 0) {
+            setSliderData(slidesData);
+            slidesRes = { data: slidesData };
           }
         } catch (slidesError) {
           console.log('Hero slides endpoint failed, using default data');
@@ -62,15 +67,16 @@ const Hero = () => {
         console.log('Requesting hero features from:', '/api/content/hero-features');
         console.log('Full URL will be:', window.location.origin + '/api/content/hero-features');
         
-        // Try proxy first, then direct backend URL if failed
+        // Try direct backend URL
         let featuresRes;
         try {
-          featuresRes = await axios.get('/api/content/hero-features');
-          console.log('Hero features response via proxy - status:', featuresRes.status);
-        } catch (proxyError) {
-          console.log('Proxy failed, trying direct backend URL...');
-          featuresRes = await axios.get('http://localhost:3001/api/content/hero-features');
-          console.log('Hero features response via direct URL - status:', featuresRes.status);
+          const featuresResponse = await fetch(`${API_BASE_URL}/api/content/hero-features`);
+          const featuresData = await featuresResponse.json();
+          featuresRes = { data: featuresData, status: featuresResponse.status };
+          console.log('Hero features response - status:', featuresResponse.status);
+        } catch (error) {
+          console.log('Hero features endpoint failed:', error);
+          featuresRes = { data: [], status: 500 };
         }
         
         console.log('Hero features response data:', featuresRes.data);
@@ -79,8 +85,9 @@ const Hero = () => {
         if (!featuresRes.data || featuresRes.data.length === 0) {
           console.log('No active hero features found, trying admin endpoint...');
           try {
-            const adminRes = await axios.get('/api/content/admin/hero-features');
-            console.log('Admin hero features response:', adminRes.data);
+            const adminResponse = await fetch(`${API_BASE_URL}/api/content/admin/hero-features`);
+            const adminData = await adminResponse.json();
+            console.log('Admin hero features response:', adminData);
           } catch (adminError) {
             console.log('Admin endpoint failed:', adminError);
           }
@@ -89,9 +96,9 @@ const Hero = () => {
         setHeroFeatures(featuresRes.data);
         
         // Preload slider images - use the updated sliderData
-        const currentSliderData = slidesRes && slidesRes.data && slidesRes.data.length > 0 ? slidesRes.data : sliderData;
+        const currentSliderData = slidesRes && slidesRes.data && slidesRes.data.length > 0 ? slidesRes.data : (sliderData || []);
         const imagePromises = currentSliderData
-          .filter(slide => slide.image_url)
+          .filter(slide => slide && slide.image_url)
           .map(slide => preloadImage(slide.image_url));
         
         await Promise.all(imagePromises);
