@@ -50,13 +50,13 @@ const AdminsManager = () => {
     setMessage('');
     try {
       if (isCreating) {
-        await axios.post('/api/content/admin/admins', formData);
+        await axios.post(`${API_BASE_URL}/content/admin/admins`, formData);
         await fetchItems();
         setMessage('Admin eklendi');
       } else if (editingItem) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
-        await axios.put(`/api/content/admin/admins/${editingItem.id}`, payload);
+        await axios.put(`${API_BASE_URL}/content/admin/admins/${editingItem.id}`, payload);
         await fetchItems();
         setMessage('Admin güncellendi');
       }
@@ -70,7 +70,7 @@ const AdminsManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu admini silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`/api/content/admin/admins/${id}`);
+      await axios.delete(`${API_BASE_URL}/content/admin/admins/${id}`);
       setItems(prev => prev.filter(it => it.id !== id));
       setMessage('Admin silindi');
     } catch (e) {

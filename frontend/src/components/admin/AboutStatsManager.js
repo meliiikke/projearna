@@ -62,7 +62,7 @@ const AboutStatsManager = () => {
           icon: '⚡', 
           is_active: true 
         };
-        const res = await axios.post('/api/content/admin/about-stats', payload);
+        const res = await axios.post(`${API_BASE_URL}/content/admin/about-stats`, payload);
         const newStat = { ...payload, id: res.data.id };
         setStats(prev => [...prev, newStat]);
         setMessage('İstatistik eklendi');
@@ -73,7 +73,7 @@ const AboutStatsManager = () => {
           icon: '⚡', 
           is_active: editingItem.is_active !== undefined ? editingItem.is_active : true 
         };
-        await axios.put(`/api/content/admin/about-stats/${editingItem.id}`, payload);
+        await axios.put(`${API_BASE_URL}/content/admin/about-stats/${editingItem.id}`, payload);
         setStats(prev => prev.map(it => it.id === editingItem.id ? { ...it, title: formData.title, value: formData.value, icon: '⚡' } : it));
         setMessage('İstatistik güncellendi');
       }
@@ -87,7 +87,7 @@ const AboutStatsManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu istatistiği silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`/api/content/admin/about-stats/${id}`);
+      await axios.delete(`${API_BASE_URL}/content/admin/about-stats/${id}`);
       setStats(prev => prev.filter(it => it.id !== id));
       setMessage('İstatistik silindi');
     } catch (e) {

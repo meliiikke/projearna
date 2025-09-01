@@ -64,7 +64,7 @@ const HeroFeaturesManager = () => {
           order_index: features.length, 
           is_active: true 
         };
-        const res = await axios.post('/api/content/admin/hero-features', payload);
+        const res = await axios.post(`${API_BASE_URL}/content/admin/hero-features`, payload);
         const newFeature = { ...payload, id: res.data.id };
         setFeatures(prev => [...prev, newFeature]);
         setMessage('Özellik eklendi');
@@ -75,7 +75,7 @@ const HeroFeaturesManager = () => {
           order_index: editingItem.order_index || 0, 
           is_active: editingItem.is_active !== undefined ? editingItem.is_active : true 
         };
-        await axios.put(`/api/content/admin/hero-features/${editingItem.id}`, payload);
+        await axios.put(`${API_BASE_URL}/content/admin/hero-features/${editingItem.id}`, payload);
         setFeatures(prev => prev.map(it => it.id === editingItem.id ? { ...it, title: formData.title, icon: '✓' } : it));
         setMessage('Özellik güncellendi');
       }
@@ -89,7 +89,7 @@ const HeroFeaturesManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu özelliği silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`/api/content/admin/hero-features/${id}`);
+      await axios.delete(`${API_BASE_URL}/content/admin/hero-features/${id}`);
       setFeatures(prev => prev.filter(it => it.id !== id));
       setMessage('Özellik silindi');
     } catch (e) {

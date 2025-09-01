@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const StaticContentManager = () => {
@@ -29,11 +30,11 @@ const StaticContentManager = () => {
         aboutStatsRes,
         footerBottomLinksRes
       ] = await Promise.all([
-        axios.get('/api/content/admin/sections'),
-        axios.get('/api/content/hero-features'),
-        axios.get('/api/content/about-features'),
-        axios.get('/api/content/about-stats'),
-        axios.get('/api/content/footer-bottom-links')
+        axios.get(`${API_BASE_URL}/content/admin/sections`),
+        axios.get(`${API_BASE_URL}/content/hero-features`),
+        axios.get(`${API_BASE_URL}/content/about-features`),
+        axios.get(`${API_BASE_URL}/content/about-stats`),
+        axios.get(`${API_BASE_URL}/content/footer-bottom-links`)
       ]);
 
       setContentSections(contentSectionsRes.data);
@@ -62,11 +63,11 @@ const StaticContentManager = () => {
 
   const getCurrentEndpoint = () => {
     switch (activeTab) {
-      case 'content-sections': return '/api/content/admin/sections';
-      case 'hero-features': return '/api/content/admin/hero-features';
-      case 'about-features': return '/api/content/admin/about-features';
-      case 'about-stats': return '/api/content/admin/about-stats';
-      case 'footer-bottom-links': return '/api/content/admin/footer-bottom-links';
+      case 'content-sections': return `${API_BASE_URL}/content/admin/sections`;
+      case 'hero-features': return `${API_BASE_URL}/content/admin/hero-features`;
+      case 'about-features': return `${API_BASE_URL}/content/admin/about-features`;
+      case 'about-stats': return `${API_BASE_URL}/content/admin/about-stats`;
+      case 'footer-bottom-links': return `${API_BASE_URL}/content/admin/footer-bottom-links`;
       default: return '';
     }
   };
@@ -468,7 +469,7 @@ const StaticContentManager = () => {
                 </div>
               </div>
             </>
-          )}
+
 
           <div className="form-group">
             <label className="checkbox-label">

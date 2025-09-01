@@ -86,11 +86,11 @@ const ServicesManager = () => {
 
     try {
       if (isCreating) {
-        const response = await axios.post('/api/content/admin/services', formData);
+        const response = await axios.post(`${API_BASE_URL}/content/admin/services`, formData);
         setServices(prev => [...prev, { ...formData, id: response.data.id }]);
         setMessage('Service created successfully!');
       } else if (editingService) {
-        await axios.put(`/api/content/admin/services/${editingService.id}`, formData);
+        await axios.put(`${API_BASE_URL}/content/admin/services/${editingService.id}`, formData);
         setServices(prev => prev.map(service => 
           service.id === editingService.id 
             ? { ...service, ...formData }
@@ -112,7 +112,7 @@ const ServicesManager = () => {
     if (!window.confirm('Are you sure you want to delete this service?')) return;
 
     try {
-      await axios.delete(`/api/content/admin/services/${id}`);
+      await axios.delete(`${API_BASE_URL}/content/admin/services/${id}`);
       setServices(prev => prev.filter(service => service.id !== id));
       setMessage('Service deleted successfully!');
     } catch (error) {

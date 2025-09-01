@@ -53,7 +53,7 @@ const ContactManager = () => {
     setMessage('');
 
     try {
-      await axios.put('/api/content/admin/contact', contactInfo);
+      await axios.put(`${API_BASE_URL}/content/admin/contact`, contactInfo);
       setMessage('Contact information updated successfully!');
     } catch (error) {
       console.error('Error updating contact info:', error);

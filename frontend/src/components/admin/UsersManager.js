@@ -56,13 +56,13 @@ const UsersManager = () => {
     setMessage('');
     try {
       if (isCreating) {
-        await axios.post('/api/content/admin/users', formData);
+        await axios.post(`${API_BASE_URL}/content/admin/users`, formData);
         await fetchItems();
         setMessage('Kullanıcı eklendi');
       } else if (editingItem) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
-        await axios.put(`/api/content/admin/users/${editingItem.id}`, payload);
+        await axios.put(`${API_BASE_URL}/content/admin/users/${editingItem.id}`, payload);
         await fetchItems();
         setMessage('Kullanıcı güncellendi');
       }
@@ -76,7 +76,7 @@ const UsersManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`/api/content/admin/users/${id}`);
+      await axios.delete(`${API_BASE_URL}/content/admin/users/${id}`);
       setItems(prev => prev.filter(it => it.id !== id));
       setMessage('Kullanıcı silindi');
     } catch (e) {

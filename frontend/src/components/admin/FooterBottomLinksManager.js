@@ -54,13 +54,13 @@ const FooterBottomLinksManager = () => {
     try {
       if (isCreating) {
         const payload = { title: formData.title, link: '', order_index: items.length, is_active: true };
-        const res = await axios.post('/api/content/admin/footer-bottom-links', payload);
+        const res = await axios.post(`${API_BASE_URL}/content/admin/footer-bottom-links`, payload);
         const newLink = { ...payload, id: res.data.id };
         setItems(prev => [...prev, newLink]);
         setMessage('Link eklendi');
       } else if (editingItem) {
         const payload = { title: formData.title, link: editingItem.link || '', order_index: editingItem.order_index || 0, is_active: editingItem.is_active !== undefined ? editingItem.is_active : true };
-        await axios.put(`/api/content/admin/footer-bottom-links/${editingItem.id}`, payload);
+        await axios.put(`${API_BASE_URL}/content/admin/footer-bottom-links/${editingItem.id}`, payload);
         setItems(prev => prev.map(it => it.id === editingItem.id ? { ...it, title: formData.title } : it));
         setMessage('Link güncellendi');
       }
@@ -74,7 +74,7 @@ const FooterBottomLinksManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu linki silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`/api/content/admin/footer-bottom-links/${id}`);
+      await axios.delete(`${API_BASE_URL}/content/admin/footer-bottom-links/${id}`);
       setItems(prev => prev.filter(it => it.id !== id));
       setMessage('Link silindi');
     } catch (e) {

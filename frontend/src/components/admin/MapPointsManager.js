@@ -63,10 +63,10 @@ const MapPointsManager = () => {
 
     try {
       if (isCreating) {
-        await axios.post('/api/content/admin/map-points', formData);
+        await axios.post(`${API_BASE_URL}/content/admin/map-points`, formData);
         setMessage('Map point created successfully');
       } else {
-        await axios.put(`/api/content/admin/map-points/${editingItem.id}`, formData);
+        await axios.put(`${API_BASE_URL}/content/admin/map-points/${editingItem.id}`, formData);
         setMessage('Map point updated successfully');
       }
       
@@ -86,7 +86,7 @@ const MapPointsManager = () => {
     if (!window.confirm('Are you sure you want to delete this map point?')) return;
     
     try {
-      await axios.delete(`/api/content/admin/map-points/${id}`);
+      await axios.delete(`${API_BASE_URL}/content/admin/map-points/${id}`);
       setMessage('Map point deleted successfully');
       fetchItems();
     } catch (error) {
@@ -107,7 +107,7 @@ const MapPointsManager = () => {
     
     try {
       setSaving(true);
-      const response = await axios.post('/api/content/admin/map-points/update-coordinates');
+      const response = await axios.post(`${API_BASE_URL}/content/admin/map-points/update-coordinates`);
       setMessage(response.data.message);
       fetchItems(); // Refresh the list
     } catch (error) {

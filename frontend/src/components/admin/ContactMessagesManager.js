@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const ContactMessagesManager = () => {
@@ -16,22 +18,21 @@ const ContactMessagesManager = () => {
       const token = localStorage.getItem('adminToken');
       console.log('Fetching messages with token:', token ? 'Token exists' : 'No token'); // Debug log
       
-      const response = await fetch('http://localhost:3001/api/content/admin/contact-messages', {
+      const response = await axios.get(`${API_BASE_URL}/content/admin/contact-messages`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
       console.log('Response status:', response.status); // Debug log
-      console.log('Response ok:', response.ok); // Debug log
       
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         console.log('Fetched messages:', data); // Debug log
         setMessages(data);
       } else {
         console.error('Failed to fetch messages, status:', response.status);
-        const errorData = await response.json();
+        const errorData = response.data;
         console.error('Error data:', errorData);
       }
     } catch (error) {
@@ -44,14 +45,13 @@ const ContactMessagesManager = () => {
   const markAsRead = async (id) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:3001/api/content/admin/contact-messages/${id}/read`, {
-        method: 'PUT',
+      const response = await axios.put(`${API_BASE_URL}/content/admin/contact-messages/${id}/read`, {}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (response.ok) {
+      if (response.status === 200) {
         setMessages(messages.map(msg => 
           msg.id === id ? { ...msg, is_read: true } : msg
         ));
@@ -68,14 +68,13 @@ const ContactMessagesManager = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:3001/api/content/admin/contact-messages/${id}`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${API_BASE_URL}/content/admin/contact-messages/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (response.ok) {
+      if (response.status === 200) {
         setMessages(messages.filter(msg => msg.id !== id));
         if (selectedMessage && selectedMessage.id === id) {
           setSelectedMessage(null);

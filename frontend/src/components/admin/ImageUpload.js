@@ -34,7 +34,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     setUploading(true);
 
     try {
-      const response = await axios.post('/api/upload/image', formData, {
+      const response = await axios.post(`${API_BASE_URL}/upload/image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -65,7 +65,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     if (!window.confirm('Bu resmi silmek istediğinizden emin misiniz?')) return;
 
     try {
-      await axios.delete(`/api/upload/image/${filename}`);
+      await axios.delete(`${API_BASE_URL}/upload/image/${filename}`);
       await fetchImages();
       
       if (selectedImage && selectedImage.includes(filename)) {
