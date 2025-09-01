@@ -7,8 +7,6 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-pr
 const Footer = () => {
   const [contactInfo, setContactInfo] = useState({});
   const [missionContent, setMissionContent] = useState(null);
-  const [services, setServices] = useState([]);
-  const [footerBottomLinks, setFooterBottomLinks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,24 +24,9 @@ const Footer = () => {
           content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
         };
         
-        const fallbackServices = [
-          { id: 1, title: 'Clean Energy' },
-          { id: 2, title: 'Solar Power' },
-          { id: 3, title: 'Wind Energy' }
-        ];
-        
-        const fallbackLinks = [
-          { id: 1, title: 'Privacy Policy', link: '#' },
-          { id: 2, title: 'Terms of Service', link: '#' }
-        ];
-        
         setContactInfo(fallbackContact);
         setMissionContent(fallbackMission);
-        setServices(fallbackServices);
-        setFooterBottomLinks(fallbackLinks);
         console.log('Contact info:', fallbackContact);
-        console.log('Services data:', fallbackServices);
-        console.log('Footer bottom links data:', fallbackLinks);
       } catch (error) {
         console.error('Error fetching footer data:', error);
         console.error('Error details:', {
@@ -115,9 +98,9 @@ const Footer = () => {
                   ))
                 ) : (
                   <>
-                    <li><a href="#">Clean Energy</a></li>
-                    <li><a href="#">Sustainable Development</a></li>
-                    <li><a href="#">Energy Transition</a></li>
+                                    <li><a href="#services">Clean Energy</a></li>
+                <li><a href="#about">Sustainable Development</a></li>
+                <li><a href="#services">Energy Transition</a></li>
                   </>
                 )}
               </ul>
@@ -157,8 +140,8 @@ const Footer = () => {
                 ))
               ) : (
                 <>
-                  <a href="#">Privacy Policy</a>
-                  <a href="#">Terms of Service</a>
+                                  <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
                 </>
               )}
             </div>

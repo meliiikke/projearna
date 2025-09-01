@@ -6,7 +6,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-pr
 
 const Contact = () => {
   const [contactInfo, setContactInfo] = useState({});
-  const [contactHeader, setContactHeader] = useState({});
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -21,7 +21,6 @@ const Contact = () => {
 
   useEffect(() => {
     fetchContactInfo();
-    fetchContactHeader();
     generateCaptcha();
   }, []);
 
@@ -44,15 +43,7 @@ const Contact = () => {
     }
   };
 
-  const fetchContactHeader = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/content/contact-header`);
-      const data = await response.json();
-      setContactHeader(data);
-    } catch (error) {
-      console.error('Error fetching contact header:', error);
-    }
-  };
+
 
   const generateCaptcha = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -163,6 +154,7 @@ const Contact = () => {
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
+            title="Google Maps - ARNA Energy Location"
           ></iframe>
         </div>
       </section>
