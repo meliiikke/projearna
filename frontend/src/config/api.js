@@ -6,7 +6,7 @@ const getApiBaseUrl = () => {
   }
   
   // Production: use environment variable or default
-  return process.env.REACT_APP_API_URL || 'https://your-railway-backend-url.railway.app';
+  return process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
