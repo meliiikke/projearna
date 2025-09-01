@@ -30,8 +30,19 @@ const HeroSlidesManager = () => {
       console.log('Fetching hero slides...');
       const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`);
       console.log('Hero slides response:', response.data);
-      setSlides(response.data || []);
-      setMessage(`${response.data?.length || 0} hero slides loaded`);
+      
+      // Resim URL'lerini tam backend URL'i ile birleştir
+      const slidesWithFullImageUrl = (response.data || []).map(slide => ({
+        ...slide,
+        image_url: slide.image_url && slide.image_url.startsWith('http') 
+          ? slide.image_url 
+          : slide.image_url 
+            ? `${API_BASE_URL.replace('/api', '')}${slide.image_url}`
+            : ''
+      }));
+      
+      setSlides(slidesWithFullImageUrl);
+      setMessage(`${slidesWithFullImageUrl.length} hero slides loaded`);
     } catch (error) {
       console.error('Error fetching hero slides:', error);
       setMessage('Error fetching hero slides: ' + error.message);

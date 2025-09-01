@@ -16,7 +16,12 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
   const fetchImages = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/upload/images`);
-      setImages(response.data);
+      // Resim URL'lerini tam backend URL'i ile birleştir
+      const imagesWithFullUrl = response.data.map(image => ({
+        ...image,
+        url: image.url.startsWith('http') ? image.url : `${API_BASE_URL.replace('/api', '')}${image.url}`
+      }));
+      setImages(imagesWithFullUrl);
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {
@@ -43,8 +48,11 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       // Resmi listeye ekle
       await fetchImages();
       
-      // Yeni yüklenen resmi seç
-      handleImageSelect(response.data.imageUrl);
+      // Yeni yüklenen resmi seç - URL'i tam backend URL'i ile birleştir
+      const fullImageUrl = response.data.imageUrl.startsWith('http') 
+        ? response.data.imageUrl 
+        : `${API_BASE_URL.replace('/api', '')}${response.data.imageUrl}`;
+      handleImageSelect(fullImageUrl);
       
       alert('Resim başarıyla yüklendi!');
     } catch (error) {
