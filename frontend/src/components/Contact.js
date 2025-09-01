@@ -33,7 +33,7 @@ const Contact = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/content/contact');
+      const response = await fetch('/api/content/contact');
       const data = await response.json();
       setContactInfo(data);
     } catch (error) {
@@ -43,7 +43,7 @@ const Contact = () => {
 
   const fetchContactHeader = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/content/contact-header');
+      const response = await fetch('/api/content/contact-header');
       const data = await response.json();
       setContactHeader(data);
     } catch (error) {
@@ -82,7 +82,7 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      const requestUrl = 'http://localhost:3001/api/content/contact';
+      const requestUrl = '/api/content/contact';
       console.log('Sending request to:', requestUrl); // Debug log
       console.log('Request body:', JSON.stringify(formData)); // Debug log
       

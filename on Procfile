@@ -1,0 +1,3 @@
+[33md935992[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Add heroku-postbuild script to fix Railway deployment - backend dependencies will now be installed automatically
+[33m866e82f[m Fix package.json: Update main entry point and add start script for server.js
+[33m5e1e549[m Initial commit: ARNA website with admin panel and map points functionality
