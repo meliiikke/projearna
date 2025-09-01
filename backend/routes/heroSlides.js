@@ -46,6 +46,11 @@ router.get('/admin/hero-slides', authMiddleware, async (req, res) => {
         : null
     }));
     
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    
     res.json(normalizedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
@@ -75,12 +80,17 @@ router.get('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
         : null
     };
     
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    
     res.json(normalizedRow);
   } catch (error) {
     console.error('Error fetching hero slide:', error);
     res.status(500).json({ message: 'Error fetching hero slide' });
   }
-};
+});
 
 // Create new hero slide
 router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
@@ -127,6 +137,11 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
         (slide.image_url.startsWith('http') ? slide.image_url : `${req.protocol}://${req.get('host')}${slide.image_url}`) 
         : null
     };
+
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
 
     res.status(201).json({
       message: 'Hero slide created successfully',
@@ -191,6 +206,11 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
         : null
     };
 
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+
     res.json({
       message: 'Hero slide updated successfully',
       slide: normalizedSlide
@@ -215,6 +235,11 @@ router.delete('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'Hero slide not found' });
     }
 
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+
     res.json({ message: 'Hero slide deleted successfully' });
   } catch (error) {
     console.error('Error deleting hero slide:', error);
@@ -234,6 +259,11 @@ router.put('/admin/hero-slides/reorder', authMiddleware, async (req, res) => {
         [slide.slide_order, slide.id]
       );
     }
+
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
 
     res.json({ message: 'Hero slides reordered successfully' });
   } catch (error) {
