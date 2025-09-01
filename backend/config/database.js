@@ -148,6 +148,22 @@ const initializeDatabase = async () => {
       )
     `);
 
+    // Default admin kullanıcısı oluştur
+    const [adminRows] = await promisePool.execute('SELECT * FROM admins WHERE username = ?', ['admin']);
+    
+    if (adminRows.length === 0) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      
+      await promisePool.execute(
+        'INSERT INTO admins (username, email, password, is_active) VALUES (?, ?, ?, ?)',
+        ['admin', 'admin@arnaenergy.com', hashedPassword, true]
+      );
+      console.log('✅ Default admin user created: username=admin, password=admin123');
+    } else {
+      console.log('✅ Admin user already exists');
+    }
+
     console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Database initialization failed:', error);

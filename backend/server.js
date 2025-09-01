@@ -31,15 +31,19 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS - Tüm origin'lere izin ver (development için)
-app.use(cors({
-  origin: true,
+// CORS - Production ve development için
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://projearna-production.up.railway.app', 'https://projearna-frontend-production.up.railway.app']
+    : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   preflightContinue: false,
   optionsSuccessStatus: 204
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -90,6 +94,8 @@ const startServer = async () => {
       console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
       console.log(`🔑 Default Admin Login: username=admin, password=admin123`);
+      console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'Using default'}`);
+      console.log(`🗄️ Database: ${process.env.DB_NAME || 'arna_energy'} on ${process.env.DB_HOST || 'localhost'}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

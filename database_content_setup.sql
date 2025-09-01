@@ -336,6 +336,16 @@ title = VALUES(title),
 link = VALUES(link),
 order_index = VALUES(order_index);
 
+-- Admin User Setup (Admin kullanıcısı kurulumu)
+-- Default admin kullanıcısı oluştur (username: admin, password: admin123)
+INSERT INTO admins (username, email, password, is_active) VALUES 
+('admin', 'admin@arnaenergy.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1)
+ON DUPLICATE KEY UPDATE
+username = VALUES(username),
+email = VALUES(email),
+password = VALUES(password),
+is_active = VALUES(is_active);
+
 -- Verification Query (Doğrulama sorguları)
 -- Bu sorguları çalıştırarak verilerin düzgün eklendiğini kontrol edebilirsiniz:
 
@@ -350,3 +360,4 @@ order_index = VALUES(order_index);
 -- SELECT * FROM footer_services ORDER BY order_index;
 -- SELECT * FROM footer_social_links ORDER BY order_index;
 -- SELECT * FROM footer_bottom_links ORDER BY order_index;
+-- SELECT * FROM admins;
