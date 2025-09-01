@@ -6,6 +6,11 @@ import './Hero.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
 
 const Hero = () => {
+  // URL'yi normalize eden yardımcı fonksiyon
+  const normalizeImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    return imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL.replace('/api', '')}${imageUrl}`;
+  };
   const [heroFeatures, setHeroFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -37,25 +42,27 @@ const Hero = () => {
   const preloadImage = useCallback((imageUrl) => {
     if (!imageUrl) return Promise.resolve();
     
+    const normalizedUrl = normalizeImageUrl(imageUrl);
+    
     // Check if image is already loaded
-    if (imagesLoaded[imageUrl] !== undefined) {
+    if (imagesLoaded[normalizedUrl] !== undefined) {
       return Promise.resolve();
     }
     
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        setImagesLoaded(prev => ({ ...prev, [imageUrl]: true }));
+        setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: true }));
         resolve();
       };
       img.onerror = () => {
-        console.warn('Failed to load image:', imageUrl);
-        setImagesLoaded(prev => ({ ...prev, [imageUrl]: false }));
+        console.warn('Failed to load image:', normalizedUrl);
+        setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: false }));
         resolve(); // Resolve anyway to not block loading
       };
-      img.src = imageUrl;
+      img.src = normalizedUrl;
     });
-  }, [imagesLoaded]);
+  }, [imagesLoaded, normalizeImageUrl]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -198,10 +205,10 @@ const Hero = () => {
         <AnimatePresence mode="wait">
           <motion.div 
             key={currentSlide}
-            className={`hero-image ${currentSlideData?.image_url && imagesLoaded[currentSlideData.image_url] ? 'image-loaded' : 'image-placeholder'}`}
+            className={`hero-image ${currentSlideData?.image_url && imagesLoaded[normalizeImageUrl(currentSlideData.image_url)] ? 'image-loaded' : 'image-placeholder'}`}
             style={{
-              backgroundImage: currentSlideData?.image_url && imagesLoaded[currentSlideData.image_url] !== false
-                ? `linear-gradient(135deg, rgba(26, 26, 26, 0.7) 0%, rgba(197, 165, 114, 0.1) 50%, rgba(26, 26, 26, 0.8) 100%), url(${currentSlideData.image_url})`
+              backgroundImage: currentSlideData?.image_url && imagesLoaded[normalizeImageUrl(currentSlideData.image_url)] !== false
+                ? `linear-gradient(135deg, rgba(26, 26, 26, 0.7) 0%, rgba(197, 165, 114, 0.1) 50%, rgba(26, 26, 26, 0.8) 100%), url(${normalizeImageUrl(currentSlideData.image_url)})`
                 : undefined
             }}
             initial={{ opacity: 0, scale: 1.02 }}

@@ -9,7 +9,16 @@ router.get('/slides', async (req, res) => {
     const [rows] = await pool.execute(
       'SELECT * FROM hero_slides WHERE is_active = 1 ORDER BY slide_order ASC, created_at ASC'
     );
-    res.json(rows);
+    
+    // Resim URL'lerini normalize et
+    const normalizedRows = rows.map(row => ({
+      ...row,
+      image_url: row.image_url ? 
+        (row.image_url.startsWith('http') ? row.image_url : `${req.protocol}://${req.get('host')}${row.image_url}`) 
+        : null
+    }));
+    
+    res.json(normalizedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
     res.status(500).json({ message: 'Error fetching hero slides' });
@@ -23,7 +32,16 @@ router.get('/admin/hero-slides', authMiddleware, async (req, res) => {
     const [rows] = await pool.execute(
       'SELECT * FROM hero_slides ORDER BY slide_order ASC, created_at ASC'
     );
-    res.json(rows);
+    
+    // Resim URL'lerini normalize et
+    const normalizedRows = rows.map(row => ({
+      ...row,
+      image_url: row.image_url ? 
+        (row.image_url.startsWith('http') ? row.image_url : `${req.protocol}://${req.get('host')}${row.image_url}`) 
+        : null
+    }));
+    
+    res.json(normalizedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
     res.status(500).json({ message: 'Error fetching hero slides' });
@@ -43,12 +61,21 @@ router.get('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'Hero slide not found' });
     }
     
-    res.json(rows[0]);
+    // Resim URL'ini normalize et
+    const row = rows[0];
+    const normalizedRow = {
+      ...row,
+      image_url: row.image_url ? 
+        (row.image_url.startsWith('http') ? row.image_url : `${req.protocol}://${req.get('host')}${row.image_url}`) 
+        : null
+    };
+    
+    res.json(normalizedRow);
   } catch (error) {
     console.error('Error fetching hero slide:', error);
     res.status(500).json({ message: 'Error fetching hero slide' });
   }
-});
+};
 
 // Create new hero slide
 router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
@@ -87,9 +114,18 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
       [result.insertId]
     );
 
+    // Resim URL'ini normalize et
+    const slide = newSlide[0];
+    const normalizedSlide = {
+      ...slide,
+      image_url: slide.image_url ? 
+        (slide.image_url.startsWith('http') ? slide.image_url : `${req.protocol}://${req.get('host')}${slide.image_url}`) 
+        : null
+    };
+
     res.status(201).json({
       message: 'Hero slide created successfully',
-      slide: newSlide[0]
+      slide: normalizedSlide
     });
   } catch (error) {
     console.error('Error creating hero slide:', error);
@@ -141,9 +177,18 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
       [id]
     );
 
+    // Resim URL'ini normalize et
+    const slide = updatedSlide[0];
+    const normalizedSlide = {
+      ...slide,
+      image_url: slide.image_url ? 
+        (slide.image_url.startsWith('http') ? slide.image_url : `${req.protocol}://${req.get('host')}${slide.image_url}`) 
+        : null
+    };
+
     res.json({
       message: 'Hero slide updated successfully',
-      slide: updatedSlide[0]
+      slide: normalizedSlide
     });
   } catch (error) {
     console.error('Error updating hero slide:', error);
