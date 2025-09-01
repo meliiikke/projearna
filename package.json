@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "ARNA Energy Company Website with Admin Panel",
   "main": "server.js",
-  
+
   "engines": {
-    "node": ">=18.0.0"
+    "node": "18.x"
   },
   "scripts": {
     "start": "node server.js",
