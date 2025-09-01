@@ -33,6 +33,30 @@ const Hero = () => {
     }
   ]);
 
+  // Preload image function - defined before useEffect to avoid "used before defined" error
+  const preloadImage = useCallback((imageUrl) => {
+    if (!imageUrl) return Promise.resolve();
+    
+    // Check if image is already loaded
+    if (imagesLoaded[imageUrl] !== undefined) {
+      return Promise.resolve();
+    }
+    
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        setImagesLoaded(prev => ({ ...prev, [imageUrl]: true }));
+        resolve();
+      };
+      img.onerror = () => {
+        console.warn('Failed to load image:', imageUrl);
+        setImagesLoaded(prev => ({ ...prev, [imageUrl]: false }));
+        resolve(); // Resolve anyway to not block loading
+      };
+      img.src = imageUrl;
+    });
+  }, [imagesLoaded]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -140,29 +164,6 @@ const Hero = () => {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  const preloadImage = useCallback((imageUrl) => {
-    if (!imageUrl) return Promise.resolve();
-    
-    // Check if image is already loaded
-    if (imagesLoaded[imageUrl] !== undefined) {
-      return Promise.resolve();
-    }
-    
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        setImagesLoaded(prev => ({ ...prev, [imageUrl]: true }));
-        resolve();
-      };
-      img.onerror = () => {
-        console.warn('Failed to load image:', imageUrl);
-        setImagesLoaded(prev => ({ ...prev, [imageUrl]: false }));
-        resolve(); // Resolve anyway to not block loading
-      };
-      img.src = imageUrl;
-    });
-  }, [imagesLoaded]);
 
   if (loading) {
     return (
