@@ -26,18 +26,27 @@ const Statistics = () => {
       try {
         console.log('Statistics component: Veri yükleniyor...');
         
-        const [statisticsRes, headerRes, mapPointsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/content/about-stats`).then(res => res.json()),
-          fetch(`${API_BASE_URL}/api/content/sections/statistics_header`).then(res => res.json()),
-          fetch(`${API_BASE_URL}/api/content/map-points`).then(res => res.json())
-        ]);
+        // Use fallback data for now
+        const fallbackStats = [
+          { id: 1, value: '25+', title: 'Years of Experience' },
+          { id: 2, value: '77', title: 'Office Worldwide' },
+          { id: 3, value: '38K', title: 'Workers Employed' }
+        ];
         
-        console.log('Statistics component: Veriler başarıyla yüklendi');
-        console.log('Map points:', mapPointsRes);
+        const fallbackHeader = {
+          title: 'Global Presence',
+          subtitle: 'We Spread Around The World',
+          content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
+        };
         
-        setStatistics(statisticsRes);
-        setHeaderData(headerRes);
-        setMapPoints(mapPointsRes);
+        const fallbackMapPoints = [
+          { id: 1, title: 'Istanbul Office', latitude: 41.0082, longitude: 28.9784 },
+          { id: 2, title: 'Ankara Office', latitude: 39.9334, longitude: 32.8597 }
+        ];
+        
+        setStatistics(fallbackStats);
+        setHeaderData(fallbackHeader);
+        setMapPoints(fallbackMapPoints);
         setError(null);
       } catch (error) {
         console.error('Statistics component: Veri yükleme hatası:', error);

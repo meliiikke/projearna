@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './Contact.css';
 
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
+
 const Contact = () => {
   const [contactInfo, setContactInfo] = useState({});
   const [contactHeader, setContactHeader] = useState({});
@@ -33,7 +36,7 @@ const Contact = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await fetch('/api/content/contact');
+      const response = await fetch(`${API_BASE_URL}/api/content/contact`);
       const data = await response.json();
       setContactInfo(data);
     } catch (error) {
@@ -43,7 +46,7 @@ const Contact = () => {
 
   const fetchContactHeader = async () => {
     try {
-      const response = await fetch('/api/content/contact-header');
+      const response = await fetch(`${API_BASE_URL}/api/content/contact-header`);
       const data = await response.json();
       setContactHeader(data);
     } catch (error) {
@@ -82,7 +85,7 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      const requestUrl = '/api/content/contact';
+      const requestUrl = `${API_BASE_URL}/api/content/contact`;
       console.log('Sending request to:', requestUrl); // Debug log
       console.log('Request body:', JSON.stringify(formData)); // Debug log
       

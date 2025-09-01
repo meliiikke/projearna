@@ -93,7 +93,7 @@ const Hero = () => {
           }
         }
         
-        setHeroFeatures(featuresRes.data);
+        setHeroFeatures(featuresRes.data || []);
         
         // Preload slider images - use the updated sliderData
         const currentSliderData = slidesRes && slidesRes.data && slidesRes.data.length > 0 ? slidesRes.data : (sliderData || []);

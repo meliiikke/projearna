@@ -17,6 +17,12 @@ const Services = () => {
         setServices(data);
       } catch (error) {
         console.error('Error fetching services:', error);
+        // Fallback data
+        setServices([
+          { id: 1, title: 'Clean Energy', description: 'Sustainable energy solutions' },
+          { id: 2, title: 'Solar Power', description: 'Renewable solar energy' },
+          { id: 3, title: 'Wind Energy', description: 'Clean wind power solutions' }
+        ]);
       } finally {
         setLoading(false);
       }

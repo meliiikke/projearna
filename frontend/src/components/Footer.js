@@ -14,20 +14,36 @@ const Footer = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [contactResponse, missionResponse, servicesResponse, linksResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/content/contact`).then(res => res.json()),
-          fetch(`${API_BASE_URL}/api/content/sections/mission`).then(res => res.json()),
-          fetch(`${API_BASE_URL}/api/content/services`).then(res => res.json()),
-          fetch(`${API_BASE_URL}/api/content/footer-bottom-links`).then(res => res.json())
-        ]);
+        // Use fallback data for now
+        const fallbackContact = {
+          phone: '+90-212-000-0000',
+          email: 'info@arna.com',
+          address: 'Istanbul, Turkey',
+          working_hours: 'Mon-Fri: 9:00 AM - 6:00 PM'
+        };
         
-        setContactInfo(contactResponse);
-        setMissionContent(missionResponse);
-        setServices(servicesResponse);
-        setFooterBottomLinks(linksResponse);
-        console.log('Contact info:', contactResponse);
-        console.log('Services data:', servicesResponse);
-        console.log('Footer bottom links data:', linksResponse);
+        const fallbackMission = {
+          content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
+        };
+        
+        const fallbackServices = [
+          { id: 1, title: 'Clean Energy' },
+          { id: 2, title: 'Solar Power' },
+          { id: 3, title: 'Wind Energy' }
+        ];
+        
+        const fallbackLinks = [
+          { id: 1, title: 'Privacy Policy', link: '#' },
+          { id: 2, title: 'Terms of Service', link: '#' }
+        ];
+        
+        setContactInfo(fallbackContact);
+        setMissionContent(fallbackMission);
+        setServices(fallbackServices);
+        setFooterBottomLinks(fallbackLinks);
+        console.log('Contact info:', fallbackContact);
+        console.log('Services data:', fallbackServices);
+        console.log('Footer bottom links data:', fallbackLinks);
       } catch (error) {
         console.error('Error fetching footer data:', error);
         console.error('Error details:', {

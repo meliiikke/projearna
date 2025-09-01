@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import './About.css';
+
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
 
 const About = () => {
   const [aboutContent, setAboutContent] = useState(null);
@@ -12,12 +14,14 @@ const About = () => {
     const fetchData = async () => {
       try {
         // Fetch about content
-        const contentRes = await axios.get('/api/content/sections/about');
-        setAboutContent(contentRes.data);
+        const contentResponse = await fetch(`${API_BASE_URL}/api/content/sections/about`);
+        const contentData = await contentResponse.json();
+        setAboutContent(contentData);
         
         // Fetch about features
-        const featuresRes = await axios.get('/api/content/about-features');
-        setAboutFeatures(featuresRes.data);
+        const featuresResponse = await fetch(`${API_BASE_URL}/api/content/about-features`);
+        const featuresData = await featuresResponse.json();
+        setAboutFeatures(featuresData);
         
 
       } catch (error) {
