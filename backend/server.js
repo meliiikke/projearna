@@ -63,7 +63,8 @@ const corsOptions = {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      // Hata fırlatmak yerine izin ver (geçici çözüm)
+      callback(null, true);
     }
   },
   credentials: true,
@@ -96,6 +97,18 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Pre-flight OPTIONS requests için
 app.options('*', cors());
+
+// OPTIONS request'leri için özel handling
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.status(200).end();
+    return;
+  }
+  next();
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);

@@ -50,6 +50,11 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
 
     const imageUrl = `/uploads/${req.file.filename}`;
     
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    
     res.json({
       message: 'Resim başarıyla yüklendi',
       imageUrl: imageUrl,
@@ -76,6 +81,11 @@ router.get('/images', authMiddleware, (req, res) => {
       }))
       .sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
 
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+
     res.json(images);
   } catch (error) {
     console.error('Error listing images:', error);
@@ -91,6 +101,12 @@ router.delete('/image/:filename', authMiddleware, (req, res) => {
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
+      
+      // CORS headers ekle
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      
       res.json({ message: 'Resim başarıyla silindi' });
     } else {
       res.status(404).json({ message: 'Resim bulunamadı' });

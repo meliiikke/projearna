@@ -18,12 +18,17 @@ router.get('/slides', async (req, res) => {
         : null
     }));
     
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    
     res.json(normalizedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
     res.status(500).json({ message: 'Error fetching hero slides' });
   }
-});
+};
 
 // Get all hero slides for admin  
 router.get('/admin/hero-slides', authMiddleware, async (req, res) => {

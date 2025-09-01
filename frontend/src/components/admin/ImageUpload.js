@@ -15,7 +15,11 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
 
   const fetchImages = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/upload/images`);
+      const response = await axios.get(`${API_BASE_URL}/upload/images`, {
+        // CORS için ek ayarlar
+        withCredentials: false,
+        timeout: 30000,
+      });
       // Backend'den gelen resim URL'lerini kullan
       const imagesWithFullUrl = response.data.map(image => ({
         ...image,
@@ -24,6 +28,9 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       setImages(imagesWithFullUrl);
     } catch (error) {
       console.error('Error fetching images:', error);
+      if (error.response?.status === 0) {
+        console.error('CORS hatası! Backend\'i kontrol edin.');
+      }
     } finally {
       setLoading(false);
     }
@@ -43,6 +50,9 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        // CORS için ek ayarlar
+        withCredentials: false,
+        timeout: 30000,
       });
 
       // Resmi listeye ekle
@@ -55,7 +65,11 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       alert('Resim başarıyla yüklendi!');
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Resim yüklenirken hata oluştu!');
+      if (error.response?.status === 0) {
+        alert('CORS hatası! Lütfen backend\'i kontrol edin.');
+      } else {
+        alert(`Resim yüklenirken hata oluştu: ${error.message}`);
+      }
     } finally {
       setUploading(false);
       event.target.value = '';
