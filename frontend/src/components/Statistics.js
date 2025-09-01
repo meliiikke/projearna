@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import './Statistics.css';
 
-// API base URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
+
 
 const Statistics = () => {
   const [statistics, setStatistics] = useState([]);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Hero.css';
 
@@ -6,7 +6,6 @@ import './Hero.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
 
 const Hero = () => {
-  const [heroContent, setHeroContent] = useState(null);
   const [heroFeatures, setHeroFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -110,7 +109,7 @@ const Hero = () => {
     };
     
     fetchData();
-  }, []); // Empty dependency array to run only once on mount
+  }, [sliderData, preloadImage]); // Include sliderData and preloadImage dependencies
 
   // Otomatik slider geçişi
   useEffect(() => {
@@ -142,7 +141,7 @@ const Hero = () => {
     }
   };
 
-  const preloadImage = (imageUrl) => {
+  const preloadImage = useCallback((imageUrl) => {
     if (!imageUrl) return Promise.resolve();
     
     // Check if image is already loaded
@@ -163,7 +162,7 @@ const Hero = () => {
       };
       img.src = imageUrl;
     });
-  };
+  }, [imagesLoaded]);
 
   if (loading) {
     return (

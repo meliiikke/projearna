@@ -13,8 +13,6 @@ import HeroFeaturesManager from '../components/admin/HeroFeaturesManager';
 import MapPointsManager from '../components/admin/MapPointsManager';
 
 import FooterBottomLinksManager from '../components/admin/FooterBottomLinksManager';
-import UsersManager from '../components/admin/UsersManager';
-import AdminsManager from '../components/admin/AdminsManager';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {

@@ -127,7 +127,6 @@ const Contact = () => {
     const mapLng = parseFloat(lng) || defaultLng;
     
     // Google Maps Embed API kullanarak daha dinamik URL
-    const encodedAddress = encodeURIComponent(address || 'Levent, Büyükdere Caddesi');
     return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${mapLat},${mapLng}&center=${mapLat},${mapLng}&zoom=15`;
   };
 

@@ -82,14 +82,13 @@ const HeroSlidesManager = () => {
     setSaving(true);
     
     try {
-      let response;
       if (editingSlide) {
         // Update existing slide
-        response = await axios.put(`${API_BASE_URL}/hero-slides/admin/hero-slides/${editingSlide.id}`, formData);
+        await axios.put(`${API_BASE_URL}/hero-slides/admin/hero-slides/${editingSlide.id}`, formData);
         setMessage('Hero slide updated successfully!');
       } else {
         // Create new slide
-        response = await axios.post(`${API_BASE_URL}/hero-slides/admin/hero-slides`, formData);
+        await axios.post(`${API_BASE_URL}/hero-slides/admin/hero-slides`, formData);
         setMessage('New hero slide created successfully!');
       }
       
