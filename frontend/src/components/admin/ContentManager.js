@@ -30,7 +30,7 @@ const ContentManager = () => {
       const response = await axios.get(`${API_BASE_URL}/content/admin/sections`);
       console.log('Sections response:', response.data);
       
-      // Resim URL'lerini tam backend URL'i ile birleştir
+      // Resim URL'lerini backend URL'i ile birleştir
       const sectionsWithFullImageUrl = response.data.map(section => ({
         ...section,
         image_url: section.image_url && section.image_url.startsWith('http') 

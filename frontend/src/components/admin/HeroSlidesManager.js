@@ -31,7 +31,7 @@ const HeroSlidesManager = () => {
       const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`);
       console.log('Hero slides response:', response.data);
       
-      // Resim URL'lerini tam backend URL'i ile birleştir
+      // Resim URL'lerini backend URL'i ile birleştir
       const slidesWithFullImageUrl = (response.data || []).map(slide => ({
         ...slide,
         image_url: slide.image_url && slide.image_url.startsWith('http') 

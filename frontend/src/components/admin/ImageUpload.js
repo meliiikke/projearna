@@ -16,7 +16,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
   const fetchImages = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/upload/images`);
-      // Resim URL'lerini tam backend URL'i ile birleştir
+      // Resim URL'lerini backend URL'i ile birleştir
       const imagesWithFullUrl = response.data.map(image => ({
         ...image,
         url: image.url.startsWith('http') ? image.url : `${API_BASE_URL.replace('/api', '')}${image.url}`

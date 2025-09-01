@@ -6,11 +6,11 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Upload klasörünü oluştur
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Upload klasörünü root klasörde oluştur
+//const uploadDir = path.join(__dirname, '../uploads');
+//if (!fs.existsSync(uploadDir)) {
+//  fs.mkdirSync(uploadDir, { recursive: true });
+//}
 
 // Multer konfigürasyonu
 const storage = multer.diskStorage({

@@ -28,7 +28,7 @@ const ServicesManager = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/content/admin/services`);
       
-      // Resim URL'lerini tam backend URL'i ile birleştir
+      // Resim URL'lerini backend URL'i ile birleştir
       const servicesWithFullImageUrl = response.data.map(service => ({
         ...service,
         image_url: service.image_url && service.image_url.startsWith('http') 
