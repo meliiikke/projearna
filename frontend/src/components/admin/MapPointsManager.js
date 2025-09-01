@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const MapPointsManager = () => {
@@ -20,7 +21,7 @@ const MapPointsManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get('/api/content/admin/map-points');
+      const res = await axios.get(`${API_BASE_URL}/content/admin/map-points`);
       setMapPoints(res.data);
     } catch (e) {
       console.error('Error fetching map-points:', e);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const FooterBottomLinksManager = () => {
@@ -16,7 +17,7 @@ const FooterBottomLinksManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get('/api/content/admin/footer-bottom-links');
+      const res = await axios.get(`${API_BASE_URL}/content/admin/footer-bottom-links`);
       setItems(res.data);
     } catch (e) {
       console.error('Error fetching footer-bottom-links:', e);

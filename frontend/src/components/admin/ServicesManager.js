@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const ServicesManager = () => {
@@ -25,7 +26,7 @@ const ServicesManager = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get('/api/content/admin/services');
+      const response = await axios.get(`${API_BASE_URL}/content/admin/services`);
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);

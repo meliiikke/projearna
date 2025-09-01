@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const AboutStatsManager = () => {
@@ -16,7 +17,7 @@ const AboutStatsManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get('/api/content/admin/about-stats');
+      const res = await axios.get(`${API_BASE_URL}/content/admin/about-stats`);
       setStats(res.data);
     } catch (e) {
       console.error('Error fetching about-stats:', e);

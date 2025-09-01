@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import ContentManager from '../components/admin/ContentManager';
 import HeroSlidesManager from '../components/admin/HeroSlidesManager';
 import ServicesManager from '../components/admin/ServicesManager';
@@ -31,9 +32,9 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const [sectionsRes, servicesRes, messagesRes] = await Promise.all([
-          axios.get('/api/content/admin/sections'),
-          axios.get('/api/content/admin/services'),
-          axios.get('/api/content/admin/contact-messages')
+          axios.get(`${API_BASE_URL}/content/admin/sections`),
+          axios.get(`${API_BASE_URL}/content/admin/services`),
+          axios.get(`${API_BASE_URL}/content/admin/contact-messages`)
         ]);
 
         setStats({

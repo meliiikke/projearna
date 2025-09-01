@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const HeroFeaturesManager = () => {
@@ -16,7 +17,7 @@ const HeroFeaturesManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get('/api/content/admin/hero-features');
+      const res = await axios.get(`${API_BASE_URL}/content/admin/hero-features`);
       setFeatures(res.data);
     } catch (e) {
       console.error('Error fetching hero-features:', e);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const ContentManager = () => {
@@ -26,7 +27,7 @@ const ContentManager = () => {
   const fetchSections = async () => {
     try {
       console.log('Fetching sections...');
-      const response = await axios.get('/api/content/admin/sections');
+      const response = await axios.get(`${API_BASE_URL}/content/admin/sections`);
       console.log('Sections response:', response.data);
       setSections(response.data);
       setMessage(`${response.data.length} content sections loaded`);
@@ -75,7 +76,7 @@ const ContentManager = () => {
     setMessage('');
 
     try {
-      await axios.put(`/api/content/admin/sections/${editingSection.id}`, formData);
+      await axios.put(`${API_BASE_URL}/content/admin/sections/${editingSection.id}`, formData);
       
       // Update local state
       setSections(prev => prev.map(section => 

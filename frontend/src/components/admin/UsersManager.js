@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const UsersManager = () => {
@@ -22,7 +23,7 @@ const UsersManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get('/api/content/admin/users');
+      const res = await axios.get(`${API_BASE_URL}/content/admin/users`);
       setItems(res.data);
     } catch (e) {
       console.error('Error fetching users:', e);

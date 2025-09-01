@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const ContactManager = () => {
@@ -21,7 +22,7 @@ const ContactManager = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await axios.get('/api/content/contact');
+      const response = await axios.get(`${API_BASE_URL}/content/contact`);
       setContactInfo({
         phone: response.data.phone || '',
         email: response.data.email || '',

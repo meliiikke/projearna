@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
+import { API_BASE_URL } from '../../config/api';
 import './AdminComponents.css';
 
 const HeroSlidesManager = () => {
@@ -27,7 +28,7 @@ const HeroSlidesManager = () => {
   const fetchSlides = async () => {
     try {
       console.log('Fetching hero slides...');
-      const response = await axios.get('/api/hero-slides/admin/hero-slides');
+      const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`);
       console.log('Hero slides response:', response.data);
       setSlides(response.data || []);
       setMessage(`${response.data?.length || 0} hero slides loaded`);
