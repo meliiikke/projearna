@@ -15,7 +15,7 @@ const heroSlidesRoutes = require('./backend/routes/heroSlides');
 const app = express();
 
 // Railway'de proxy arkasında olduğumuz için trust proxy'i etkinleştir
-app.set('trust proxy', true);
+app.set('trust proxy', 1);  // 1 = sadece bir proxy katmanına güven
 const PORT = process.env.PORT || 3001;
 
 // ✅ Proxy arkasında (Railway, Render, Vercel vb.) doğru IP algılaması için
@@ -28,16 +28,12 @@ app.use(helmet({
 
 // Rate limiting (production için)
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // limit each IP to 1000 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  // Railway'de proxy arkasında olduğumuz için IP algılamasını düzelt
-  keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'unknown';
-  }
-});
-app.use(limiter);
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // limit each IP
+    standardHeaders: true,
+    legacyHeaders: false
+  });
+  app.use(limiter);
 
 const allowedOrigins = [
     'http://localhost:3000',
