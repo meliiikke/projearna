@@ -15,6 +15,9 @@ const heroSlidesRoutes = require('./backend/routes/heroSlides');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// ✅ Proxy arkasında (Railway, Render, Vercel vb.) doğru IP algılaması için
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false, // Disable for development
