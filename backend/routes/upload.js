@@ -53,6 +53,7 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
     res.json({
       message: 'Resim başarıyla yüklendi',
       imageUrl: imageUrl,
+      fullUrl: `${req.protocol}://${req.get('host')}${imageUrl}`,
       fileName: req.file.filename
     });
   } catch (error) {
@@ -70,6 +71,7 @@ router.get('/images', authMiddleware, (req, res) => {
       .map(file => ({
         name: file,
         url: `/uploads/${file}`,
+        fullUrl: `${req.protocol}://${req.get('host')}/uploads/${file}`,
         uploadDate: fs.statSync(path.join(uploadDir, file)).mtime
       }))
       .sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));

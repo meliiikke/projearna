@@ -16,10 +16,10 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
   const fetchImages = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/upload/images`);
-      // Backend'den gelen resim URL'lerini tam URL yap
+      // Backend'den gelen resim URL'lerini kullan
       const imagesWithFullUrl = response.data.map(image => ({
         ...image,
-        url: `${API_BASE_URL.replace('/api', '')}${image.url}`
+        url: image.fullUrl || `${API_BASE_URL.replace('/api', '')}${image.url}`
       }));
       setImages(imagesWithFullUrl);
     } catch (error) {
@@ -48,8 +48,9 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       // Resmi listeye ekle
       await fetchImages();
       
-      // Yeni yüklenen resmi seç - resimler artık frontend public klasöründe
-      handleImageSelect(response.data.imageUrl);
+      // Yeni yüklenen resmi seç - backend'den gelen fullUrl'i kullan
+      const fullImageUrl = response.data.fullUrl || `${API_BASE_URL.replace('/api', '')}${response.data.imageUrl}`;
+      handleImageSelect(fullImageUrl);
       
       alert('Resim başarıyla yüklendi!');
     } catch (error) {
@@ -62,10 +63,9 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
   };
 
   const handleImageSelect = (imageUrl) => {
-    // Eğer imageUrl zaten tam URL ise olduğu gibi kullan, değilse tam URL yap
-    const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL.replace('/api', '')}${imageUrl}`;
-    setSelectedImage(fullImageUrl);
-    onImageSelect(fullImageUrl);
+    // imageUrl zaten tam URL olmalı
+    setSelectedImage(imageUrl);
+    onImageSelect(imageUrl);
   };
 
   const handleImageDelete = async (filename) => {
