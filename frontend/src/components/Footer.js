@@ -90,19 +90,9 @@ const Footer = () => {
             <div className="footer-section">
               <h3 className="footer-title">Services</h3>
               <ul className="footer-links">
-                {services && services.length > 0 ? (
-                  services.map((service) => (
-                    <li key={service.id}>
-                      <a href={service.link || '#'}>{service.title}</a>
-                    </li>
-                  ))
-                ) : (
-                  <>
-                                    <li><a href="#services">Clean Energy</a></li>
+                <li><a href="#services">Clean Energy</a></li>
                 <li><a href="#about">Sustainable Development</a></li>
                 <li><a href="#services">Energy Transition</a></li>
-                  </>
-                )}
               </ul>
             </div>
 
@@ -134,16 +124,8 @@ const Footer = () => {
           <div className="footer-bottom-content">
             <p>&copy; 2025 ARNA. All rights reserved.</p>
             <div className="footer-bottom-links">
-              {footerBottomLinks && footerBottomLinks.length > 0 ? (
-                footerBottomLinks.map((link) => (
-                  <a key={link.id} href={link.link || '#'}>{link.title}</a>
-                ))
-              ) : (
-                <>
-                                  <a href="/privacy">Privacy Policy</a>
-                <a href="/terms">Terms of Service</a>
-                </>
-              )}
+              <a href="/privacy">Privacy Policy</a>
+              <a href="/terms">Terms of Service</a>
             </div>
           </div>
         </div>
