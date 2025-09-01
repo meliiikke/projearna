@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import './Services.css';
 
 // API base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
 
 const Services = () => {
   const [services, setServices] = useState([]);

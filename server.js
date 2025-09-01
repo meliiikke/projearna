@@ -14,7 +14,8 @@ const heroSlidesRoutes = require('./backend/routes/heroSlides');
 
 const app = express();
 
-app.set('trust proxy', 1);
+// Railway'de proxy arkasında olduğumuz için trust proxy'i etkinleştir
+app.set('trust proxy', true);
 const PORT = process.env.PORT || 3001;
 
 // ✅ Proxy arkasında (Railway, Render, Vercel vb.) doğru IP algılaması için
@@ -25,13 +26,15 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disable for development
 }));
 
-// Rate limiting (gevşetilmiş development için)
+// Rate limiting (production için)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // limit each IP to 1000 requests per windowMs
-  skip: (req) => {
-    // Development'ta localhost'u skip et
-    return req.ip === '127.0.0.1' || req.ip === '::1';
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Railway'de proxy arkasında olduğumuz için IP algılamasını düzelt
+  keyGenerator: (req) => {
+    return req.ip || req.connection.remoteAddress || 'unknown';
   }
 });
 app.use(limiter);
@@ -93,7 +96,7 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`🚀 ARNA Energy Backend Server running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
+      console.log(`🌐 API Base URL: https://projearna-production.up.railway.app/api`);
       console.log(`🔑 Default Admin Login: username=admin, password=admin123`);
     });
   } catch (error) {

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './Hero.css';
 
 // API base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
 
 const Hero = () => {
   const [heroContent, setHeroContent] = useState(null);
@@ -110,19 +110,17 @@ const Hero = () => {
     };
     
     fetchData();
-
-    // Auto-refresh kaldırıldı - gereksiz tekrarları önlemek için
-    // const interval = setInterval(fetchData, 30000);
-    // return () => clearInterval(interval);
   }, []); // Empty dependency array to run only once on mount
 
   // Otomatik slider geçişi
   useEffect(() => {
-    const slideInterval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % sliderData.length);
-    }, 6000); // 6 saniyede bir değiş
+    if (sliderData.length > 0) {
+      const slideInterval = setInterval(() => {
+        setCurrentSlide(prev => (prev + 1) % sliderData.length);
+      }, 6000); // 6 saniyede bir değiş
 
-    return () => clearInterval(slideInterval);
+      return () => clearInterval(slideInterval);
+    }
   }, [sliderData.length]);
 
   const nextSlide = () => {

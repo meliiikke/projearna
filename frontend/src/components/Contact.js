@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Contact.css';
 
 // API base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
 
 const Contact = () => {
   const [contactInfo, setContactInfo] = useState({});
