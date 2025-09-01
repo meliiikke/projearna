@@ -98,6 +98,3 @@ Thumbs.db
 # Database
 *.sqlite
 *.db
-
-# Uploads
-uploads/
