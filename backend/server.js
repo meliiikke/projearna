@@ -33,9 +33,39 @@ app.use(limiter);
 
 // CORS - Production ve development için
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://projearna-production.up.railway.app', 'https://projearna-frontend-production.up.railway.app']
-    : true,
+  origin: function (origin, callback) {
+    // Development'ta tüm origin'lere izin ver
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    // Environment variable'dan ek domain'ler eklenebilir
+    const additionalOrigins = process.env.ALLOWED_ORIGINS 
+      ? process.env.ALLOWED_ORIGINS.split(',') 
+      : [];
+    
+    // Production'da izin verilen domain'ler
+    const allowedOrigins = [
+      'https://projearna-production.up.railway.app',
+      'https://projearna-frontend-production.up.railway.app',
+      'https://scintillating-panda-bbf94b.netlify.app',
+      'https://projearna.netlify.app',
+      ...additionalOrigins
+    ];
+    
+    // Origin yoksa (mobile app, postman gibi) izin ver
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Origin izin verilen listede mi kontrol et
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -44,6 +74,18 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// CORS error handling
+app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      error: 'CORS Error',
+      message: 'Origin not allowed',
+      origin: req.headers.origin
+    });
+  }
+  next(err);
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
