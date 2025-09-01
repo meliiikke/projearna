@@ -32,7 +32,7 @@ const ContentManager = () => {
       
       // Resimler artık frontend public klasöründe - URL'leri olduğu gibi kullan
       setSections(response.data);
-      setMessage(`${sectionsWithFullImageUrl.length} content sections loaded`);
+      setMessage(`${response.data.length} content sections loaded`);
     } catch (error) {
       console.error('Error fetching sections:', error);
       setMessage('Error fetching content sections: ' + error.message);

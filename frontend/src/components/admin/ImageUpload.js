@@ -18,7 +18,6 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       const response = await axios.get(`${API_BASE_URL}/upload/images`);
       // Resimler artık frontend public klasöründe - URL'leri olduğu gibi kullan
       setImages(response.data);
-      setImages(imagesWithFullUrl);
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {

@@ -33,7 +33,7 @@ const HeroSlidesManager = () => {
       
       // Resimler artık frontend public klasöründe - URL'leri olduğu gibi kullan
       setSlides(response.data || []);
-      setMessage(`${slidesWithFullImageUrl.length} hero slides loaded`);
+      setMessage(`${response.data?.length || 0} hero slides loaded`);
     } catch (error) {
       console.error('Error fetching hero slides:', error);
       setMessage('Error fetching hero slides: ' + error.message);
