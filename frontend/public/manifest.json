@@ -1,0 +1,15 @@
+{
+  "short_name": "ARNA Energy",
+  "name": "ARNA Energy - Sustainable Energy Solutions",
+  "icons": [
+    {
+      "src": "arna-logo.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#C5A572",
+  "background_color": "#1a1a1a"
+}
