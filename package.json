@@ -13,7 +13,10 @@
     "server": "nodemon server.js",
     "client": "cd frontend && npm start",
     "install-all": "npm install && cd frontend && npm install",
-    "build": "npm install",
+    "build": "npm run build:frontend",
+    "build:backend": "npm install",
+    "build:frontend": "cd frontend && npm run build",
+    "build:check": "npm run build:backend && npm run build:frontend",
     "postinstall": "echo 'Dependencies installed successfully'"
   },
   "keywords": ["energy", "industrial", "website", "admin-panel"],
