@@ -9,20 +9,22 @@ router.get('/slides', async (req, res) => {
     const [rows] = await pool.execute(
       'SELECT * FROM hero_slides WHERE is_active = 1 ORDER BY slide_order ASC, created_at ASC'
     );
-    
+
     // Resim URL'lerini normalize et
-    const normalizedRows = rows.map(row => ({
+    const normalizedRows = rows.map((row) => ({
       ...row,
-      image_url: row.image_url ? 
-        (row.image_url.startsWith('http') ? row.image_url : `${req.protocol}://${req.get('host')}${row.image_url}`) 
-        : null
+      image_url: row.image_url
+        ? row.image_url.startsWith('http')
+          ? row.image_url
+          : `${req.protocol}://${req.get('host')}${row.image_url}`
+        : null,
     }));
-    
+
     // CORS headers ekle
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    
+
     res.json(normalizedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
@@ -30,27 +32,29 @@ router.get('/slides', async (req, res) => {
   }
 });
 
-// Get all hero slides for admin  
+// Get all hero slides for admin
 router.get('/admin/hero-slides', authMiddleware, async (req, res) => {
   console.log('GET /admin/hero-slides called');
   try {
     const [rows] = await pool.execute(
       'SELECT * FROM hero_slides ORDER BY slide_order ASC, created_at ASC'
     );
-    
+
     // Resim URL'lerini normalize et
-    const normalizedRows = rows.map(row => ({
+    const normalizedRows = rows.map((row) => ({
       ...row,
-      image_url: row.image_url ? 
-        (row.image_url.startsWith('http') ? row.image_url : `${req.protocol}://${req.get('host')}${row.image_url}`) 
-        : null
+      image_url: row.image_url
+        ? row.image_url.startsWith('http')
+          ? row.image_url
+          : `${req.protocol}://${req.get('host')}${row.image_url}`
+        : null,
     }));
-    
+
     // CORS headers ekle
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    
+
     res.json(normalizedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
@@ -62,29 +66,28 @@ router.get('/admin/hero-slides', authMiddleware, async (req, res) => {
 router.get('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await pool.execute(
-      'SELECT * FROM hero_slides WHERE id = ?',
-      [id]
-    );
-    
+    const [rows] = await pool.execute('SELECT * FROM hero_slides WHERE id = ?', [id]);
+
     if (rows.length === 0) {
       return res.status(404).json({ message: 'Hero slide not found' });
     }
-    
+
     // Resim URL'ini normalize et
     const row = rows[0];
     const normalizedRow = {
       ...row,
-      image_url: row.image_url ? 
-        (row.image_url.startsWith('http') ? row.image_url : `${req.protocol}://${req.get('host')}${row.image_url}`) 
-        : null
+      image_url: row.image_url
+        ? row.image_url.startsWith('http')
+          ? row.image_url
+          : `${req.protocol}://${req.get('host')}${row.image_url}`
+        : null,
     };
-    
+
     // CORS headers ekle
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    
+
     res.json(normalizedRow);
   } catch (error) {
     console.error('Error fetching hero slide:', error);
@@ -96,15 +99,15 @@ router.get('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
 router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
   console.log('POST /admin/hero-slides called with data:', req.body);
   try {
-    const { 
-      title, 
-      subtitle, 
-      content, 
-      image_url, 
-      button_text, 
-      button_link, 
-      slide_order, 
-      is_active 
+    const {
+      title,
+      subtitle,
+      content,
+      image_url,
+      button_text,
+      button_link,
+      slide_order,
+      is_active,
     } = req.body;
 
     const [result] = await pool.execute(
@@ -119,23 +122,24 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
         button_text || '',
         button_link || '',
         slide_order || 0,
-        is_active !== undefined ? is_active : true
+        is_active !== undefined ? is_active : true,
       ]
     );
 
     // Get the created slide
-    const [newSlide] = await pool.execute(
-      'SELECT * FROM hero_slides WHERE id = ?',
-      [result.insertId]
-    );
+    const [newSlide] = await pool.execute('SELECT * FROM hero_slides WHERE id = ?', [
+      result.insertId,
+    ]);
 
     // Resim URL'ini normalize et
     const slide = newSlide[0];
     const normalizedSlide = {
       ...slide,
-      image_url: slide.image_url ? 
-        (slide.image_url.startsWith('http') ? slide.image_url : `${req.protocol}://${req.get('host')}${slide.image_url}`) 
-        : null
+      image_url: slide.image_url
+        ? slide.image_url.startsWith('http')
+          ? slide.image_url
+          : `${req.protocol}://${req.get('host')}${slide.image_url}`
+        : null,
     };
 
     // CORS headers ekle
@@ -145,7 +149,7 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
 
     res.status(201).json({
       message: 'Hero slide created successfully',
-      slide: normalizedSlide
+      slide: normalizedSlide,
     });
   } catch (error) {
     console.error('Error creating hero slide:', error);
@@ -157,15 +161,15 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
 router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { 
-      title, 
-      subtitle, 
-      content, 
-      image_url, 
-      button_text, 
-      button_link, 
-      slide_order, 
-      is_active 
+    const {
+      title,
+      subtitle,
+      content,
+      image_url,
+      button_text,
+      button_link,
+      slide_order,
+      is_active,
     } = req.body;
 
     const [result] = await pool.execute(
@@ -183,7 +187,7 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
         button_link || '',
         slide_order || 0,
         is_active !== undefined ? is_active : true,
-        id
+        id,
       ]
     );
 
@@ -192,18 +196,17 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
     }
 
     // Get the updated slide
-    const [updatedSlide] = await pool.execute(
-      'SELECT * FROM hero_slides WHERE id = ?',
-      [id]
-    );
+    const [updatedSlide] = await pool.execute('SELECT * FROM hero_slides WHERE id = ?', [id]);
 
     // Resim URL'ini normalize et
     const slide = updatedSlide[0];
     const normalizedSlide = {
       ...slide,
-      image_url: slide.image_url ? 
-        (slide.image_url.startsWith('http') ? slide.image_url : `${req.protocol}://${req.get('host')}${slide.image_url}`) 
-        : null
+      image_url: slide.image_url
+        ? slide.image_url.startsWith('http')
+          ? slide.image_url
+          : `${req.protocol}://${req.get('host')}${slide.image_url}`
+        : null,
     };
 
     // CORS headers ekle
@@ -213,7 +216,7 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
 
     res.json({
       message: 'Hero slide updated successfully',
-      slide: normalizedSlide
+      slide: normalizedSlide,
     });
   } catch (error) {
     console.error('Error updating hero slide:', error);
@@ -225,11 +228,8 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
 router.delete('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const [result] = await pool.execute(
-      'DELETE FROM hero_slides WHERE id = ?',
-      [id]
-    );
+
+    const [result] = await pool.execute('DELETE FROM hero_slides WHERE id = ?', [id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Hero slide not found' });
@@ -251,13 +251,13 @@ router.delete('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
 router.put('/admin/hero-slides/reorder', authMiddleware, async (req, res) => {
   try {
     const { slides } = req.body; // Array of {id, slide_order}
-    
+
     // Update each slide's order
     for (const slide of slides) {
-      await pool.execute(
-        'UPDATE hero_slides SET slide_order = ? WHERE id = ?',
-        [slide.slide_order, slide.id]
-      );
+      await pool.execute('UPDATE hero_slides SET slide_order = ? WHERE id = ?', [
+        slide.slide_order,
+        slide.id,
+      ]);
     }
 
     // CORS headers ekle
