@@ -39,15 +39,24 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS - Tüm origin'lere izin ver (development için)
-app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://scintillating-panda-bbf94b.netlify.app'
+  ];
+  
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    optionsSuccessStatus: 204
+  }));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
