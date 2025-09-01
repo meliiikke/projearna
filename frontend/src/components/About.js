@@ -77,7 +77,7 @@ const About = () => {
 
             <div className="about-features">
               <div className="feature-list">
-                {aboutFeatures && aboutFeatures.length > 0 ? (
+                {Array.isArray(aboutFeatures) && aboutFeatures.length > 0 ? (
                   aboutFeatures.map((feature) => (
                     <div key={feature.id} className="feature-item">
                       <div className="feature-icon">✓</div>

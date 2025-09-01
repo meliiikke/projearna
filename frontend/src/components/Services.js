@@ -65,7 +65,7 @@ const Services = () => {
         </motion.div>
 
         <div className="services-grid">
-          {services.map((service, index) => (
+          {Array.isArray(services) && services.map((service, index) => (
             <motion.div
               key={service.id}
               className="service-card"
