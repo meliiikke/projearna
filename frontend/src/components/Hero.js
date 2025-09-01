@@ -6,11 +6,11 @@ import './Hero.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
 
 const Hero = () => {
-  // URL'yi normalize eden yardımcı fonksiyon
-  const normalizeImageUrl = (imageUrl) => {
+  // URL'yi normalize eden yardımcı fonksiyon - useCallback ile sarmalayalım
+  const normalizeImageUrl = useCallback((imageUrl) => {
     if (!imageUrl) return null;
     return imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL.replace('/api', '')}${imageUrl}`;
-  };
+  }, []);
   const [heroFeatures, setHeroFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
