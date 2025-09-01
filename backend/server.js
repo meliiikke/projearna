@@ -91,7 +91,8 @@ app.use((err, req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files for uploads artık gerekli değil - resimler frontend public klasöründe
+// Static files middleware
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Pre-flight OPTIONS requests için
 app.options('*', cors());

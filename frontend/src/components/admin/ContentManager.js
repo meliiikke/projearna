@@ -30,9 +30,14 @@ const ContentManager = () => {
       const response = await axios.get(`${API_BASE_URL}/content/admin/sections`);
       console.log('Sections response:', response.data);
       
-      // Resimler artık frontend public klasöründe - URL'leri olduğu gibi kullan
-      setSections(response.data);
-      setMessage(`${response.data.length} content sections loaded`);
+      // Backend'den gelen resim URL'lerini tam URL yap
+      const sectionsWithFullImageUrl = response.data.map(section => ({
+        ...section,
+        image_url: section.image_url ? `${API_BASE_URL.replace('/api', '')}${section.image_url}` : null
+      }));
+      
+      setSections(sectionsWithFullImageUrl);
+      setMessage(`${sectionsWithFullImageUrl.length} content sections loaded`);
     } catch (error) {
       console.error('Error fetching sections:', error);
       setMessage('Error fetching content sections: ' + error.message);

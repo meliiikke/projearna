@@ -28,8 +28,13 @@ const ServicesManager = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/content/admin/services`);
       
-      // Resimler artık frontend public klasöründe - URL'leri olduğu gibi kullan
-      setServices(response.data);
+      // Backend'den gelen resim URL'lerini tam URL yap
+      const servicesWithFullImageUrl = response.data.map(service => ({
+        ...service,
+        image_url: service.image_url ? `${API_BASE_URL.replace('/api', '')}${service.image_url}` : null
+      }));
+      
+      setServices(servicesWithFullImageUrl);
     } catch (error) {
       console.error('Error fetching services:', error);
       setMessage('Error fetching services');

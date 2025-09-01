@@ -6,8 +6,8 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Upload klasörünü frontend public klasöründe oluştur
-const uploadDir = path.join(__dirname, '../../frontend/public/uploads');
+// Upload klasörünü root'ta tut
+const uploadDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
