@@ -28,7 +28,7 @@ router.get('/slides', async (req, res) => {
     console.error('Error fetching hero slides:', error);
     res.status(500).json({ message: 'Error fetching hero slides' });
   }
-};
+});
 
 // Get all hero slides for admin  
 router.get('/admin/hero-slides', authMiddleware, async (req, res) => {
