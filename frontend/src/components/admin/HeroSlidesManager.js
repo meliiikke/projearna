@@ -31,17 +31,8 @@ const HeroSlidesManager = () => {
       const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`);
       console.log('Hero slides response:', response.data);
       
-      // Resim URL'lerini backend URL'i ile birleştir
-      const slidesWithFullImageUrl = (response.data || []).map(slide => ({
-        ...slide,
-        image_url: slide.image_url && slide.image_url.startsWith('http') 
-          ? slide.image_url 
-          : slide.image_url 
-            ? `${API_BASE_URL.replace('/api', '')}${slide.image_url}`
-            : ''
-      }));
-      
-      setSlides(slidesWithFullImageUrl);
+      // Resimler artık frontend public klasöründe - URL'leri olduğu gibi kullan
+      setSlides(response.data || []);
       setMessage(`${slidesWithFullImageUrl.length} hero slides loaded`);
     } catch (error) {
       console.error('Error fetching hero slides:', error);
