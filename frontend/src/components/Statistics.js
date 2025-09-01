@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import './Statistics.css';
+
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
 
 const Statistics = () => {
   const [statistics, setStatistics] = useState([]);
@@ -25,17 +27,17 @@ const Statistics = () => {
         console.log('Statistics component: Veri yükleniyor...');
         
         const [statisticsRes, headerRes, mapPointsRes] = await Promise.all([
-          axios.get('/api/content/about-stats'),
-          axios.get('/api/content/sections/statistics_header'),
-          axios.get('/api/content/map-points')
+          fetch(`${API_BASE_URL}/api/content/about-stats`).then(res => res.json()),
+          fetch(`${API_BASE_URL}/api/content/sections/statistics_header`).then(res => res.json()),
+          fetch(`${API_BASE_URL}/api/content/map-points`).then(res => res.json())
         ]);
         
         console.log('Statistics component: Veriler başarıyla yüklendi');
-        console.log('Map points:', mapPointsRes.data);
+        console.log('Map points:', mapPointsRes);
         
-        setStatistics(statisticsRes.data);
-        setHeaderData(headerRes.data);
-        setMapPoints(mapPointsRes.data);
+        setStatistics(statisticsRes);
+        setHeaderData(headerRes);
+        setMapPoints(mapPointsRes);
         setError(null);
       } catch (error) {
         console.error('Statistics component: Veri yükleme hatası:', error);

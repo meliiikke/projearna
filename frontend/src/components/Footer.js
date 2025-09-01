@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import './Footer.css';
+
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
 
 const Footer = () => {
   const [contactInfo, setContactInfo] = useState({});
@@ -13,19 +15,19 @@ const Footer = () => {
     const fetchData = async () => {
       try {
         const [contactResponse, missionResponse, servicesResponse, linksResponse] = await Promise.all([
-          axios.get('/api/content/contact'),
-          axios.get('/api/content/sections/mission'),
-          axios.get('/api/content/services'),
-          axios.get('/api/content/footer-bottom-links')
+          fetch(`${API_BASE_URL}/api/content/contact`).then(res => res.json()),
+          fetch(`${API_BASE_URL}/api/content/sections/mission`).then(res => res.json()),
+          fetch(`${API_BASE_URL}/api/content/services`).then(res => res.json()),
+          fetch(`${API_BASE_URL}/api/content/footer-bottom-links`).then(res => res.json())
         ]);
         
-        setContactInfo(contactResponse.data);
-        setMissionContent(missionResponse.data);
-        setServices(servicesResponse.data);
-        setFooterBottomLinks(linksResponse.data);
-        console.log('Contact info:', contactResponse.data);
-        console.log('Services data:', servicesResponse.data);
-        console.log('Footer bottom links data:', linksResponse.data);
+        setContactInfo(contactResponse);
+        setMissionContent(missionResponse);
+        setServices(servicesResponse);
+        setFooterBottomLinks(linksResponse);
+        console.log('Contact info:', contactResponse);
+        console.log('Services data:', servicesResponse);
+        console.log('Footer bottom links data:', linksResponse);
       } catch (error) {
         console.error('Error fetching footer data:', error);
         console.error('Error details:', {

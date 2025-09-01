@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import './Services.css';
+
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://projearna-production.up.railway.app';
 
 const Services = () => {
   const [services, setServices] = useState([]);
@@ -10,8 +12,9 @@ const Services = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get('/api/content/services');
-        setServices(response.data);
+        const response = await fetch(`${API_BASE_URL}/api/content/services`);
+        const data = await response.json();
+        setServices(data);
       } catch (error) {
         console.error('Error fetching services:', error);
       } finally {
