@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGet, apiPutAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const ContactManager = () => {
@@ -22,24 +21,43 @@ const ContactManager = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/content/contact`);
-      setContactInfo({
-        phone: response.data.phone || '',
-        email: response.data.email || '',
-        address: response.data.address || '',
-        working_hours: response.data.working_hours || '',
-        map_lat: response.data.map_lat || '41.0781',
-        map_lng: response.data.map_lng || '29.0173'
-      });
+      const data = await apiGet('/content/contact');
+      
+      if (!data.error) {
+        setContactInfo({
+          phone: data.phone || '',
+          email: data.email || '',
+          address: data.address || '',
+          working_hours: data.working_hours || '',
+          map_lat: data.map_lat || '41.0781',
+          map_lng: data.map_lng || '29.0173'
+        });
+        setMessage('Contact information loaded successfully');
+      } else {
+        console.error('Error fetching contact info:', data.error);
+        setMessage('Error fetching contact information');
+        // Set fallback data
+        setContactInfo({
+          phone: '+90 555 55 55',
+          email: 'info@arna.com.tr',
+          address: 'Levent Mahallesi, Büyükdere Caddesi No:201 Şişli/İSTANBUL',
+          working_hours: 'Pazartesi - Cuma: 09:00 - 18:00',
+          map_lat: '41.0781',
+          map_lng: '29.0173'
+        });
+      }
     } catch (error) {
       console.error('Error fetching contact info:', error);
-      console.error('Error details:', {
-        message: error.message,
-        code: error.code,
-        response: error.response?.data,
-        status: error.response?.status
-      });
       setMessage('Error fetching contact information');
+      // Set fallback data
+      setContactInfo({
+        phone: '+90 555 55 55',
+        email: 'info@arna.com.tr',
+        address: 'Levent Mahallesi, Büyükdere Caddesi No:201 Şişli/İSTANBUL',
+        working_hours: 'Pazartesi - Cuma: 09:00 - 18:00',
+        map_lat: '41.0781',
+        map_lng: '29.0173'
+      });
     } finally {
       setLoading(false);
     }
@@ -59,31 +77,17 @@ const ContactManager = () => {
     setMessage('');
 
     try {
-      const token = localStorage.getItem('adminToken');
-      await axios.put(`${API_BASE_URL}/content/admin/contact`, contactInfo, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      setMessage('Contact information updated successfully!');
+      const data = await apiPutAuth('/content/admin/contact', contactInfo);
+      
+      if (!data.error) {
+        setMessage('Contact information updated successfully!');
+      } else {
+        console.error('Error updating contact info:', data.error);
+        setMessage(`Error updating contact information: ${data.error}`);
+      }
     } catch (error) {
       console.error('Error updating contact info:', error);
-      console.error('Error details:', {
-        message: error.message,
-        code: error.code,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      if (error.code === 'ERR_NETWORK') {
-        setMessage('Network error: Backend server is not responding. Please check if the server is running.');
-      } else if (error.response?.status === 401) {
-        setMessage('Authentication error: Please login again.');
-      } else if (error.response?.status === 500) {
-        setMessage('Server error: Please try again later.');
-      } else {
-        setMessage(`Error updating contact information: ${error.message}`);
-      }
+      setMessage(`Error updating contact information: ${error.message}`);
     } finally {
       setSaving(false);
     }

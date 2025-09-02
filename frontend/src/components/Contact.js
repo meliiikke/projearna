@@ -35,9 +35,27 @@ const Contact = () => {
         setContactInfo(data);
       } else {
         console.error('Contact info fetch failed:', data.error);
+        // Set fallback contact info
+        setContactInfo({
+          phone: '+90 555 55 55',
+          email: 'info@arna.com.tr',
+          address: 'Levent Mahallesi, Büyükdere Caddesi No:201 Şişli/İSTANBUL',
+          working_hours: 'Pazartesi - Cuma: 09:00 - 18:00',
+          map_lat: '41.0781',
+          map_lng: '29.0173'
+        });
       }
     } catch (error) {
       console.error('Error fetching contact info:', error);
+      // Set fallback contact info
+      setContactInfo({
+        phone: '+90 555 55 55',
+        email: 'info@arna.com.tr',
+        address: 'Levent Mahallesi, Büyükdere Caddesi No:201 Şişli/İSTANBUL',
+        working_hours: 'Pazartesi - Cuma: 09:00 - 18:00',
+        map_lat: '41.0781',
+        map_lng: '29.0173'
+      });
     }
   };
 

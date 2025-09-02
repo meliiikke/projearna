@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
-import { API_BASE_URL } from '../config/api';
+import { apiGetAuth } from '../utils/api';
 import ContentManager from '../components/admin/ContentManager';
 import HeroSlidesManager from '../components/admin/HeroSlidesManager';
 import ServicesManager from '../components/admin/ServicesManager';
@@ -29,19 +28,25 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [sectionsRes, servicesRes, messagesRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/content/admin/sections`),
-          axios.get(`${API_BASE_URL}/content/admin/services`),
-          axios.get(`${API_BASE_URL}/content/admin/contact-messages`)
+        const [sectionsData, servicesData, messagesData] = await Promise.all([
+          apiGetAuth('/content/admin/sections'),
+          apiGetAuth('/content/admin/services'),
+          apiGetAuth('/content/admin/contact-messages')
         ]);
 
         setStats({
-          totalSections: sectionsRes.data.length,
-          totalServices: servicesRes.data.length,
-          totalMessages: messagesRes.data.length
+          totalSections: sectionsData.error ? 0 : sectionsData.length,
+          totalServices: servicesData.error ? 0 : servicesData.length,
+          totalMessages: messagesData.error ? 0 : messagesData.length
         });
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
+        // Set fallback stats
+        setStats({
+          totalSections: 0,
+          totalServices: 0,
+          totalMessages: 0
+        });
       } finally {
         setLoading(false);
       }

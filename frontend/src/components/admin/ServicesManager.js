@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import ImageUpload from './ImageUpload';
-import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
+import { normalizeImageUrl } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const ServicesManager = () => {
@@ -26,10 +26,17 @@ const ServicesManager = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/content/admin/services`);
+      const data = await apiGetAuth('/content/admin/services');
+      
+      if (data.error) {
+        console.error('Error fetching services:', data.error);
+        setMessage('Error fetching services');
+        setServices([]);
+        return;
+      }
       
       // Backend'den gelen resim URL'lerini tam URL yap
-      const servicesWithFullImageUrl = response.data.map(service => {
+      const servicesWithFullImageUrl = data.map(service => {
         const normalizedUrl = service.image_url ? normalizeImageUrl(service.image_url) : null;
         
         // Eski resim URL'si tespit edilirse uyarı ver
@@ -44,9 +51,11 @@ const ServicesManager = () => {
       });
       
       setServices(servicesWithFullImageUrl);
+      setMessage(`${servicesWithFullImageUrl.length} services loaded`);
     } catch (error) {
       console.error('Error fetching services:', error);
       setMessage('Error fetching services');
+      setServices([]);
     } finally {
       setLoading(false);
     }
@@ -102,34 +111,35 @@ const ServicesManager = () => {
 
     try {
       console.log('Saving service:', formData);
-      console.log('API URL:', `${API_BASE_URL}/content/admin/services`);
       
       if (isCreating) {
-        const response = await axios.post(`${API_BASE_URL}/content/admin/services`, formData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-          },
-          timeout: 30000
-        });
-        console.log('Service creation response:', response.data);
-        setServices(prev => [...prev, { ...formData, id: response.data.id }]);
-        setMessage('Service created successfully!');
+        const data = await apiPostAuth('/content/admin/services', formData);
+        
+        if (!data.error) {
+          console.log('Service creation response:', data);
+          setServices(prev => [...prev, { ...formData, id: data.id }]);
+          setMessage('Service created successfully!');
+        } else {
+          console.error('Failed to create service:', data.error);
+          setMessage(`Error creating service: ${data.error}`);
+          return;
+        }
       } else if (editingService) {
-        const response = await axios.put(`${API_BASE_URL}/content/admin/services/${editingService.id}`, formData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-          },
-          timeout: 30000
-        });
-        console.log('Service update response:', response.data);
-        setServices(prev => prev.map(service => 
-          service.id === editingService.id 
-            ? { ...service, ...formData }
-            : service
-        ));
-        setMessage('Service updated successfully!');
+        const data = await apiPutAuth(`/content/admin/services/${editingService.id}`, formData);
+        
+        if (!data.error) {
+          console.log('Service update response:', data);
+          setServices(prev => prev.map(service => 
+            service.id === editingService.id 
+              ? { ...service, ...formData }
+              : service
+          ));
+          setMessage('Service updated successfully!');
+        } else {
+          console.error('Failed to update service:', data.error);
+          setMessage(`Error updating service: ${data.error}`);
+          return;
+        }
       }
 
       handleCancel();
@@ -160,9 +170,15 @@ const ServicesManager = () => {
     if (!window.confirm('Are you sure you want to delete this service?')) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/content/admin/services/${id}`);
-      setServices(prev => prev.filter(service => service.id !== id));
-      setMessage('Service deleted successfully!');
+      const data = await apiDeleteAuth(`/content/admin/services/${id}`);
+      
+      if (!data.error) {
+        setServices(prev => prev.filter(service => service.id !== id));
+        setMessage('Service deleted successfully!');
+      } else {
+        console.error('Failed to delete service:', data.error);
+        setMessage(`Error deleting service: ${data.error}`);
+      }
     } catch (error) {
       console.error('Error deleting service:', error);
       setMessage('Error deleting service');
