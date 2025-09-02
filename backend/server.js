@@ -19,7 +19,6 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet({
   contentSecurityPolicy: false, // Disable for development
 }));
-
 app.use((req, res, next) => {
     if (
       req.header('x-forwarded-proto') !== 'https' &&
@@ -30,6 +29,7 @@ app.use((req, res, next) => {
     }
     next();
   });
+  
 // Rate limiting - daha esnek ayarlar
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 dakika

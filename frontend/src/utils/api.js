@@ -8,7 +8,7 @@ export const apiRequest = async (endpoint, options = {}) => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
     console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
-    console.log(`🔧 Full URL: ${window.location.origin}${url}`);
+    console.log(`🔧 Full URL: ${url}`);
     
     const response = await fetch(url, {
       headers: {
