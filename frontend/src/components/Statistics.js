@@ -4,73 +4,62 @@ import CountUp from 'react-countup';
 import { API_BASE_URL } from '../config/api';
 import './Statistics.css';
 
-
-
 const Statistics = () => {
   const [statistics, setStatistics] = useState([]);
   const [mapPoints, setMapPoints] = useState([]);
   const [headerData, setHeaderData] = useState({
     title: 'Global Presence',
     subtitle: 'We Spread Around The World',
-    content: 'Lorem ipsum consectetur hardrerit dictum cursor vitae volutpat elit vel mauris. Etlacerat diam volutpat lectus aliquam ornare tortor sed ut molestie lorem.'
+    content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-
-
-
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log('📊 Statistics component: Loading data...');
-        
-        // Fetch statistics from API
+
+        // Fetch statistics + header data from about-stats endpoint
         try {
-          const statsResponse = await fetch(`${API_BASE_URL}/content/statistics`);
+          const statsResponse = await fetch(`${API_BASE_URL}/content/about-stats`);
           if (statsResponse.ok) {
             const statsData = await statsResponse.json();
-            console.log('✅ Statistics loaded:', statsData.length, 'items');
-            setStatistics(statsData);
+            console.log('✅ About Stats loaded:', statsData);
+
+            // items array varsa onu al
+            if (Array.isArray(statsData.items)) {
+              setStatistics(statsData.items);
+            } else if (Array.isArray(statsData)) {
+              setStatistics(statsData);
+            } else {
+              setStatistics([]);
+            }
+
+            // Header verisini al
+            setHeaderData({
+              title: statsData.title || 'Global Presence',
+              subtitle: statsData.subtitle || 'We Spread Around The World',
+              content: statsData.content || 'Leading the way in sustainable energy solutions for a better tomorrow.'
+            });
           } else {
             throw new Error(`HTTP ${statsResponse.status}`);
           }
         } catch (statsError) {
-          console.log('⚠️ Statistics API failed, using fallback data');
+          console.log('⚠️ About Stats API failed, using fallback data');
           // Fallback data
-          const fallbackStats = [
+          setStatistics([
             { id: 1, value: '25+', title: 'Years of Experience' },
             { id: 2, value: '77', title: 'Office Worldwide' },
             { id: 3, value: '38K', title: 'Workers Employed' }
-          ];
-          setStatistics(fallbackStats);
-        }
-        
-        // Fetch statistics header from content sections
-        try {
-          const headerResponse = await fetch(`${API_BASE_URL}/content/sections/statistics`);
-          if (headerResponse.ok) {
-            const headerData = await headerResponse.json();
-            console.log('✅ Statistics header loaded:', headerData.title);
-            setHeaderData({
-              title: headerData.title || 'Global Presence',
-              subtitle: headerData.subtitle || 'We Spread Around The World',
-              content: headerData.content || 'Leading the way in sustainable energy solutions for a better tomorrow.'
-            });
-          } else {
-            throw new Error(`HTTP ${headerResponse.status}`);
-          }
-        } catch (headerError) {
-          console.log('⚠️ Statistics header API failed, using fallback data');
-          // Fallback header
+          ]);
           setHeaderData({
             title: 'Global Presence',
             subtitle: 'We Spread Around The World',
             content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
           });
         }
-        
+
         // Fetch map points
         try {
           const mapResponse = await fetch(`${API_BASE_URL}/content/map-points`);
@@ -83,27 +72,23 @@ const Statistics = () => {
           }
         } catch (mapError) {
           console.log('⚠️ Map points API failed, using fallback data');
-          // Fallback map points
-          const fallbackMapPoints = [
+          setMapPoints([
             { id: 1, title: 'Istanbul Office', latitude: 41.0082, longitude: 28.9784 },
             { id: 2, title: 'Ankara Office', latitude: 39.9334, longitude: 32.8597 }
-          ];
-          setMapPoints(fallbackMapPoints);
+          ]);
         }
-        
+
         setError(null);
       } catch (error) {
         console.error('Statistics component: Veri yükleme hatası:', error);
         setError(error.message);
-        
-        // Fallback data if API fails
+
+        // fallback
         setStatistics([
           { id: 1, value: '25+', title: 'Years of Experience' },
           { id: 2, value: '77', title: 'Office Worldwide' },
           { id: 3, value: '38K', title: 'Workers Employed' }
         ]);
-        
-        // No fallback map points - only use database data
         setMapPoints([]);
       } finally {
         setLoading(false);
@@ -114,7 +99,7 @@ const Statistics = () => {
 
     // Auto-refresh her 30 saniyede bir
     const interval = setInterval(fetchData, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -139,8 +124,8 @@ const Statistics = () => {
             Error: {error}
           </div>
         )}
-        
-        <motion.div 
+
+        <motion.div
           className="section-header text-center"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -167,8 +152,8 @@ const Statistics = () => {
               <div className="stat-content">
                 <div className="stat-value">
                   {stat.value && stat.value.includes('+') ? (
-                    <CountUp 
-                      end={parseInt(stat.value.replace(/[^0-9]/g, '')) || 0} 
+                    <CountUp
+                      end={parseInt(stat.value.replace(/[^0-9]/g, '')) || 0}
                       duration={2.5}
                       delay={0.5 + (index * 0.2)}
                       suffix="+"
@@ -176,8 +161,8 @@ const Statistics = () => {
                       useGrouping={false}
                     />
                   ) : stat.value && stat.value.includes('K') ? (
-                    <CountUp 
-                      end={parseInt(stat.value.replace(/[^0-9]/g, '')) || 0} 
+                    <CountUp
+                      end={parseInt(stat.value.replace(/[^0-9]/g, '')) || 0}
                       duration={2.5}
                       delay={0.5 + (index * 0.2)}
                       suffix="K"
@@ -185,8 +170,8 @@ const Statistics = () => {
                       useGrouping={false}
                     />
                   ) : (
-                    <CountUp 
-                      end={parseInt(stat.value.replace(/[^0-9]/g, '')) || 0} 
+                    <CountUp
+                      end={parseInt(stat.value.replace(/[^0-9]/g, '')) || 0}
                       duration={2.5}
                       delay={0.5 + (index * 0.2)}
                       useEasing={false}
@@ -201,79 +186,71 @@ const Statistics = () => {
         </div>
 
         <div className="world-map">
-          <motion.div 
+          <motion.div
             className="map-container"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-                          <div className="map-placeholder">
-                <div className="map-bg">
-                  <img 
-                    src={require('../assets/map.png')} 
-                    alt="World Map" 
-                    className="world-map-image"
-                    onError={(e) => {
-                      // Fallback to a simple background if image fails to load
-                      e.target.style.display = 'none';
-                      e.target.parentElement.style.background = 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)';
-                    }}
-                  />
-                </div>
-                <div className="map-points">
-                  {mapPoints && mapPoints.length > 0 && mapPoints.map((point, index) => {
-                    // Only use points from database
-                    let x, y;
-                    
-                    if (point.x && point.y) {
-                      // Use stored coordinates
-                      x = point.x;
-                      y = point.y;
-                    } else if (point.latitude && point.longitude) {
-                      // Convert latitude/longitude to percentage coordinates (legacy support)
-                      const lat = point.latitude;
-                      const lng = point.longitude;
-                      x = ((lng + 180) / 360) * 100;
-                      y = ((90 - lat) / 180) * 100;
-                    } else {
-                      // Generate random coordinates for points without coordinates
-                      // Use index to ensure different positions for each point
-                      const baseX = 10 + (index * 15) % 80; // Spread points horizontally
-                      const baseY = 10 + (index * 20) % 80; // Spread points vertically
-                      x = baseX + (Math.random() - 0.5) * 10; // Add some randomness
-                      y = baseY + (Math.random() - 0.5) * 10; // Add some randomness
-                      
-                      // Ensure coordinates are within bounds
-                      x = Math.max(5, Math.min(95, x));
-                      y = Math.max(5, Math.min(95, y));
-                    }
-                    
-                    return (
-                      <motion.div
-                        key={point.id}
-                        className="map-point"
-                        style={{
-                          position: 'absolute',
-                          left: `${x}%`,
-                          top: `${y}%`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                        initial={{ opacity: 0, scale: 0 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.6, delay: index * 0.2 }}
-                        viewport={{ once: true }}
-                        title={`${point.title}: ${point.description}`}
-                      >
-                        <div className="map-point-tooltip">
-                          <div className="tooltip-title">{point.title}</div>
-                          <div className="tooltip-description">{point.description}</div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+            <div className="map-placeholder">
+              <div className="map-bg">
+                <img
+                  src={require('../assets/map.png')}
+                  alt="World Map"
+                  className="world-map-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.style.background = 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)';
+                  }}
+                />
               </div>
+              <div className="map-points">
+                {mapPoints && mapPoints.length > 0 && mapPoints.map((point, index) => {
+                  let x, y;
+
+                  if (point.x && point.y) {
+                    x = point.x;
+                    y = point.y;
+                  } else if (point.latitude && point.longitude) {
+                    const lat = point.latitude;
+                    const lng = point.longitude;
+                    x = ((lng + 180) / 360) * 100;
+                    y = ((90 - lat) / 180) * 100;
+                  } else {
+                    const baseX = 10 + (index * 15) % 80;
+                    const baseY = 10 + (index * 20) % 80;
+                    x = baseX + (Math.random() - 0.5) * 10;
+                    y = baseY + (Math.random() - 0.5) * 10;
+                    x = Math.max(5, Math.min(95, x));
+                    y = Math.max(5, Math.min(95, y));
+                  }
+
+                  return (
+                    <motion.div
+                      key={point.id}
+                      className="map-point"
+                      style={{
+                        position: 'absolute',
+                        left: `${x}%`,
+                        top: `${y}%`,
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                      initial={{ opacity: 0, scale: 0 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.6, delay: index * 0.2 }}
+                      viewport={{ once: true }}
+                      title={`${point.title}: ${point.description}`}
+                    >
+                      <div className="map-point-tooltip">
+                        <div className="tooltip-title">{point.title}</div>
+                        <div className="tooltip-description">{point.description}</div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
