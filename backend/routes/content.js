@@ -1054,6 +1054,71 @@ router.delete('/admin/admins/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Initialize statistics with default data
+router.post('/admin/initialize-statistics', authMiddleware, async (req, res) => {
+  try {
+    console.log('📊 Initializing statistics...');
+    
+    const statistics = [
+      {
+        title: 'Years of Experience',
+        value: '15+',
+        description: 'Leading the energy industry',
+        icon: '📈',
+        order_index: 1,
+        is_active: true
+      },
+      {
+        title: 'Projects Completed',
+        value: '500+',
+        description: 'Successful energy projects',
+        icon: '🏗️',
+        order_index: 2,
+        is_active: true
+      },
+      {
+        title: 'Happy Clients',
+        value: '1000+',
+        description: 'Satisfied customers worldwide',
+        icon: '😊',
+        order_index: 3,
+        is_active: true
+      }
+    ];
+    
+    let createdCount = 0;
+    let updatedCount = 0;
+    
+    for (const stat of statistics) {
+      try {
+        const [result] = await pool.execute(
+          'INSERT INTO statistics (title, value, description, icon, order_index, is_active) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), value = VALUES(value), description = VALUES(description), icon = VALUES(icon), order_index = VALUES(order_index), is_active = VALUES(is_active)',
+          [stat.title, stat.value, stat.description, stat.icon, stat.order_index, stat.is_active]
+        );
+        
+        if (result.affectedRows === 1) {
+          createdCount++;
+        } else if (result.affectedRows === 2) {
+          updatedCount++;
+        }
+      } catch (error) {
+        console.error(`Error with statistic ${stat.title}:`, error);
+      }
+    }
+    
+    console.log(`✅ Statistics initialized: ${createdCount} created, ${updatedCount} updated`);
+    
+    res.json({
+      message: 'Statistics initialized successfully',
+      created: createdCount,
+      updated: updatedCount
+    });
+  } catch (error) {
+    console.error('❌ Statistics initialization error:', error);
+    res.status(500).json({ message: 'Statistics initialization failed', error: error.message });
+  }
+});
+
 // Initialize content sections with default data
 router.post('/admin/initialize-sections', authMiddleware, async (req, res) => {
   try {

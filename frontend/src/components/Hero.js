@@ -68,13 +68,12 @@ const Hero = () => {
     const fetchData = async () => {
       try {
         // First check if backend is running
-        console.log('Checking backend health...');
         try {
           const healthRes = await fetch(`${API_BASE_URL}/health`);
           const healthData = await healthRes.json();
-          console.log('Backend health check:', healthData);
+          console.log('✅ Backend health check:', healthData.status);
         } catch (healthError) {
-          console.error('Backend health check failed:', healthError);
+          console.error('❌ Backend health check failed:', healthError);
           // Don't return, continue with hero features anyway
         }
         
@@ -94,46 +93,32 @@ const Hero = () => {
               return true;
             });
             
-            console.log(`Hero slides: ${slidesData.length} toplam, ${filteredSlides.length} geçerli (Cloudinary)`);
+            console.log(`✅ Hero slides: ${slidesData.length} total, ${filteredSlides.length} valid (Cloudinary)`);
             setSliderData(filteredSlides);
             slidesRes = { data: filteredSlides };
           }
         } catch (slidesError) {
-          console.log('Hero slides endpoint failed, using default data');
+          console.log('⚠️ Hero slides endpoint failed, using default data');
         }
         
         // Skip hero content for now, focus on features
         
         // Fetch hero features
-        console.log('Requesting hero features from:', '/content/hero-features');
-        console.log('Full URL will be:', API_BASE_URL + '/content/hero-features');
-        
-        // Try direct backend URL
         let featuresRes;
         try {
-          console.log('Fetching from URL:', `${API_BASE_URL}/content/hero-features`);
           const featuresResponse = await fetch(`${API_BASE_URL}/content/hero-features`);
-          console.log('Hero features response - status:', featuresResponse.status);
-          console.log('Hero features response - ok:', featuresResponse.ok);
           
           if (!featuresResponse.ok) {
             throw new Error(`HTTP ${featuresResponse.status}: ${featuresResponse.statusText}`);
           }
           
           const featuresData = await featuresResponse.json();
-          console.log('Hero features data received:', featuresData);
+          console.log('✅ Hero features loaded:', featuresData.length, 'items');
           featuresRes = { data: featuresData, status: featuresResponse.status };
         } catch (error) {
-          console.error('Hero features endpoint failed:', error);
-          console.error('Error details:', {
-            message: error.message,
-            name: error.name,
-            stack: error.stack
-          });
+          console.error('❌ Hero features failed:', error.message);
           featuresRes = { data: [], status: 500 };
         }
-        
-        console.log('Hero features response data:', featuresRes.data);
         
         setHeroFeatures(featuresRes.data || []);
         
@@ -152,7 +137,7 @@ const Hero = () => {
     };
     
     fetchData();
-  }, [sliderData, preloadImage]); // Include sliderData and preloadImage dependencies
+  }, []); // Empty dependency array - only run once on mount
 
   // Otomatik slider geçişi
   useEffect(() => {
@@ -326,8 +311,7 @@ const Hero = () => {
           </AnimatePresence>
 
           <div className="hero-features">
-            {console.log('Rendering hero features, count:', heroFeatures?.length)}
-            {console.log('Hero features data:', heroFeatures)}
+            {/* Hero features rendered */}
             {heroFeatures && heroFeatures.length > 0 ? (
               heroFeatures.map((feature, index) => (
                 <motion.div 

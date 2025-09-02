@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
+import { API_BASE_URL } from '../config/api';
 import './Statistics.css';
 
 
@@ -23,29 +24,73 @@ const Statistics = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Statistics component: Veri yükleniyor...');
+        console.log('📊 Statistics component: Loading data...');
         
-        // Use fallback data for now
-        const fallbackStats = [
-          { id: 1, value: '25+', title: 'Years of Experience' },
-          { id: 2, value: '77', title: 'Office Worldwide' },
-          { id: 3, value: '38K', title: 'Workers Employed' }
-        ];
+        // Fetch statistics from API
+        try {
+          const statsResponse = await fetch(`${API_BASE_URL}/content/statistics`);
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            console.log('✅ Statistics loaded:', statsData.length, 'items');
+            setStatistics(statsData);
+          } else {
+            throw new Error(`HTTP ${statsResponse.status}`);
+          }
+        } catch (statsError) {
+          console.log('⚠️ Statistics API failed, using fallback data');
+          // Fallback data
+          const fallbackStats = [
+            { id: 1, value: '25+', title: 'Years of Experience' },
+            { id: 2, value: '77', title: 'Office Worldwide' },
+            { id: 3, value: '38K', title: 'Workers Employed' }
+          ];
+          setStatistics(fallbackStats);
+        }
         
-        const fallbackHeader = {
-          title: 'Global Presence',
-          subtitle: 'We Spread Around The World',
-          content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
-        };
+        // Fetch statistics header from content sections
+        try {
+          const headerResponse = await fetch(`${API_BASE_URL}/content/sections/statistics`);
+          if (headerResponse.ok) {
+            const headerData = await headerResponse.json();
+            console.log('✅ Statistics header loaded:', headerData.title);
+            setHeaderData({
+              title: headerData.title || 'Global Presence',
+              subtitle: headerData.subtitle || 'We Spread Around The World',
+              content: headerData.content || 'Leading the way in sustainable energy solutions for a better tomorrow.'
+            });
+          } else {
+            throw new Error(`HTTP ${headerResponse.status}`);
+          }
+        } catch (headerError) {
+          console.log('⚠️ Statistics header API failed, using fallback data');
+          // Fallback header
+          setHeaderData({
+            title: 'Global Presence',
+            subtitle: 'We Spread Around The World',
+            content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
+          });
+        }
         
-        const fallbackMapPoints = [
-          { id: 1, title: 'Istanbul Office', latitude: 41.0082, longitude: 28.9784 },
-          { id: 2, title: 'Ankara Office', latitude: 39.9334, longitude: 32.8597 }
-        ];
+        // Fetch map points
+        try {
+          const mapResponse = await fetch(`${API_BASE_URL}/content/map-points`);
+          if (mapResponse.ok) {
+            const mapData = await mapResponse.json();
+            console.log('✅ Map points loaded:', mapData.length, 'items');
+            setMapPoints(mapData);
+          } else {
+            throw new Error(`HTTP ${mapResponse.status}`);
+          }
+        } catch (mapError) {
+          console.log('⚠️ Map points API failed, using fallback data');
+          // Fallback map points
+          const fallbackMapPoints = [
+            { id: 1, title: 'Istanbul Office', latitude: 41.0082, longitude: 28.9784 },
+            { id: 2, title: 'Ankara Office', latitude: 39.9334, longitude: 32.8597 }
+          ];
+          setMapPoints(fallbackMapPoints);
+        }
         
-        setStatistics(fallbackStats);
-        setHeaderData(fallbackHeader);
-        setMapPoints(fallbackMapPoints);
         setError(null);
       } catch (error) {
         console.error('Statistics component: Veri yükleme hatası:', error);

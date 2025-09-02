@@ -52,12 +52,7 @@ const About = () => {
     };
 
     fetchData();
-
-    // Auto-refresh her 30 saniyede bir
-    const interval = setInterval(fetchData, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
+  }, []); // Only run once on mount
 
   if (loading) {
     return (

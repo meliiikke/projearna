@@ -23,14 +23,8 @@ const Contact = () => {
     generateCaptcha();
   }, []);
 
-  // Contact bilgilerini periyodik olarak güncelle (30 saniyede bir)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchContactInfo();
-    }, 30000); // 30 saniye
-
-    return () => clearInterval(interval);
-  }, []);
+  // Contact bilgilerini sadece bir kez yükle
+  // Auto-refresh kaldırıldı - gereksiz API çağrılarını önlemek için
 
   const fetchContactInfo = async () => {
     try {

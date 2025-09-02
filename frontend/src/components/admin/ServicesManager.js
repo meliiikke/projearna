@@ -101,12 +101,29 @@ const ServicesManager = () => {
     setMessage('');
 
     try {
+      console.log('Saving service:', formData);
+      console.log('API URL:', `${API_BASE_URL}/content/admin/services`);
+      
       if (isCreating) {
-        const response = await axios.post(`${API_BASE_URL}/content/admin/services`, formData);
+        const response = await axios.post(`${API_BASE_URL}/content/admin/services`, formData, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          },
+          timeout: 30000
+        });
+        console.log('Service creation response:', response.data);
         setServices(prev => [...prev, { ...formData, id: response.data.id }]);
         setMessage('Service created successfully!');
       } else if (editingService) {
-        await axios.put(`${API_BASE_URL}/content/admin/services/${editingService.id}`, formData);
+        const response = await axios.put(`${API_BASE_URL}/content/admin/services/${editingService.id}`, formData, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          },
+          timeout: 30000
+        });
+        console.log('Service update response:', response.data);
         setServices(prev => prev.map(service => 
           service.id === editingService.id 
             ? { ...service, ...formData }
@@ -118,7 +135,22 @@ const ServicesManager = () => {
       handleCancel();
     } catch (error) {
       console.error('Error saving service:', error);
-      setMessage(`Error ${isCreating ? 'creating' : 'updating'} service`);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      if (error.code === 'ERR_NETWORK') {
+        setMessage('Network error: Backend server is not responding. Please check if the server is running.');
+      } else if (error.response?.status === 401) {
+        setMessage('Authentication error: Please login again.');
+      } else if (error.response?.status === 500) {
+        setMessage('Server error: Please try again later.');
+      } else {
+        setMessage(`Error ${isCreating ? 'creating' : 'updating'} service: ${error.message}`);
+      }
     } finally {
       setSaving(false);
     }
