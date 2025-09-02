@@ -31,10 +31,19 @@ const ContentManager = () => {
       console.log('Sections response:', response.data);
       
       // Backend'den gelen resim URL'lerini tam URL yap
-      const sectionsWithFullImageUrl = response.data.map(section => ({
-        ...section,
-        image_url: section.image_url ? normalizeImageUrl(section.image_url) : null
-      }));
+      const sectionsWithFullImageUrl = response.data.map(section => {
+        const normalizedUrl = section.image_url ? normalizeImageUrl(section.image_url) : null;
+        
+        // Eski resim URL'si tespit edilirse uyarı ver
+        if (section.image_url && !normalizedUrl) {
+          console.warn(`Content section "${section.title}" eski resim URL'si kullanıyor:`, section.image_url);
+        }
+        
+        return {
+          ...section,
+          image_url: normalizedUrl
+        };
+      });
       
       setSections(sectionsWithFullImageUrl);
       setMessage(`${sectionsWithFullImageUrl.length} content sections loaded`);

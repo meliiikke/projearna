@@ -29,10 +29,19 @@ const ServicesManager = () => {
       const response = await axios.get(`${API_BASE_URL}/content/admin/services`);
       
       // Backend'den gelen resim URL'lerini tam URL yap
-      const servicesWithFullImageUrl = response.data.map(service => ({
-        ...service,
-        image_url: service.image_url ? normalizeImageUrl(service.image_url) : null
-      }));
+      const servicesWithFullImageUrl = response.data.map(service => {
+        const normalizedUrl = service.image_url ? normalizeImageUrl(service.image_url) : null;
+        
+        // Eski resim URL'si tespit edilirse uyarı ver
+        if (service.image_url && !normalizedUrl) {
+          console.warn(`Service "${service.title}" eski resim URL'si kullanıyor:`, service.image_url);
+        }
+        
+        return {
+          ...service,
+          image_url: normalizedUrl
+        };
+      });
       
       setServices(servicesWithFullImageUrl);
     } catch (error) {
