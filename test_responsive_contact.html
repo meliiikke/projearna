@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Info Responsive Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .contact-content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+            justify-content: center;
+        }
+        
+        .contact-info-column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .contact-info-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .contact-info-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-icon {
+            font-size: 1.5rem;
+            color: #ffd700;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .contact-content {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .contact-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000;
+            text-align: center;
+        }
+        
+        .contact-content p {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.5;
+            margin: 5px 0;
+            text-align: center;
+        }
+        
+        .contact-form-column {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-header h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        
+        .responsive-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .contact-content-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                justify-content: center;
+            }
+            
+            .contact-info-column {
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .contact-info-item {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .contact-content-container {
+                padding: 0 15px;
+            }
+            
+            .contact-info-item {
+                padding: 15px;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .contact-icon {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Contact Info Responsive Test</h1>
+        
+        <div class="responsive-info">
+            <strong>Responsive Test:</strong> Bu sayfayı farklı ekran boyutlarında test edin:
+            <br>• Desktop (1200px+)
+            <br>• Tablet (768px-1199px)
+            <br>• Mobile (480px-767px)
+            <br>• Small Mobile (480px altı)
+        </div>
+        
+        <div class="contact-content-container">
+            <!-- Left Column - Contact Information -->
+            <div class="contact-info-column">
+                <div class="contact-info-item">
+                    <div class="contact-icon">📞</div>
+                    <div class="contact-content">
+                        <h4>Call Us</h4>
+                        <p>+222 222 22 22</p>
+                    </div>
+                </div>
+
+                <div class="contact-info-item">
+                    <div class="contact-icon">✉️</div>
+                    <div class="contact-content">
+                        <h4>Email Us</h4>
+                        <p>info@arna.com</p>
+                    </div>
+                </div>
+
+                <div class="contact-info-item">
+                    <div class="contact-icon">📍</div>
+                    <div class="contact-content">
+                        <h4>Location</h4>
+                        <p>Ankara, Kızılay</p>
+                    </div>
+                </div>
+
+                <div class="contact-info-item">
+                    <div class="contact-icon">🕒</div>
+                    <div class="contact-content">
+                        <h4>WORKING HOURS</h4>
+                        <p>Pazarte 09:00 - 18:00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Contact Form -->
+            <div class="contact-form-column">
+                <div class="form-header">
+                    <h3>Contact Form</h3>
+                    <p>Test formu - responsive tasarım için</p>
+                </div>
+                
+                <form>
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" placeholder="Name *" style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <input type="email" placeholder="Email *" style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <textarea placeholder="Message *" rows="5" style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <button type="submit" style="width: 100%; background: #000; color: white; border: none; padding: 15px; font-size: 1.1rem; font-weight: 600; border-radius: 5px; cursor: pointer;">
+                        SEND
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

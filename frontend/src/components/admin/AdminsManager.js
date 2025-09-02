@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const AdminsManager = () => {
@@ -17,8 +16,12 @@ const AdminsManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/content/admin/admins`);
-      setItems(res.data);
+      const res = await apiGetAuth('/content/admin/admins');
+      if (!res.error) {
+        setItems(res);
+      } else {
+        setMessage('Error fetching admins');
+      }
     } catch (e) {
       console.error('Error fetching admins:', e);
       setMessage('Error fetching admins');
@@ -50,15 +53,19 @@ const AdminsManager = () => {
     setMessage('');
     try {
       if (isCreating) {
-        await axios.post(`${API_BASE_URL}/content/admin/admins`, formData);
-        await fetchItems();
-        setMessage('Admin eklendi');
+        const response = await apiPostAuth('/content/admin/admins', formData);
+        if (!response.error) {
+          await fetchItems();
+          setMessage('Admin eklendi');
+        }
       } else if (editingItem) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
-        await axios.put(`${API_BASE_URL}/content/admin/admins/${editingItem.id}`, payload);
-        await fetchItems();
-        setMessage('Admin güncellendi');
+        const response = await apiPutAuth(`/content/admin/admins/${editingItem.id}`, payload);
+        if (!response.error) {
+          await fetchItems();
+          setMessage('Admin güncellendi');
+        }
       }
       handleCancel();
     } catch (e) {
@@ -70,9 +77,11 @@ const AdminsManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu admini silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/content/admin/admins/${id}`);
-      setItems(prev => prev.filter(it => it.id !== id));
-      setMessage('Admin silindi');
+      const response = await apiDeleteAuth(`/content/admin/admins/${id}`);
+      if (!response.error) {
+        setItems(prev => prev.filter(it => it.id !== id));
+        setMessage('Admin silindi');
+      }
     } catch (e) {
       console.error('Delete error:', e);
       setMessage('Silme sırasında hata');

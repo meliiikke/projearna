@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const ContactMessagesManager = () => {
@@ -15,19 +14,14 @@ const ContactMessagesManager = () => {
 
   const fetchMessages = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-      console.log('Fetching messages with token:', token ? 'Token exists' : 'No token'); // Debug log
+      console.log('Fetching messages...'); // Debug log
       
-      const response = await axios.get(`${API_BASE_URL}/content/admin/contact-messages`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiGetAuth('/content/admin/contact-messages');
       
-      console.log('Response status:', response.status); // Debug log
+      console.log('Response:', response); // Debug log
       
-      if (response.status === 200) {
-        const data = response.data;
+      if (!response.error) {
+        const data = response;
         console.log('Fetched messages:', data); // Debug log
         setMessages(data);
       } else {
@@ -44,14 +38,9 @@ const ContactMessagesManager = () => {
 
   const markAsRead = async (id) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.put(`${API_BASE_URL}/content/admin/contact-messages/${id}/read`, {}, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiPutAuth(`/content/admin/contact-messages/${id}/read`, {});
       
-      if (response.status === 200) {
+      if (!response.error) {
         setMessages(messages.map(msg => 
           msg.id === id ? { ...msg, is_read: true } : msg
         ));
@@ -67,14 +56,9 @@ const ContactMessagesManager = () => {
     }
 
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.delete(`${API_BASE_URL}/content/admin/contact-messages/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiDeleteAuth(`/content/admin/contact-messages/${id}`);
       
-      if (response.status === 200) {
+      if (!response.error) {
         setMessages(messages.filter(msg => msg.id !== id));
         if (selectedMessage && selectedMessage.id === id) {
           setSelectedMessage(null);

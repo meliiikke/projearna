@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const StaticContentManager = () => {
@@ -24,24 +23,24 @@ const StaticContentManager = () => {
   const fetchAllData = async () => {
     try {
       const [
-        contentSectionsRes,
-        heroFeaturesRes,
-        aboutFeaturesRes,
-        aboutStatsRes,
-        footerBottomLinksRes
+        contentSectionsData,
+        heroFeaturesData,
+        aboutFeaturesData,
+        aboutStatsData,
+        footerBottomLinksData
       ] = await Promise.all([
-        axios.get(`${API_BASE_URL}/content/admin/sections`),
-        axios.get(`${API_BASE_URL}/content/admin/hero-features`),
-        axios.get(`${API_BASE_URL}/content/admin/about-features`),
-        axios.get(`${API_BASE_URL}/content/admin/about-stats`),
-        axios.get(`${API_BASE_URL}/content/admin/footer-bottom-links`)
+        apiGetAuth('/content/admin/sections'),
+        apiGetAuth('/content/admin/hero-features'),
+        apiGetAuth('/content/admin/about-features'),
+        apiGetAuth('/content/admin/about-stats'),
+        apiGetAuth('/content/admin/footer-bottom-links')
       ]);
 
-      setContentSections(contentSectionsRes.data);
-      setHeroFeatures(heroFeaturesRes.data);
-      setAboutFeatures(aboutFeaturesRes.data);
-      setAboutStats(aboutStatsRes.data);
-      setFooterBottomLinks(footerBottomLinksRes.data);
+      if (!contentSectionsData.error) setContentSections(contentSectionsData);
+      if (!heroFeaturesData.error) setHeroFeatures(heroFeaturesData);
+      if (!aboutFeaturesData.error) setAboutFeatures(aboutFeaturesData);
+      if (!aboutStatsData.error) setAboutStats(aboutStatsData);
+      if (!footerBottomLinksData.error) setFooterBottomLinks(footerBottomLinksData);
     } catch (error) {
       console.error('Error fetching static content:', error);
       setMessage('Error fetching content');
@@ -122,14 +121,14 @@ const StaticContentManager = () => {
 
       if (activeTab === 'content-sections') {
         // Content sections are always updates, never creates
-        response = await axios.put(`${endpoint}/${editingItem.id}`, formData);
-        setMessage('Content section updated successfully!');
+        response = await apiPutAuth(`${endpoint}/${editingItem.id}`, formData);
+        if (!response.error) setMessage('Content section updated successfully!');
       } else if (isCreating) {
-        response = await axios.post(endpoint, formData);
-        setMessage('Item created successfully!');
+        response = await apiPostAuth(endpoint, formData);
+        if (!response.error) setMessage('Item created successfully!');
       } else {
-        response = await axios.put(`${endpoint}/${editingItem.id}`, formData);
-        setMessage('Item updated successfully!');
+        response = await apiPutAuth(`${endpoint}/${editingItem.id}`, formData);
+        if (!response.error) setMessage('Item updated successfully!');
       }
 
       // Refresh data
@@ -152,9 +151,13 @@ const StaticContentManager = () => {
 
     try {
       const endpoint = getCurrentEndpoint();
-      await axios.delete(`${endpoint}/${id}`);
-      setMessage('Item deleted successfully!');
-      fetchAllData();
+      const response = await apiDeleteAuth(`${endpoint}/${id}`);
+      if (!response.error) {
+        setMessage('Item deleted successfully!');
+        fetchAllData();
+      } else {
+        setMessage('Error deleting item');
+      }
     } catch (error) {
       console.error('Error deleting item:', error);
       setMessage('Error deleting item');

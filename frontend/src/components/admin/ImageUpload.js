@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiDeleteAuth } from '../../utils/api';
 import './ImageUpload.css';
 
 const ImageUpload = ({ onImageSelect, currentImage }) => {
@@ -15,19 +14,14 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
 
   const fetchImages = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/images`, {
-        headers: {
-          'x-auth-token': token
-        },
-        timeout: 30000,
-      });
+      const response = await apiGetAuth('/images');
       
-      // Backend'den gelen Cloudinary resimlerini kullan
-      const cloudinaryImages = response.data.map(image => ({
-        name: image.name,
-        url: image.url, // Cloudinary URL'si zaten tam URL
-        cloudinaryId: image.cloudinaryId, // "projearna_uploads/abc123" formatında
+      if (!response.error) {
+        // Backend'den gelen Cloudinary resimlerini kullan
+        const cloudinaryImages = response.map(image => ({
+          name: image.name,
+          url: image.url, // Cloudinary URL'si zaten tam URL
+          cloudinaryId: image.cloudinaryId, // "projearna_uploads/abc123" formatında
         uploadDate: image.uploadDate,
         format: image.format,
         size: image.size
@@ -72,11 +66,10 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     try {
       const token = localStorage.getItem('token');
       console.log('🔑 Token available:', !!token);
-      console.log('🌐 Upload URL:', `${API_BASE_URL}/image`);
+      console.log('🌐 Upload URL: /image');
       
-      const response = await axios.post(`${API_BASE_URL}/image`, formData, {
+      const response = await apiPostAuth('/image', formData, {
         headers: {
-          'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
         },
         timeout: 60000, // 60 saniye timeout
@@ -151,13 +144,11 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       
       console.log('Deleting image with param:', deleteParam);
       
-      await axios.delete(`${API_BASE_URL}/image/${encodeURIComponent(deleteParam)}`, {
-        headers: {
-          'x-auth-token': token
-        }
-      });
+      const response = await apiDeleteAuth(`/image/${encodeURIComponent(deleteParam)}`);
       
-      await fetchImages();
+      if (!response.error) {
+        await fetchImages();
+      }
       
       // Eğer silinen resim seçili ise, seçimi temizle
       if (selectedImage === image.url) {
