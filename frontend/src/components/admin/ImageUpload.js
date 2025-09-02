@@ -25,10 +25,9 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       
       // Backend'den gelen Cloudinary resimlerini kullan
       const cloudinaryImages = response.data.map(image => ({
-        ...image,
-        url: image.url, // Cloudinary URL'si zaten tam URL
         name: image.name,
-        cloudinaryId: image.cloudinaryId,
+        url: image.url, // Cloudinary URL'si zaten tam URL
+        cloudinaryId: image.cloudinaryId, // "projearna_uploads/abc123" formatında
         uploadDate: image.uploadDate,
         format: image.format,
         size: image.size
@@ -100,8 +99,14 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
 
     try {
       const token = localStorage.getItem('token');
-      // Cloudinary ID'yi kullan
+      
+      // Cloudinary ID'yi kullan - "projearna_uploads/abc123" formatında
       const cloudinaryId = image.cloudinaryId;
+      
+      if (!cloudinaryId) {
+        alert('Resim ID bulunamadı!');
+        return;
+      }
       
       await axios.delete(`${API_BASE_URL}/upload/image/${cloudinaryId}`, {
         headers: {
@@ -122,8 +127,10 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       console.error('Delete error:', error);
       if (error.response?.status === 401) {
         alert('Auth hatası! Lütfen tekrar giriş yapın.');
+      } else if (error.response?.status === 404) {
+        alert('Resim bulunamadı veya zaten silinmiş!');
       } else {
-        alert('Resim silinirken hata oluştu!');
+        alert(`Resim silinirken hata oluştu: ${error.message}`);
       }
     }
   };

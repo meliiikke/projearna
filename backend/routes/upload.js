@@ -65,7 +65,7 @@ router.get('/images', authMiddleware, async (req, res) => {
     const images = result.resources.map(r => ({
       name: r.public_id.split('/').pop(),
       url: r.secure_url,
-      cloudinaryId: r.public_id,
+      cloudinaryId: r.public_id, // "projearna_uploads/abc123" formatında
       uploadDate: r.created_at,
       format: r.format,
       size: r.bytes
