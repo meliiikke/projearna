@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
-import { API_BASE_URL } from '../config/api';
+import { apiGet } from '../utils/api';
 import './Statistics.css';
 
 const Statistics = () => {
@@ -21,31 +21,26 @@ const Statistics = () => {
         console.log('📊 Statistics component: Loading data...');
 
         // Fetch statistics + header data from about-stats endpoint
-        try {
-          const statsResponse = await fetch(`${API_BASE_URL}/content/about-stats`);
-          if (statsResponse.ok) {
-            const statsData = await statsResponse.json();
-            console.log('✅ About Stats loaded:', statsData);
+        const statsData = await apiGet('/content/about-stats');
+        if (!statsData.error) {
+          console.log('✅ About Stats loaded:', statsData);
 
-            // items array varsa onu al
-            if (Array.isArray(statsData.items)) {
-              setStatistics(statsData.items);
-            } else if (Array.isArray(statsData)) {
-              setStatistics(statsData);
-            } else {
-              setStatistics([]);
-            }
-
-            // Header verisini al
-            setHeaderData({
-              title: statsData.title || 'Global Presence',
-              subtitle: statsData.subtitle || 'We Spread Around The World',
-              content: statsData.content || 'Leading the way in sustainable energy solutions for a better tomorrow.'
-            });
+          // items array varsa onu al
+          if (Array.isArray(statsData.items)) {
+            setStatistics(statsData.items);
+          } else if (Array.isArray(statsData)) {
+            setStatistics(statsData);
           } else {
-            throw new Error(`HTTP ${statsResponse.status}`);
+            setStatistics([]);
           }
-        } catch (statsError) {
+
+          // Header verisini al
+          setHeaderData({
+            title: statsData.title || 'Global Presence',
+            subtitle: statsData.subtitle || 'We Spread Around The World',
+            content: statsData.content || 'Leading the way in sustainable energy solutions for a better tomorrow.'
+          });
+        } else {
           console.log('⚠️ About Stats API failed, using fallback data');
           // Fallback data
           setStatistics([
@@ -61,16 +56,11 @@ const Statistics = () => {
         }
 
         // Fetch map points
-        try {
-          const mapResponse = await fetch(`${API_BASE_URL}/content/map-points`);
-          if (mapResponse.ok) {
-            const mapData = await mapResponse.json();
-            console.log('✅ Map points loaded:', mapData.length, 'items');
-            setMapPoints(mapData);
-          } else {
-            throw new Error(`HTTP ${mapResponse.status}`);
-          }
-        } catch (mapError) {
+        const mapData = await apiGet('/content/map-points');
+        if (!mapData.error) {
+          console.log('✅ Map points loaded:', mapData.length, 'items');
+          setMapPoints(mapData);
+        } else {
           console.log('⚠️ Map points API failed, using fallback data');
           setMapPoints([
             { id: 1, title: 'Istanbul Office', latitude: 41.0082, longitude: 28.9784 },

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { apiGet, apiPost } from '../utils/api';
 import './Contact.css';
-
-import { API_BASE_URL } from '../config/api';
 
 const Contact = () => {
   const [contactInfo, setContactInfo] = useState({});
@@ -28,25 +27,17 @@ const Contact = () => {
 
   const fetchContactInfo = async () => {
     try {
-      console.log('Fetching contact info from:', `${API_BASE_URL}/content/contact`);
-      const response = await fetch(`${API_BASE_URL}/content/contact`);
-      console.log('Contact info response - status:', response.status);
-      console.log('Contact info response - ok:', response.ok);
+      console.log('Fetching contact info from: /content/contact');
+      const data = await apiGet('/content/contact');
       
-      if (response.ok) {
-        const data = await response.json();
+      if (!data.error) {
         console.log('Contact info data received:', data);
         setContactInfo(data);
       } else {
-        console.error('Contact info fetch failed:', response.status, response.statusText);
+        console.error('Contact info fetch failed:', data.error);
       }
     } catch (error) {
       console.error('Error fetching contact info:', error);
-      console.error('Error details:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack
-      });
     }
   };
 
@@ -83,25 +74,13 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      const requestUrl = `${API_BASE_URL}/content/contact`;
-      console.log('Sending request to:', requestUrl); // Debug log
+      console.log('Sending request to: /content/contact'); // Debug log
       console.log('Request body:', JSON.stringify(formData)); // Debug log
       
-      const response = await fetch(requestUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      console.log('Response status:', response.status); // Debug log
-      console.log('Response ok:', response.ok); // Debug log
-
-      const data = await response.json();
+      const data = await apiPost('/content/contact', formData);
       console.log('Response data:', data); // Debug log
 
-      if (response.ok) {
+      if (!data.error) {
         setSubmitStatus('success');
         setFormData({
           name: '',
@@ -113,7 +92,7 @@ const Contact = () => {
         setCaptchaInput('');
         generateCaptcha();
       } else {
-        console.error('Server error:', data); // Debug log
+        console.error('Server error:', data.error); // Debug log
         setSubmitStatus('error');
       }
     } catch (error) {

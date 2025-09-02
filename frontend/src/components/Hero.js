@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { normalizeImageUrl, API_BASE_URL } from '../config/api';
+import { normalizeImageUrl } from '../config/api';
+import { apiGet } from '../utils/api';
 import './Hero.css';
 
 const Hero = () => {
@@ -68,59 +69,46 @@ const Hero = () => {
     const fetchData = async () => {
       try {
         // First check if backend is running
-        try {
-          const healthRes = await fetch(`${API_BASE_URL}/health`);
-          const healthData = await healthRes.json();
+        const healthData = await apiGet('/health');
+        if (!healthData.error) {
           console.log('✅ Backend health check:', healthData.status);
-        } catch (healthError) {
-          console.error('❌ Backend health check failed:', healthError);
+        } else {
+          console.error('❌ Backend health check failed:', healthData.error);
           // Don't return, continue with hero features anyway
         }
         
         // Fetch hero slides (try both endpoints)
         let slidesRes = null;
-        try {
-          const slidesResponse = await fetch(`${API_BASE_URL}/hero-slides/slides`);
-          const slidesData = await slidesResponse.json();
-          if (slidesData && slidesData.length > 0) {
-            // Eski resimleri filtrele, sadece Cloudinary resimlerini kullan
-            const filteredSlides = slidesData.filter(slide => {
-              const normalizedUrl = normalizeImageUrl(slide.image_url);
-              if (!normalizedUrl && slide.image_url) {
-                console.warn(`Hero slide "${slide.title}" eski resim URL'si kullanıyor, filtrelendi:`, slide.image_url);
-                return false;
-              }
-              return true;
-            });
-            
-            console.log(`✅ Hero slides: ${slidesData.length} total, ${filteredSlides.length} valid (Cloudinary)`);
-            setSliderData(filteredSlides);
-            slidesRes = { data: filteredSlides };
-          }
-        } catch (slidesError) {
+        const slidesData = await apiGet('/hero-slides/slides');
+        if (!slidesData.error && slidesData && slidesData.length > 0) {
+          // Eski resimleri filtrele, sadece Cloudinary resimlerini kullan
+          const filteredSlides = slidesData.filter(slide => {
+            const normalizedUrl = normalizeImageUrl(slide.image_url);
+            if (!normalizedUrl && slide.image_url) {
+              console.warn(`Hero slide "${slide.title}" eski resim URL'si kullanıyor, filtrelendi:`, slide.image_url);
+              return false;
+            }
+            return true;
+          });
+          
+          console.log(`✅ Hero slides: ${slidesData.length} total, ${filteredSlides.length} valid (Cloudinary)`);
+          setSliderData(filteredSlides);
+          slidesRes = { data: filteredSlides };
+        } else {
           console.log('⚠️ Hero slides endpoint failed, using default data');
         }
         
         // Skip hero content for now, focus on features
         
         // Fetch hero features
-        let featuresRes;
-        try {
-          const featuresResponse = await fetch(`${API_BASE_URL}/content/hero-features`);
-          
-          if (!featuresResponse.ok) {
-            throw new Error(`HTTP ${featuresResponse.status}: ${featuresResponse.statusText}`);
-          }
-          
-          const featuresData = await featuresResponse.json();
+        const featuresData = await apiGet('/content/hero-features');
+        if (!featuresData.error) {
           console.log('✅ Hero features loaded:', featuresData.length, 'items');
-          featuresRes = { data: featuresData, status: featuresResponse.status };
-        } catch (error) {
-          console.error('❌ Hero features failed:', error.message);
-          featuresRes = { data: [], status: 500 };
+        } else {
+          console.error('❌ Hero features failed:', featuresData.error);
         }
         
-        setHeroFeatures(featuresRes.data || []);
+        setHeroFeatures(featuresData.error ? [] : featuresData);
         
         // Preload slider images - use the updated sliderData
         const currentSliderData = slidesRes && slidesRes.data && slidesRes.data.length > 0 ? slidesRes.data : (sliderData || []);

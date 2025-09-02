@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import ImageUpload from './ImageUpload';
-import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
+import { normalizeImageUrl } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const ContentManager = () => {
@@ -27,11 +27,18 @@ const ContentManager = () => {
   const fetchSections = async () => {
     try {
       console.log('Fetching sections...');
-      const response = await axios.get(`${API_BASE_URL}/content/admin/sections`);
-      console.log('Sections response:', response.data);
+      const data = await apiGetAuth('/content/admin/sections');
+      
+      if (data.error) {
+        console.error('Failed to fetch sections:', data.error);
+        setMessage('Failed to load sections');
+        return;
+      }
+      
+      console.log('Sections response:', data);
       
       // Backend'den gelen resim URL'lerini tam URL yap
-      const sectionsWithFullImageUrl = response.data.map(section => {
+      const sectionsWithFullImageUrl = data.map(section => {
         const normalizedUrl = section.image_url ? normalizeImageUrl(section.image_url) : null;
         
         // Eski resim URL'si tespit edilirse uyarı ver

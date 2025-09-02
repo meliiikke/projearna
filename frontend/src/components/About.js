@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { normalizeImageUrl } from '../config/api';
+import { apiGet } from '../utils/api';
 import './About.css';
-
-import { API_BASE_URL } from '../config/api';
 
 const About = () => {
   const [aboutContent, setAboutContent] = useState(null);
@@ -14,29 +13,23 @@ const About = () => {
     const fetchData = async () => {
       try {
         // Fetch about content
-        console.log('Fetching about content from:', `${API_BASE_URL}/content/sections/about`);
-        const contentResponse = await fetch(`${API_BASE_URL}/content/sections/about`);
-        console.log('About content response - status:', contentResponse.status);
-        
-        if (contentResponse.ok) {
-          const contentData = await contentResponse.json();
+        console.log('Fetching about content from: /content/sections/about');
+        const contentData = await apiGet('/content/sections/about');
+        if (!contentData.error) {
           console.log('About content data received:', contentData);
           setAboutContent(contentData);
         } else {
-          console.error('About content fetch failed:', contentResponse.status, contentResponse.statusText);
+          console.error('About content fetch failed:', contentData.error);
         }
         
         // Fetch about features
-        console.log('Fetching about features from:', `${API_BASE_URL}/content/about-features`);
-        const featuresResponse = await fetch(`${API_BASE_URL}/content/about-features`);
-        console.log('About features response - status:', featuresResponse.status);
-        
-        if (featuresResponse.ok) {
-          const featuresData = await featuresResponse.json();
+        console.log('Fetching about features from: /content/about-features');
+        const featuresData = await apiGet('/content/about-features');
+        if (!featuresData.error) {
           console.log('About features data received:', featuresData);
           setAboutFeatures(featuresData);
         } else {
-          console.error('About features fetch failed:', featuresResponse.status, featuresResponse.statusText);
+          console.error('About features fetch failed:', featuresData.error);
         }
 
       } catch (error) {

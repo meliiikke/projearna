@@ -32,13 +32,19 @@ export const AuthProvider = ({ children }) => {
       (error) => {
         if (error.code === 'ERR_NETWORK') {
           console.error('Network error: Backend server is not responding');
-          // Network hatası durumunda logout yapma
+          // Network hatası durumunda logout yapma - sadece log
         } else if (error.response?.status === 401) {
           console.error('Authentication error: Token expired or invalid');
           // Sadece gerçek auth hatası durumunda logout yap
           if (error.config?.url?.includes('/auth/')) {
+            console.log('🔐 Auth endpoint failed, logging out user');
             logout();
+          } else {
+            console.log('🔐 Non-auth endpoint returned 401, keeping user logged in');
           }
+        } else {
+          // Diğer hatalar için sadece log, logout yapma
+          console.error('API Error:', error.response?.status, error.message);
         }
         return Promise.reject(error);
       }

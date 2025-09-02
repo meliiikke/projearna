@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { normalizeImageUrl } from '../config/api';
+import { apiGet } from '../utils/api';
 import './Services.css';
-
-import { API_BASE_URL } from '../config/api';
 
 const Services = () => {
   const [services, setServices] = useState([]);
@@ -12,17 +11,14 @@ const Services = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        console.log('Fetching services from:', `${API_BASE_URL}/content/services`);
-        const response = await fetch(`${API_BASE_URL}/content/services`);
-        console.log('Services response - status:', response.status);
-        console.log('Services response - ok:', response.ok);
+        console.log('Fetching services from: /content/services');
+        const data = await apiGet('/content/services');
         
-        if (response.ok) {
-          const data = await response.json();
+        if (!data.error) {
           console.log('Services data received:', data);
           setServices(data);
         } else {
-          console.error('Services fetch failed:', response.status, response.statusText);
+          console.error('Services fetch failed:', data.error);
           // Fallback data
           setServices([
             { id: 1, title: 'Clean Energy', description: 'Sustainable energy solutions' },
@@ -32,11 +28,6 @@ const Services = () => {
         }
       } catch (error) {
         console.error('Error fetching services:', error);
-        console.error('Error details:', {
-          message: error.message,
-          name: error.name,
-          stack: error.stack
-        });
         // Fallback data
         setServices([
           { id: 1, title: 'Clean Energy', description: 'Sustainable energy solutions' },

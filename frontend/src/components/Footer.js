@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config/api';
+import { apiGet } from '../utils/api';
 import './Footer.css';
 
 
@@ -14,9 +14,8 @@ const Footer = () => {
     const fetchData = async () => {
       try {
         // Fetch contact info from API
-        const contactResponse = await fetch(`${API_BASE_URL}/content/contact`);
-        if (contactResponse.ok) {
-          const contactData = await contactResponse.json();
+        const contactData = await apiGet('/content/contact');
+        if (!contactData.error) {
           setContactInfo(contactData);
           console.log('Contact info loaded from API:', contactData);
         } else {
@@ -32,21 +31,12 @@ const Footer = () => {
         }
         
         // Fetch mission content from content sections
-        try {
-          const missionResponse = await fetch(`${API_BASE_URL}/content/sections/mission`);
-          if (missionResponse.ok) {
-            const missionData = await missionResponse.json();
-            setMissionContent(missionData);
-            console.log('Mission content loaded from API:', missionData);
-          } else {
-            console.warn('Failed to fetch mission content, using fallback');
-            const fallbackMission = {
-              content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
-            };
-            setMissionContent(fallbackMission);
-          }
-        } catch (missionError) {
-          console.warn('Mission content fetch error:', missionError);
+        const missionData = await apiGet('/content/sections/mission');
+        if (!missionData.error) {
+          setMissionContent(missionData);
+          console.log('Mission content loaded from API:', missionData);
+        } else {
+          console.warn('Failed to fetch mission content, using fallback');
           const fallbackMission = {
             content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
           };
@@ -54,23 +44,13 @@ const Footer = () => {
         }
 
         // Fetch services for footer
-        try {
-          const servicesResponse = await fetch(`${API_BASE_URL}/content/services`);
-          if (servicesResponse.ok) {
-            const servicesData = await servicesResponse.json();
-            // Take first 3 services for footer
-            setServices(servicesData.slice(0, 3));
-            console.log('Services loaded from API:', servicesData.slice(0, 3));
-          } else {
-            console.warn('Failed to fetch services, using fallback');
-            setServices([
-              { title: 'Clean Energy', description: 'Sustainable energy solutions' },
-              { title: 'Solar Power', description: 'Renewable solar energy' },
-              { title: 'Wind Energy', description: 'Clean wind power solutions' }
-            ]);
-          }
-        } catch (servicesError) {
-          console.warn('Services fetch error:', servicesError);
+        const servicesData = await apiGet('/content/services');
+        if (!servicesData.error) {
+          // Take first 3 services for footer
+          setServices(servicesData.slice(0, 3));
+          console.log('Services loaded from API:', servicesData.slice(0, 3));
+        } else {
+          console.warn('Failed to fetch services, using fallback');
           setServices([
             { title: 'Clean Energy', description: 'Sustainable energy solutions' },
             { title: 'Solar Power', description: 'Renewable solar energy' },
