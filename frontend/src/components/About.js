@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { normalizeImageUrl } from '../config/api';
 import './About.css';
 
-// API base URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app';
+import { API_BASE_URL } from '../config/api';
 
 const About = () => {
   const [aboutContent, setAboutContent] = useState(null);
