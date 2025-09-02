@@ -12,8 +12,11 @@ const cleanImageUrl = (imageUrl) => {
     return imageUrl;
   }
   
-  // If it's an old local path, return null to prevent CORS errors
-  if (imageUrl.startsWith('/uploads/') || imageUrl.includes('img-')) {
+  // If it's an old local path or contains old image patterns, return null to prevent CORS errors
+  if (imageUrl.startsWith('/uploads/') || 
+      imageUrl.includes('img-') || 
+      imageUrl.includes('uploads/') ||
+      imageUrl.match(/img-\d+-\d+\.(jpg|jpeg|png|webp|gif)/i)) {
     console.warn('Old image URL detected, returning null:', imageUrl);
     return null;
   }

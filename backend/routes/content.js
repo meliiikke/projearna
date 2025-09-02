@@ -1045,4 +1045,44 @@ router.delete('/admin/admins/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// EMERGENCY: Clean old image URLs from database
+router.post('/admin/clean-old-images', authMiddleware, async (req, res) => {
+  try {
+    console.log('🧹 Cleaning old image URLs from database...');
+    
+    // Clean hero_slides
+    const [heroResult] = await pool.execute(
+      "UPDATE hero_slides SET image_url = NULL WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%'"
+    );
+    
+    // Clean content_sections
+    const [contentResult] = await pool.execute(
+      "UPDATE content_sections SET image_url = NULL WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%'"
+    );
+    
+    // Clean services
+    const [servicesResult] = await pool.execute(
+      "UPDATE services SET image_url = NULL WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%'"
+    );
+    
+    console.log('✅ Cleanup completed:', {
+      hero_slides: heroResult.affectedRows,
+      content_sections: contentResult.affectedRows,
+      services: servicesResult.affectedRows
+    });
+    
+    res.json({
+      message: 'Old image URLs cleaned successfully',
+      affectedRows: {
+        hero_slides: heroResult.affectedRows,
+        content_sections: contentResult.affectedRows,
+        services: servicesResult.affectedRows
+      }
+    });
+  } catch (error) {
+    console.error('❌ Cleanup error:', error);
+    res.status(500).json({ message: 'Cleanup failed', error: error.message });
+  }
+});
+
 module.exports = router;

@@ -229,7 +229,7 @@ const HeroSlidesManager = () => {
                     <div className="card-description">
                       {slide.subtitle || 'No subtitle'}
                     </div>
-                    {slide.image_url && (
+                    {slide.image_url ? (
                       <div className="card-image">
                         <img 
                           src={slide.image_url} 
@@ -241,7 +241,18 @@ const HeroSlidesManager = () => {
                             borderRadius: '8px',
                             marginTop: '10px'
                           }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
                         />
+                        <div style={{display: 'none', padding: '20px', textAlign: 'center', color: '#999', fontSize: '0.9rem'}}>
+                          Resim yüklenemedi
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{padding: '20px', textAlign: 'center', color: '#999', fontSize: '0.9rem', border: '1px dashed #ddd', borderRadius: '8px', marginTop: '10px'}}>
+                        Resim yok
                       </div>
                     )}
                   </div>
@@ -382,7 +393,14 @@ const HeroSlidesManager = () => {
                         borderRadius: '8px',
                         marginTop: '5px'
                       }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
                     />
+                    <div style={{display: 'none', padding: '20px', textAlign: 'center', color: '#999', fontSize: '0.9rem', border: '1px dashed #ddd', borderRadius: '8px'}}>
+                      Resim yüklenemedi
+                    </div>
                   </div>
                 )}
               </div>

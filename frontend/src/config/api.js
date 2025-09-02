@@ -34,7 +34,10 @@ export const normalizeImageUrl = (imageUrl) => {
   }
   
   // Eski resim URL'leri için null döndür (artık kullanılmıyor)
-  if (imageUrl.startsWith('/uploads') || imageUrl.includes('img-')) {
+  if (imageUrl.startsWith('/uploads') || 
+      imageUrl.includes('img-') || 
+      imageUrl.includes('uploads/') ||
+      imageUrl.match(/img-\d+-\d+\.(jpg|jpeg|png|webp|gif)/i)) {
     console.warn('Eski resim URL\'si tespit edildi, Cloudinary kullanın:', imageUrl);
     return null;
   }
