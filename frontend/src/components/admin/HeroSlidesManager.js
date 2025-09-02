@@ -32,10 +32,19 @@ const HeroSlidesManager = () => {
       console.log('Hero slides response:', response.data);
       
       // Backend'den gelen resim URL'lerini tam URL yap
-      const slidesWithFullImageUrl = response.data?.map(slide => ({
-        ...slide,
-        image_url: slide.image_url ? normalizeImageUrl(slide.image_url) : null
-      })) || [];
+      const slidesWithFullImageUrl = response.data?.map(slide => {
+        const normalizedUrl = slide.image_url ? normalizeImageUrl(slide.image_url) : null;
+        
+        // Eski resim URL'si tespit edilirse uyarı ver
+        if (slide.image_url && !normalizedUrl) {
+          console.warn(`Hero slide "${slide.title}" eski resim URL'si kullanıyor:`, slide.image_url);
+        }
+        
+        return {
+          ...slide,
+          image_url: normalizedUrl
+        };
+      }) || [];
       
       setSlides(slidesWithFullImageUrl);
       setMessage(`${slidesWithFullImageUrl.length} hero slides loaded`);

@@ -119,7 +119,14 @@ const About = () => {
                     className="industrial-bg"
                     style={{
                       backgroundImage: aboutContent?.image_url 
-                        ? `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${normalizeImageUrl(aboutContent.image_url)})`
+                        ? (() => {
+                            const normalizedUrl = normalizeImageUrl(aboutContent.image_url);
+                            if (!normalizedUrl) {
+                              console.warn('About section eski resim URL\'si kullanıyor:', aboutContent.image_url);
+                              return 'linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%)';
+                            }
+                            return `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${normalizedUrl})`;
+                          })()
                         : undefined
                     }}
                     onError={(e) => {

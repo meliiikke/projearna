@@ -19,22 +19,28 @@ export const API_BASE_URL = getApiBaseUrl();
 // Backend base URL (API olmadan)
 export const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
 
-// Resim URL'lerini normalize eden yardımcı fonksiyon - Cloudinary için
+// Resim URL'lerini normalize eden yardımcı fonksiyon - Sadece Cloudinary için
 export const normalizeImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
   
-  // Eğer zaten tam URL ise (Cloudinary veya diğer), olduğu gibi döndür
+  // Eğer zaten tam URL ise, HTTPS kullanımını garanti et
   if (imageUrl.startsWith('http')) {
     return imageUrl.replace(/^http:/, 'https:');
   }
   
-  // Eğer /uploads ile başlıyorsa, direkt static serving kullan (fallback)
-  if (imageUrl.startsWith('/uploads')) {
-    return `${BACKEND_BASE_URL}${imageUrl}`;
+  // Eğer Cloudinary URL'si ise, olduğu gibi döndür
+  if (imageUrl.includes('cloudinary.com')) {
+    return imageUrl;
   }
   
-  // Diğer durumlarda da direkt static serving kullan (fallback)
-  return `${BACKEND_BASE_URL}/uploads/${imageUrl}`;
+  // Eski resim URL'leri için null döndür (artık kullanılmıyor)
+  if (imageUrl.startsWith('/uploads') || imageUrl.includes('img-')) {
+    console.warn('Eski resim URL\'si tespit edildi, Cloudinary kullanın:', imageUrl);
+    return null;
+  }
+  
+  // Diğer durumlarda da null döndür
+  return null;
 };
 
 // Eski yöntemler kaldırıldı - sadece Cloudinary kullanıyoruz

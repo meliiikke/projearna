@@ -50,7 +50,7 @@ const Hero = () => {
         resolve();
       };
       img.onerror = () => {
-        console.warn('Failed to load Cloudinary image:', normalizedUrl);
+        console.warn('Failed to load image:', normalizedUrl);
         setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: false }));
         resolve(); // Resolve anyway to not block loading
       };

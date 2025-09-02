@@ -21,10 +21,19 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
         timeout: 30000,
       });
       // Backend'den gelen resim URL'lerini kullan - Cloudinary URL'leri
-      const imagesWithFullUrl = response.data.map(image => ({
-        ...image,
-        url: image.fullUrl || normalizeImageUrl(image.url)
-      }));
+      const imagesWithFullUrl = response.data.map(image => {
+        const normalizedUrl = image.fullUrl || normalizeImageUrl(image.url);
+        
+        // Eski resim URL'si tespit edilirse uyarı ver
+        if (image.url && !normalizedUrl) {
+          console.warn(`Eski resim URL'si tespit edildi:`, image.url);
+        }
+        
+        return {
+          ...image,
+          url: normalizedUrl
+        };
+      });
       setImages(imagesWithFullUrl);
     } catch (error) {
       console.error('Error fetching images:', error);
