@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
 import './AdminComponents.css';
 
 const ContentManager = () => {
@@ -33,7 +33,7 @@ const ContentManager = () => {
       // Backend'den gelen resim URL'lerini tam URL yap
       const sectionsWithFullImageUrl = response.data.map(section => ({
         ...section,
-        image_url: section.image_url ? `${API_BASE_URL.replace('/api', '')}${section.image_url}` : null
+        image_url: section.image_url ? normalizeImageUrl(section.image_url) : null
       }));
       
       setSections(sectionsWithFullImageUrl);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
 import './AdminComponents.css';
 
 const HeroSlidesManager = () => {
@@ -34,7 +34,7 @@ const HeroSlidesManager = () => {
       // Backend'den gelen resim URL'lerini tam URL yap
       const slidesWithFullImageUrl = response.data?.map(slide => ({
         ...slide,
-        image_url: slide.image_url ? `${API_BASE_URL.replace('/api', '')}${slide.image_url}` : null
+        image_url: slide.image_url ? normalizeImageUrl(slide.image_url) : null
       })) || [];
       
       setSlides(slidesWithFullImageUrl);

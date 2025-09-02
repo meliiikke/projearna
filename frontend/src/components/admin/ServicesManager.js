@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
 import './AdminComponents.css';
 
 const ServicesManager = () => {
@@ -31,7 +31,7 @@ const ServicesManager = () => {
       // Backend'den gelen resim URL'lerini tam URL yap
       const servicesWithFullImageUrl = response.data.map(service => ({
         ...service,
-        image_url: service.image_url ? `${API_BASE_URL.replace('/api', '')}${service.image_url}` : null
+        image_url: service.image_url ? normalizeImageUrl(service.image_url) : null
       }));
       
       setServices(servicesWithFullImageUrl);

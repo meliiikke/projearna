@@ -6,8 +6,8 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Upload klasörünü root'ta tut
-const uploadDir = path.join(__dirname, '../../uploads');
+// Upload klasörünü backend klasöründe tut
+const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -55,10 +55,14 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     
+    // Production'da HTTPS kullan, development'ta req.protocol kullan
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : req.protocol;
+    const host = req.get('host');
+    
     res.json({
       message: 'Resim başarıyla yüklendi',
       imageUrl: imageUrl,
-      fullUrl: `${req.protocol}://${req.get('host')}${imageUrl}`,
+      fullUrl: `${protocol}://${host}${imageUrl}`,
       fileName: req.file.filename
     });
   } catch (error) {
@@ -71,12 +75,16 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
 router.get('/images', authMiddleware, (req, res) => {
   try {
     const files = fs.readdirSync(uploadDir);
+    // Production'da HTTPS kullan, development'ta req.protocol kullan
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : req.protocol;
+    const host = req.get('host');
+    
     const images = files
       .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
       .map(file => ({
         name: file,
         url: `/uploads/${file}`,
-        fullUrl: `${req.protocol}://${req.get('host')}/uploads/${file}`,
+        fullUrl: `${protocol}://${host}/uploads/${file}`,
         uploadDate: fs.statSync(path.join(uploadDir, file)).mtime
       }))
       .sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
 import './ImageUpload.css';
 
 const ImageUpload = ({ onImageSelect, currentImage }) => {
@@ -23,7 +23,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       // Backend'den gelen resim URL'lerini kullan
       const imagesWithFullUrl = response.data.map(image => ({
         ...image,
-        url: image.fullUrl || `${API_BASE_URL.replace('/api', '')}${image.url}`
+        url: image.fullUrl || normalizeImageUrl(image.url)
       }));
       setImages(imagesWithFullUrl);
     } catch (error) {
@@ -59,7 +59,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       await fetchImages();
       
       // Yeni yüklenen resmi seç - backend'den gelen fullUrl'i kullan
-      const fullImageUrl = response.data.fullUrl || `${API_BASE_URL.replace('/api', '')}${response.data.imageUrl}`;
+      const fullImageUrl = response.data.fullUrl || normalizeImageUrl(response.data.imageUrl);
       handleImageSelect(fullImageUrl);
       
       alert('Resim başarıyla yüklendi!');

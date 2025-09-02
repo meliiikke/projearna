@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { normalizeImageUrl } from '../config/api';
 import './Services.css';
 
 // API base URL
@@ -76,7 +77,7 @@ const Services = () => {
             >
               {service.image_url && (
                 <div className="service-image">
-                  <img src={service.image_url} alt={service.title} />
+                  <img src={normalizeImageUrl(service.image_url)} alt={service.title} />
                 </div>
               )}
               <div className="service-content">

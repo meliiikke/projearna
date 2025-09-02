@@ -14,6 +14,27 @@ const getApiBaseUrl = () => {
 
 export const API_BASE_URL = getApiBaseUrl();
 
+// Backend base URL (API olmadan)
+export const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
+
+// Resim URL'lerini normalize eden yardımcı fonksiyon
+export const normalizeImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  
+  // Eğer zaten tam URL ise, olduğu gibi döndür
+  if (imageUrl.startsWith('http')) {
+    return imageUrl;
+  }
+  
+  // Eğer /uploads ile başlıyorsa, backend base URL ile birleştir
+  if (imageUrl.startsWith('/uploads')) {
+    return `${BACKEND_BASE_URL}${imageUrl}`;
+  }
+  
+  // Diğer durumlarda da backend base URL ile birleştir
+  return `${BACKEND_BASE_URL}${imageUrl}`;
+};
+
 // Axios instance with base URL
 const api = axios.create({
   baseURL: API_BASE_URL,

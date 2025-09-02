@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { normalizeImageUrl } from '../config/api';
 import './About.css';
 
 // API base URL
@@ -118,7 +119,7 @@ const About = () => {
                     className="industrial-bg"
                     style={{
                       backgroundImage: aboutContent?.image_url 
-                        ? `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${aboutContent.image_url})`
+                        ? `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${normalizeImageUrl(aboutContent.image_url)})`
                         : undefined
                     }}
                   ></div>
