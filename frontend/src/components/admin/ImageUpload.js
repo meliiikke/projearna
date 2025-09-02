@@ -16,7 +16,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
   const fetchImages = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/images`, {
+      const response = await axios.get(`${API_BASE_URL}/upload/images`, {
         headers: {
           'x-auth-token': token
         },
@@ -60,9 +60,14 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     try {
       const token = localStorage.getItem('token');
       console.log('🔑 Token available:', !!token);
-      console.log('🌐 Upload URL:', `${API_BASE_URL}/image`);
+      console.log('🌐 Upload URL:', `${API_BASE_URL}/upload/image`);
       
-      const response = await axios.post(`${API_BASE_URL}/image`, formData, {
+      if (!token) {
+        alert('Giriş yapmanız gerekiyor! Lütfen admin paneline giriş yapın.');
+        return;
+      }
+      
+      const response = await axios.post(`${API_BASE_URL}/upload/image`, formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
@@ -134,7 +139,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       
       console.log('Deleting image with param:', deleteParam);
       
-      await axios.delete(`${API_BASE_URL}/image/${encodeURIComponent(deleteParam)}`, {
+      await axios.delete(`${API_BASE_URL}/upload/image/${encodeURIComponent(deleteParam)}`, {
         headers: {
           'x-auth-token': token
         }

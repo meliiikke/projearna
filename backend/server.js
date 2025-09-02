@@ -98,7 +98,6 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api', uploadRoutes); // Direct mount for /api/image endpoints
 app.use('/api/hero-slides', heroSlidesRoutes);
 
 // Health check endpoint
