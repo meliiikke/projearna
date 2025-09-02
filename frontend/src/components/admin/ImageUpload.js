@@ -15,30 +15,32 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
 
   const fetchImages = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await axios.get(`${API_BASE_URL}/upload/images`, {
-        // CORS için ek ayarlar
-        withCredentials: false,
+        headers: {
+          'x-auth-token': token
+        },
         timeout: 30000,
       });
-      // Backend'den gelen resim URL'lerini kullan - Cloudinary URL'leri
-      const imagesWithFullUrl = response.data.map(image => {
-        const normalizedUrl = image.fullUrl || normalizeImageUrl(image.url);
-        
-        // Eski resim URL'si tespit edilirse uyarı ver
-        if (image.url && !normalizedUrl) {
-          console.warn(`Eski resim URL'si tespit edildi:`, image.url);
-        }
-        
-        return {
-          ...image,
-          url: normalizedUrl
-        };
-      });
-      setImages(imagesWithFullUrl);
+      
+      // Backend'den gelen Cloudinary resimlerini kullan
+      const cloudinaryImages = response.data.map(image => ({
+        ...image,
+        url: image.url, // Cloudinary URL'si zaten tam URL
+        name: image.name,
+        cloudinaryId: image.cloudinaryId,
+        uploadDate: image.uploadDate,
+        format: image.format,
+        size: image.size
+      }));
+      
+      setImages(cloudinaryImages);
     } catch (error) {
       console.error('Error fetching images:', error);
-      if (error.response?.status === 0) {
-        console.error('CORS hatası! Backend\'i kontrol edin.');
+      if (error.response?.status === 401) {
+        console.error('Auth hatası! Token kontrol edin.');
+      } else {
+        console.error('Resimler yüklenirken hata:', error.message);
       }
     } finally {
       setLoading(false);
@@ -50,32 +52,34 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', file); // Backend'de beklenen key adı
 
     setUploading(true);
 
     try {
+      const token = localStorage.getItem('token');
       const response = await axios.post(`${API_BASE_URL}/upload/image`, formData, {
         headers: {
+          'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
         },
-        // CORS için ek ayarlar
-        withCredentials: false,
         timeout: 30000,
       });
 
+      // Backend'den gelen Cloudinary response'u
+      const { imageUrl, fileName, cloudinaryId } = response.data;
+      
       // Resmi listeye ekle
       await fetchImages();
       
-      // Yeni yüklenen resmi seç - backend'den gelen fullUrl'i kullan
-      const fullImageUrl = response.data.fullUrl || normalizeImageUrl(response.data.imageUrl);
-      handleImageSelect(fullImageUrl);
+      // Yeni yüklenen resmi seç - Cloudinary URL'si
+      handleImageSelect(imageUrl);
       
-      alert('Resim başarıyla yüklendi!');
+      alert('Resim başarıyla Cloudinary\'ye yüklendi!');
     } catch (error) {
       console.error('Upload error:', error);
-      if (error.response?.status === 0) {
-        alert('CORS hatası! Lütfen backend\'i kontrol edin.');
+      if (error.response?.status === 401) {
+        alert('Auth hatası! Lütfen tekrar giriş yapın.');
       } else {
         alert(`Resim yüklenirken hata oluştu: ${error.message}`);
       }
@@ -95,20 +99,32 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     if (!window.confirm('Bu resmi silmek istediğinizden emin misiniz?')) return;
 
     try {
-      // Cloudinary ID'yi kullan (eğer varsa)
-      const deleteId = image.cloudinaryId || image.name;
-      await axios.delete(`${API_BASE_URL}/upload/image/${deleteId}`);
+      const token = localStorage.getItem('token');
+      // Cloudinary ID'yi kullan
+      const cloudinaryId = image.cloudinaryId;
+      
+      await axios.delete(`${API_BASE_URL}/upload/image/${cloudinaryId}`, {
+        headers: {
+          'x-auth-token': token
+        }
+      });
+      
       await fetchImages();
       
-      if (selectedImage && selectedImage.includes(image.name)) {
+      // Eğer silinen resim seçili ise, seçimi temizle
+      if (selectedImage === image.url) {
         setSelectedImage('');
         onImageSelect('');
       }
       
-      alert('Resim başarıyla silindi!');
+      alert('Resim başarıyla Cloudinary\'den silindi!');
     } catch (error) {
       console.error('Delete error:', error);
-      alert('Resim silinirken hata oluştu!');
+      if (error.response?.status === 401) {
+        alert('Auth hatası! Lütfen tekrar giriş yapın.');
+      } else {
+        alert('Resim silinirken hata oluştu!');
+      }
     }
   };
 

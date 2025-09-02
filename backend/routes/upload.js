@@ -17,7 +17,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'projearna_uploads',
+    folder: 'projearna_uploads', // Cloudinary'de klasör ismi
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'],
     resource_type: 'image',
     transformation: [{ width: 1920, height: 1080, crop: 'limit' }]
@@ -41,13 +41,11 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
       return res.status(400).json({ message: 'Dosya yüklenmedi' });
     }
 
-    res.header('Access-Control-Allow-Origin', '*');
-
     res.json({
       message: 'Resim başarıyla Cloudinary\'ye yüklendi',
-      imageUrl: req.file.path,      // Cloudinary URL
-      fileName: req.file.filename,  // Cloudinary public_id
-      cloudinaryId: req.file.filename
+      imageUrl: req.file.path,          // Cloudinary URL
+      fileName: req.file.originalname,  // Orijinal dosya adı
+      cloudinaryId: req.file.filename   // Cloudinary public_id
     });
   } catch (error) {
     console.error('Cloudinary upload error:', error);
@@ -73,7 +71,6 @@ router.get('/images', authMiddleware, async (req, res) => {
       size: r.bytes
     }));
 
-    res.header('Access-Control-Allow-Origin', '*');
     res.json(images);
   } catch (error) {
     console.error('Error listing Cloudinary images:', error);
@@ -86,8 +83,6 @@ router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
   try {
     const cloudinaryId = req.params.cloudinaryId;
     const result = await cloudinary.uploader.destroy(cloudinaryId);
-
-    res.header('Access-Control-Allow-Origin', '*');
 
     if (result.result === 'ok') {
       res.json({ message: 'Resim başarıyla silindi' });
@@ -104,7 +99,7 @@ router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
 router.get('/debug', (req, res) => {
   res.json({
     message: 'Cloudinary Upload Service',
-    cloudinaryConfigured: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY),
+    cloudinaryConfigured: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET),
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     folder: 'projearna_uploads'
   });

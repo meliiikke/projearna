@@ -73,39 +73,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // uploads klasörünü public yap - Railway için ultra agresif CORS
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
-  setHeaders: (res, filePath) => {
-    // Ultra agresif CORS headers
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "*");
-    res.setHeader("Access-Control-Allow-Headers", "*");
-    res.setHeader("Access-Control-Expose-Headers", "*");
-    res.setHeader("Access-Control-Allow-Credentials", "false");
-    res.setHeader("Access-Control-Max-Age", "86400");
-    
-    // Security headers
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "SAMEORIGIN");
-    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    
-    // Cache headers
-    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-    res.setHeader("ETag", `"${Date.now()}"`);
-    
-    // Content-Type'ı doğru şekilde ayarla
-    if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
-      res.setHeader("Content-Type", "image/jpeg");
-    } else if (filePath.endsWith('.png')) {
-      res.setHeader("Content-Type", "image/png");
-    } else if (filePath.endsWith('.gif')) {
-      res.setHeader("Content-Type", "image/gif");
-    } else if (filePath.endsWith('.webp')) {
-      res.setHeader("Content-Type", "image/webp");
-    } else if (filePath.endsWith('.avif')) {
-      res.setHeader("Content-Type", "image/avif");
-    }
-  }
-}));
+
 
 // Pre-flight OPTIONS requests için
 app.options('*', cors());
