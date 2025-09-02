@@ -4,11 +4,36 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
+// Helper function to clean image URLs
+const cleanImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  
+  // If it's already a Cloudinary URL, return as is
+  if (imageUrl.includes('cloudinary.com')) {
+    return imageUrl;
+  }
+  
+  // If it's an old local path, return null to prevent CORS errors
+  if (imageUrl.startsWith('/uploads/') || imageUrl.includes('img-')) {
+    console.warn('Old image URL detected, returning null:', imageUrl);
+    return null;
+  }
+  
+  return imageUrl;
+};
+
 // Get all content sections (public)
 router.get('/sections', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM content_sections WHERE is_active = true ORDER BY section_name');
-    res.json(rows);
+    
+    // Clean image URLs to prevent CORS errors
+    const cleanedRows = rows.map(section => ({
+      ...section,
+      image_url: cleanImageUrl(section.image_url)
+    }));
+    
+    res.json(cleanedRows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -25,7 +50,13 @@ router.get('/sections/:sectionName', async (req, res) => {
       return res.status(404).json({ message: 'Content section not found' });
     }
     
-    res.json(rows[0]);
+    // Clean image URL to prevent CORS errors
+    const section = {
+      ...rows[0],
+      image_url: cleanImageUrl(rows[0].image_url)
+    };
+    
+    res.json(section);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -36,7 +67,14 @@ router.get('/sections/:sectionName', async (req, res) => {
 router.get('/services', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM services WHERE is_active = true ORDER BY order_index');
-    res.json(rows);
+    
+    // Clean image URLs to prevent CORS errors
+    const cleanedRows = rows.map(service => ({
+      ...service,
+      image_url: cleanImageUrl(service.image_url)
+    }));
+    
+    res.json(cleanedRows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -691,7 +729,14 @@ router.delete('/admin/footer-bottom-links/:id', authMiddleware, async (req, res)
 router.get('/admin/sections', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM content_sections ORDER BY section_name');
-    res.json(rows);
+    
+    // Clean image URLs to prevent CORS errors
+    const cleanedRows = rows.map(section => ({
+      ...section,
+      image_url: cleanImageUrl(section.image_url)
+    }));
+    
+    res.json(cleanedRows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -726,7 +771,14 @@ router.put('/admin/sections/:id', authMiddleware, async (req, res) => {
 router.get('/admin/services', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM services ORDER BY order_index');
-    res.json(rows);
+    
+    // Clean image URLs to prevent CORS errors
+    const cleanedRows = rows.map(service => ({
+      ...service,
+      image_url: cleanImageUrl(service.image_url)
+    }));
+    
+    res.json(cleanedRows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

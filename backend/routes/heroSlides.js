@@ -3,13 +3,38 @@ const router = express.Router();
 const { pool } = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 
+// Helper function to clean image URLs
+const cleanImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  
+  // If it's already a Cloudinary URL, return as is
+  if (imageUrl.includes('cloudinary.com')) {
+    return imageUrl;
+  }
+  
+  // If it's an old local path, return null to prevent CORS errors
+  if (imageUrl.startsWith('/uploads/') || imageUrl.includes('img-')) {
+    console.warn('Old image URL detected, returning null:', imageUrl);
+    return null;
+  }
+  
+  return imageUrl;
+};
+
 // Get all hero slides (public)
 router.get('/slides', async (req, res) => {
   try {
     const [rows] = await pool.execute(
       'SELECT * FROM hero_slides WHERE is_active = 1 ORDER BY slide_order ASC, created_at ASC'
     );
-    res.json(rows);
+    
+    // Clean image URLs to prevent CORS errors
+    const cleanedRows = rows.map(slide => ({
+      ...slide,
+      image_url: cleanImageUrl(slide.image_url)
+    }));
+    
+    res.json(cleanedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
     res.status(500).json({ message: 'Error fetching hero slides' });
@@ -22,7 +47,14 @@ router.get('/admin/hero-slides', authMiddleware, async (req, res) => {
     const [rows] = await pool.execute(
       'SELECT * FROM hero_slides ORDER BY slide_order ASC, created_at ASC'
     );
-    res.json(rows);
+    
+    // Clean image URLs to prevent CORS errors
+    const cleanedRows = rows.map(slide => ({
+      ...slide,
+      image_url: cleanImageUrl(slide.image_url)
+    }));
+    
+    res.json(cleanedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
     res.status(500).json({ message: 'Error fetching hero slides' });
@@ -39,7 +71,13 @@ router.get('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'Hero slide not found' });
     }
 
-    res.json(rows[0]);
+    // Clean image URL to prevent CORS errors
+    const slide = {
+      ...rows[0],
+      image_url: cleanImageUrl(rows[0].image_url)
+    };
+
+    res.json(slide);
   } catch (error) {
     console.error('Error fetching hero slide:', error);
     res.status(500).json({ message: 'Error fetching hero slide' });
@@ -80,9 +118,15 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
       result.insertId,
     ]);
 
+    // Clean image URL to prevent CORS errors
+    const slide = {
+      ...newSlide[0],
+      image_url: cleanImageUrl(newSlide[0].image_url)
+    };
+
     res.status(201).json({
       message: 'Hero slide created successfully',
-      slide: newSlide[0],
+      slide: slide,
     });
   } catch (error) {
     console.error('Error creating hero slide:', error);
@@ -130,9 +174,15 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
 
     const [updatedSlide] = await pool.execute('SELECT * FROM hero_slides WHERE id = ?', [id]);
 
+    // Clean image URL to prevent CORS errors
+    const slide = {
+      ...updatedSlide[0],
+      image_url: cleanImageUrl(updatedSlide[0].image_url)
+    };
+
     res.json({
       message: 'Hero slide updated successfully',
-      slide: updatedSlide[0],
+      slide: slide,
     });
   } catch (error) {
     console.error('Error updating hero slide:', error);
