@@ -71,6 +71,24 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
   }
 });
 
+// Debug endpoint - uploads klasörünü kontrol et
+router.get('/debug', (req, res) => {
+  try {
+    const uploadDirExists = fs.existsSync(uploadDir);
+    const files = uploadDirExists ? fs.readdirSync(uploadDir) : [];
+    
+    res.json({
+      uploadDir: uploadDir,
+      uploadDirExists: uploadDirExists,
+      files: files,
+      currentWorkingDir: process.cwd(),
+      __dirname: __dirname
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Yüklenen resimleri listele (Admin only)
 router.get('/images', authMiddleware, (req, res) => {
   try {
