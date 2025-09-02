@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const HeroFeaturesManager = () => {
@@ -17,11 +16,21 @@ const HeroFeaturesManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/content/admin/hero-features`);
-      setFeatures(res.data);
+      const data = await apiGetAuth('/content/admin/hero-features');
+      
+      if (data.error) {
+        console.error('Failed to fetch hero features:', data.error);
+        setMessage('Failed to load hero features');
+        setFeatures([]);
+        return;
+      }
+      
+      setFeatures(data);
+      setMessage(`${data.length} hero features loaded`);
     } catch (e) {
       console.error('Error fetching hero-features:', e);
       setMessage('Error fetching features');
+      setFeatures([]);
     } finally { setLoading(false); }
   };
 
@@ -64,10 +73,17 @@ const HeroFeaturesManager = () => {
           order_index: features.length, 
           is_active: true 
         };
-        const res = await axios.post(`${API_BASE_URL}/content/admin/hero-features`, payload);
-        const newFeature = { ...payload, id: res.data.id };
+        const data = await apiPostAuth('/content/admin/hero-features', payload);
+        
+        if (data.error) {
+          console.error('Failed to create hero feature:', data.error);
+          setMessage(`Error creating hero feature: ${data.error}`);
+          return;
+        }
+        
+        const newFeature = { ...payload, id: data.id };
         setFeatures(prev => [...prev, newFeature]);
-        setMessage('Özellik eklendi');
+        setMessage('Hero feature created successfully!');
       } else if (editingItem) {
         const payload = { 
           title: formData.title, 
@@ -75,26 +91,40 @@ const HeroFeaturesManager = () => {
           order_index: editingItem.order_index || 0, 
           is_active: editingItem.is_active !== undefined ? editingItem.is_active : true 
         };
-        await axios.put(`${API_BASE_URL}/content/admin/hero-features/${editingItem.id}`, payload);
+        const data = await apiPutAuth(`/content/admin/hero-features/${editingItem.id}`, payload);
+        
+        if (data.error) {
+          console.error('Failed to update hero feature:', data.error);
+          setMessage(`Error updating hero feature: ${data.error}`);
+          return;
+        }
+        
         setFeatures(prev => prev.map(it => it.id === editingItem.id ? { ...it, title: formData.title, icon: '✓' } : it));
-        setMessage('Özellik güncellendi');
+        setMessage('Hero feature updated successfully!');
       }
       handleCancel();
     } catch (e) {
       console.error('Save error:', e);
-      setMessage(`Hata: ${isCreating ? 'ekleme' : 'güncelleme'} başarısız`);
+      setMessage(`Error: ${isCreating ? 'creating' : 'updating'} hero feature failed`);
     } finally { setSaving(false); }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Bu özelliği silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/content/admin/hero-features/${id}`);
+      const data = await apiDeleteAuth(`/content/admin/hero-features/${id}`);
+      
+      if (data.error) {
+        console.error('Failed to delete hero feature:', data.error);
+        setMessage(`Error deleting hero feature: ${data.error}`);
+        return;
+      }
+      
       setFeatures(prev => prev.filter(it => it.id !== id));
-      setMessage('Özellik silindi');
+      setMessage('Hero feature deleted successfully!');
     } catch (e) {
       console.error('Delete error:', e);
-      setMessage('Silme sırasında hata');
+      setMessage('Error deleting hero feature');
     }
   };
 

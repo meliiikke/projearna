@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const MapPointsManager = () => {
@@ -21,11 +20,21 @@ const MapPointsManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/content/admin/map-points`);
-      setMapPoints(res.data);
+      const data = await apiGetAuth('/content/admin/map-points');
+      
+      if (data.error) {
+        console.error('Failed to fetch map points:', data.error);
+        setMessage('Failed to load map points');
+        setMapPoints([]);
+        return;
+      }
+      
+      setMapPoints(data);
+      setMessage(`${data.length} map points loaded`);
     } catch (e) {
       console.error('Error fetching map-points:', e);
       setMessage('Error fetching map points');
+      setMapPoints([]);
     } finally { setLoading(false); }
   };
 
@@ -63,10 +72,24 @@ const MapPointsManager = () => {
 
     try {
       if (isCreating) {
-        await axios.post(`${API_BASE_URL}/content/admin/map-points`, formData);
+        const data = await apiPostAuth('/content/admin/map-points', formData);
+        
+        if (data.error) {
+          console.error('Failed to create map point:', data.error);
+          setMessage(`Error creating map point: ${data.error}`);
+          return;
+        }
+        
         setMessage('Map point created successfully');
       } else {
-        await axios.put(`${API_BASE_URL}/content/admin/map-points/${editingItem.id}`, formData);
+        const data = await apiPutAuth(`/content/admin/map-points/${editingItem.id}`, formData);
+        
+        if (data.error) {
+          console.error('Failed to update map point:', data.error);
+          setMessage(`Error updating map point: ${data.error}`);
+          return;
+        }
+        
         setMessage('Map point updated successfully');
       }
       
@@ -86,7 +109,14 @@ const MapPointsManager = () => {
     if (!window.confirm('Are you sure you want to delete this map point?')) return;
     
     try {
-      await axios.delete(`${API_BASE_URL}/content/admin/map-points/${id}`);
+      const data = await apiDeleteAuth(`/content/admin/map-points/${id}`);
+      
+      if (data.error) {
+        console.error('Failed to delete map point:', data.error);
+        setMessage(`Error deleting map point: ${data.error}`);
+        return;
+      }
+      
       setMessage('Map point deleted successfully');
       fetchItems();
     } catch (error) {
@@ -107,8 +137,15 @@ const MapPointsManager = () => {
     
     try {
       setSaving(true);
-      const response = await axios.post(`${API_BASE_URL}/content/admin/map-points/update-coordinates`);
-      setMessage(response.data.message);
+      const data = await apiPostAuth('/content/admin/map-points/update-coordinates');
+      
+      if (data.error) {
+        console.error('Failed to update coordinates:', data.error);
+        setMessage(`Error updating coordinates: ${data.error}`);
+        return;
+      }
+      
+      setMessage(data.message);
       fetchItems(); // Refresh the list
     } catch (error) {
       console.error('Error updating coordinates:', error);

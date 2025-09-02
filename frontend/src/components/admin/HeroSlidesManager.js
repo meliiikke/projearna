@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import ImageUpload from './ImageUpload';
-import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
+import { normalizeImageUrl } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const HeroSlidesManager = () => {
@@ -28,16 +28,19 @@ const HeroSlidesManager = () => {
   const fetchSlides = async () => {
     try {
       console.log('Fetching hero slides...');
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      console.log('Hero slides response:', response.data);
+      const data = await apiGetAuth('/hero-slides/admin/hero-slides');
+      
+      if (data.error) {
+        console.error('Failed to fetch hero slides:', data.error);
+        setMessage('Failed to load hero slides');
+        setSlides([]);
+        return;
+      }
+      
+      console.log('Hero slides response:', data);
       
       // Backend'den gelen resim URL'lerini normalize et
-      const slidesWithFullImageUrl = response.data?.map(slide => {
+      const slidesWithFullImageUrl = data?.map(slide => {
         const normalizedUrl = slide.image_url ? normalizeImageUrl(slide.image_url) : null;
         
         // Eski resim URL'si tespit edilirse uyarı ver ve null yap
@@ -54,7 +57,7 @@ const HeroSlidesManager = () => {
       setSlides(slidesWithFullImageUrl);
       
       // Eski resim URL'leri varsa kullanıcıyı bilgilendir
-      const oldImageCount = response.data?.filter(slide => 
+      const oldImageCount = data?.filter(slide => 
         slide.image_url && !normalizeImageUrl(slide.image_url)
       ).length || 0;
       
@@ -66,6 +69,7 @@ const HeroSlidesManager = () => {
     } catch (error) {
       console.error('Error fetching hero slides:', error);
       setMessage('Error fetching hero slides: ' + error.message);
+      setSlides([]);
     } finally {
       setLoading(false);
     }
@@ -104,27 +108,32 @@ const HeroSlidesManager = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setMessage('');
     
     try {
-      const token = localStorage.getItem('adminToken');
-      
       if (editingSlide && editingSlide.id) {
         // Update existing slide
         console.log('Updating slide with ID:', editingSlide.id);
-        await axios.put(`${API_BASE_URL}/hero-slides/admin/hero-slides/${editingSlide.id}`, formData, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const data = await apiPutAuth(`/hero-slides/admin/hero-slides/${editingSlide.id}`, formData);
+        
+        if (data.error) {
+          console.error('Failed to update slide:', data.error);
+          setMessage(`Error updating hero slide: ${data.error}`);
+          return;
+        }
+        
         setMessage('Hero slide updated successfully!');
       } else {
         // Create new slide
         console.log('Creating new slide');
-        await axios.post(`${API_BASE_URL}/hero-slides/admin/hero-slides`, formData, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const data = await apiPostAuth('/hero-slides/admin/hero-slides', formData);
+        
+        if (data.error) {
+          console.error('Failed to create slide:', data.error);
+          setMessage(`Error creating hero slide: ${data.error}`);
+          return;
+        }
+        
         setMessage('New hero slide created successfully!');
       }
       
@@ -172,12 +181,14 @@ const HeroSlidesManager = () => {
     }
     
     try {
-      const token = localStorage.getItem('adminToken');
-      await axios.delete(`${API_BASE_URL}/hero-slides/admin/hero-slides/${slideId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const data = await apiDeleteAuth(`/hero-slides/admin/hero-slides/${slideId}`);
+      
+      if (data.error) {
+        console.error('Failed to delete slide:', data.error);
+        setMessage(`Error deleting hero slide: ${data.error}`);
+        return;
+      }
+      
       setMessage('Hero slide deleted successfully!');
       fetchSlides();
     } catch (error) {

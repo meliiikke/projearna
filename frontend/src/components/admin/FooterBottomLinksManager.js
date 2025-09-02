@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const FooterBottomLinksManager = () => {
@@ -17,11 +16,21 @@ const FooterBottomLinksManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/content/admin/footer-bottom-links`);
-      setItems(res.data);
+      const data = await apiGetAuth('/content/admin/footer-bottom-links');
+      
+      if (data.error) {
+        console.error('Failed to fetch footer bottom links:', data.error);
+        setMessage('Failed to load footer bottom links');
+        setItems([]);
+        return;
+      }
+      
+      setItems(data);
+      setMessage(`${data.length} footer bottom links loaded`);
     } catch (e) {
       console.error('Error fetching footer-bottom-links:', e);
       setMessage('Error fetching links');
+      setItems([]);
     } finally { setLoading(false); }
   };
 
@@ -54,32 +63,53 @@ const FooterBottomLinksManager = () => {
     try {
       if (isCreating) {
         const payload = { title: formData.title, link: '', order_index: items.length, is_active: true };
-        const res = await axios.post(`${API_BASE_URL}/content/admin/footer-bottom-links`, payload);
-        const newLink = { ...payload, id: res.data.id };
+        const data = await apiPostAuth('/content/admin/footer-bottom-links', payload);
+        
+        if (data.error) {
+          console.error('Failed to create footer bottom link:', data.error);
+          setMessage(`Error creating footer bottom link: ${data.error}`);
+          return;
+        }
+        
+        const newLink = { ...payload, id: data.id };
         setItems(prev => [...prev, newLink]);
-        setMessage('Link eklendi');
+        setMessage('Footer bottom link created successfully!');
       } else if (editingItem) {
         const payload = { title: formData.title, link: editingItem.link || '', order_index: editingItem.order_index || 0, is_active: editingItem.is_active !== undefined ? editingItem.is_active : true };
-        await axios.put(`${API_BASE_URL}/content/admin/footer-bottom-links/${editingItem.id}`, payload);
+        const data = await apiPutAuth(`/content/admin/footer-bottom-links/${editingItem.id}`, payload);
+        
+        if (data.error) {
+          console.error('Failed to update footer bottom link:', data.error);
+          setMessage(`Error updating footer bottom link: ${data.error}`);
+          return;
+        }
+        
         setItems(prev => prev.map(it => it.id === editingItem.id ? { ...it, title: formData.title } : it));
-        setMessage('Link güncellendi');
+        setMessage('Footer bottom link updated successfully!');
       }
       handleCancel();
     } catch (e) {
       console.error('Save error:', e);
-      setMessage(`Hata: ${isCreating ? 'ekleme' : 'güncelleme'} başarısız`);
+      setMessage(`Error: ${isCreating ? 'creating' : 'updating'} footer bottom link failed`);
     } finally { setSaving(false); }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Bu linki silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/content/admin/footer-bottom-links/${id}`);
+      const data = await apiDeleteAuth(`/content/admin/footer-bottom-links/${id}`);
+      
+      if (data.error) {
+        console.error('Failed to delete footer bottom link:', data.error);
+        setMessage(`Error deleting footer bottom link: ${data.error}`);
+        return;
+      }
+      
       setItems(prev => prev.filter(it => it.id !== id));
-      setMessage('Link silindi');
+      setMessage('Footer bottom link deleted successfully!');
     } catch (e) {
       console.error('Delete error:', e);
-      setMessage('Silme sırasında hata');
+      setMessage('Error deleting footer bottom link');
     }
   };
 

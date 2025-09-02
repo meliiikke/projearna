@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const AboutStatsManager = () => {
@@ -17,16 +16,21 @@ const AboutStatsManager = () => {
 
   const fetchItems = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await axios.get(`${API_BASE_URL}/content/admin/about-stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      setStats(res.data);
+      const data = await apiGetAuth('/content/admin/about-stats');
+      
+      if (data.error) {
+        console.error('Failed to fetch about stats:', data.error);
+        setMessage('Failed to load about stats');
+        setStats([]);
+        return;
+      }
+      
+      setStats(data);
+      setMessage(`${data.length} about stats loaded`);
     } catch (e) {
       console.error('Error fetching about-stats:', e);
       setMessage('Error fetching stats');
+      setStats([]);
     } finally { setLoading(false); }
   };
 
@@ -67,15 +71,17 @@ const AboutStatsManager = () => {
           icon: '⚡', 
           is_active: true 
         };
-        const token = localStorage.getItem('adminToken');
-        await axios.post(`${API_BASE_URL}/content/admin/about-stats`, payload, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const data = await apiPostAuth('/content/admin/about-stats', payload);
+        
+        if (data.error) {
+          console.error('Failed to create about stat:', data.error);
+          setMessage(`Error creating about stat: ${data.error}`);
+          return;
+        }
+        
         // Refresh data from server to ensure consistency
         await fetchItems();
-        setMessage('İstatistik eklendi');
+        setMessage('About stat created successfully!');
       } else if (editingItem) {
         const payload = { 
           title: formData.title, 
@@ -83,15 +89,17 @@ const AboutStatsManager = () => {
           icon: '⚡', 
           is_active: editingItem.is_active !== undefined ? editingItem.is_active : true 
         };
-        const token = localStorage.getItem('adminToken');
-        await axios.put(`${API_BASE_URL}/content/admin/about-stats/${editingItem.id}`, payload, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const data = await apiPutAuth(`/content/admin/about-stats/${editingItem.id}`, payload);
+        
+        if (data.error) {
+          console.error('Failed to update about stat:', data.error);
+          setMessage(`Error updating about stat: ${data.error}`);
+          return;
+        }
+        
         // Refresh data from server to ensure consistency
         await fetchItems();
-        setMessage('İstatistik güncellendi');
+        setMessage('About stat updated successfully!');
       }
       handleCancel();
     } catch (e) {
@@ -110,7 +118,7 @@ const AboutStatsManager = () => {
       } else if (e.response?.status === 500) {
         setMessage('Server error: Please try again later.');
       } else {
-        setMessage(`Hata: ${isCreating ? 'ekleme' : 'güncelleme'} başarısız - ${e.message}`);
+        setMessage(`Error: ${isCreating ? 'creating' : 'updating'} about stat failed - ${e.message}`);
       }
     } finally { setSaving(false); }
   };
@@ -118,18 +126,20 @@ const AboutStatsManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu istatistiği silmek istediğinize emin misiniz?')) return;
     try {
-      const token = localStorage.getItem('adminToken');
-      await axios.delete(`${API_BASE_URL}/content/admin/about-stats/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const data = await apiDeleteAuth(`/content/admin/about-stats/${id}`);
+      
+      if (data.error) {
+        console.error('Failed to delete about stat:', data.error);
+        setMessage(`Error deleting about stat: ${data.error}`);
+        return;
+      }
+      
       // Refresh data from server to ensure consistency
       await fetchItems();
-      setMessage('İstatistik silindi');
+      setMessage('About stat deleted successfully!');
     } catch (e) {
       console.error('Delete error:', e);
-      setMessage('Silme sırasında hata');
+      setMessage('Error deleting about stat');
     }
   };
 
