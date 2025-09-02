@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiGet } from '../utils/api';
 
 const BackendTest = () => {
   const [testResults, setTestResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const testEndpoints = [
+  const testEndpoints = useMemo(() => [
     { name: 'Health Check', endpoint: '/health' },
     { name: 'Test Endpoint', endpoint: '/test' },
     { name: 'Content Sections', endpoint: '/content/sections' },
     { name: 'Hero Slides', endpoint: '/hero-slides/slides' }
-  ];
+  ], []);
 
-  const runTests = async () => {
+  const runTests = useCallback(async () => {
     setLoading(true);
     setTestResults([]);
 
@@ -40,11 +40,11 @@ const BackendTest = () => {
     }
 
     setLoading(false);
-  };
+  }, [testEndpoints]);
 
   useEffect(() => {
     runTests();
-  }, []);
+  }, [runTests]);
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>

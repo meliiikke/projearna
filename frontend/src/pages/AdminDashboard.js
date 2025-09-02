@@ -16,7 +16,7 @@ import BackendTest from '../components/BackendTest';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('backend-test');
+  const [activeTab, setActiveTab] = useState(process.env.NODE_ENV === 'development' ? 'backend-test' : 'content');
   const [stats, setStats] = useState({
     totalSections: 0,
     totalServices: 0,
@@ -61,7 +61,7 @@ const AdminDashboard = () => {
   };
 
   const tabs = [
-    { id: 'backend-test', label: 'Backend Test', icon: '🔧' },
+    ...(process.env.NODE_ENV === 'development' ? [{ id: 'backend-test', label: 'Backend Test', icon: '🔧' }] : []),
     { id: 'content', label: 'Content Sections', icon: '📝' },
     { id: 'hero-slides', label: 'Hero Slides', icon: '🎬' },
     { id: 'hero-features', label: 'Hero Features', icon: '⭐' },
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
       case 'map-points':
         return <MapPointsManager />;
       default:
-        return <BackendTest />;
+        return <ContentManager />;
     }
   };
 

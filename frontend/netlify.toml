@@ -5,6 +5,8 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "9"
+  REACT_APP_API_BASE_URL = "https://projearna-production.up.railway.app/api"
+  CI = "false"
 
 [[redirects]]
   from = "/*"
