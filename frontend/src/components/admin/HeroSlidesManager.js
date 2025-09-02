@@ -28,7 +28,12 @@ const HeroSlidesManager = () => {
   const fetchSlides = async () => {
     try {
       console.log('Fetching hero slides...');
-      const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`);
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       console.log('Hero slides response:', response.data);
       
       // Backend'den gelen resim URL'lerini normalize et
@@ -101,15 +106,25 @@ const HeroSlidesManager = () => {
     setSaving(true);
     
     try {
+      const token = localStorage.getItem('adminToken');
+      
       if (editingSlide && editingSlide.id) {
         // Update existing slide
         console.log('Updating slide with ID:', editingSlide.id);
-        await axios.put(`${API_BASE_URL}/hero-slides/admin/hero-slides/${editingSlide.id}`, formData);
+        await axios.put(`${API_BASE_URL}/hero-slides/admin/hero-slides/${editingSlide.id}`, formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setMessage('Hero slide updated successfully!');
       } else {
         // Create new slide
         console.log('Creating new slide');
-        await axios.post(`${API_BASE_URL}/hero-slides/admin/hero-slides`, formData);
+        await axios.post(`${API_BASE_URL}/hero-slides/admin/hero-slides`, formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setMessage('New hero slide created successfully!');
       }
       
@@ -130,7 +145,22 @@ const HeroSlidesManager = () => {
       });
     } catch (error) {
       console.error('Error saving hero slide:', error);
-      setMessage('Error saving hero slide: ' + error.message);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      if (error.code === 'ERR_NETWORK') {
+        setMessage('Network error: Backend server is not responding. Please check if the server is running.');
+      } else if (error.response?.status === 401) {
+        setMessage('Authentication error: Please login again.');
+      } else if (error.response?.status === 500) {
+        setMessage('Server error: Please try again later.');
+      } else {
+        setMessage(`Error saving hero slide: ${error.message}`);
+      }
     } finally {
       setSaving(false);
     }
@@ -142,12 +172,32 @@ const HeroSlidesManager = () => {
     }
     
     try {
-      await axios.delete(`${API_BASE_URL}/hero-slides/admin/hero-slides/${slideId}`);
+      const token = localStorage.getItem('adminToken');
+      await axios.delete(`${API_BASE_URL}/hero-slides/admin/hero-slides/${slideId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setMessage('Hero slide deleted successfully!');
       fetchSlides();
     } catch (error) {
       console.error('Error deleting hero slide:', error);
-      setMessage('Error deleting hero slide: ' + error.message);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      if (error.code === 'ERR_NETWORK') {
+        setMessage('Network error: Backend server is not responding. Please check if the server is running.');
+      } else if (error.response?.status === 401) {
+        setMessage('Authentication error: Please login again.');
+      } else if (error.response?.status === 500) {
+        setMessage('Server error: Please try again later.');
+      } else {
+        setMessage(`Error deleting hero slide: ${error.message}`);
+      }
     }
   };
 

@@ -96,6 +96,12 @@ router.get('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
 // Create new hero slide
 router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
   try {
+    // CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     const {
       title,
       subtitle,
@@ -146,6 +152,12 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
 // Update hero slide
 router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
   try {
+    // CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     const { id } = req.params;
     const {
       title,
