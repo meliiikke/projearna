@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ImageUpload from './ImageUpload';
 import { normalizeImageUrl } from '../../config/api';
-import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from '../../utils/api';
+import { apiGetAuth, apiPostAuth, apiPutAuth } from '../../utils/api';
 import './AdminComponents.css';
 
 const ContentManager = () => {
