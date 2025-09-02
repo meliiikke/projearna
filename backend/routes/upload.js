@@ -55,8 +55,8 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     
-    // Production'da her zaman HTTPS kullan
-    const protocol = 'https';
+    // Railway zaten HTTPS veriyor
+    const protocol = req.protocol;
     const host = req.get('host');
     
     res.json({
@@ -142,8 +142,8 @@ router.get('/proxy/:filename', (req, res) => {
 router.get('/images', authMiddleware, (req, res) => {
   try {
     const files = fs.readdirSync(uploadDir);
-    // Production'da her zaman HTTPS kullan
-    const protocol = 'https';
+    // Railway zaten HTTPS veriyor
+    const protocol = req.protocol;
     const host = req.get('host');
     
     const images = files

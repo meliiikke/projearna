@@ -31,50 +31,12 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS - Production ve development için
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Development'ta tüm origin'lere izin ver
-    if (process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
-    
-    // Environment variable'dan ek domain'ler eklenebilir
-    const additionalOrigins = process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',') 
-      : [];
-    
-    // Production'da izin verilen domain'ler
-    const allowedOrigins = [
-      'https://projearna-production.up.railway.app',
-      'https://projearna-frontend-production.up.railway.app',
-      'https://scintillating-panda-bbf94b.netlify.app',
-      'https://projearna.netlify.app',
-      ...additionalOrigins
-    ];
-    
-    // Origin yoksa (mobile app, postman gibi) izin ver
-    if (!origin) {
-      return callback(null, true);
-    }
-    
-    // Origin izin verilen listede mi kontrol et
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      // Hata fırlatmak yerine izin ver (geçici çözüm)
-      callback(null, true);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-
-app.use(cors(corsOptions));
+// CORS ayarları - basit ve etkili
+app.use(cors({
+  origin: "*", // ya da sadece Netlify domainini yaz
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // CORS error handling
 app.use((err, req, res, next) => {
@@ -92,33 +54,10 @@ app.use((err, req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files middleware with CORS headers
-app.use('/uploads', (req, res, next) => {
-  // CORS headers ekle - daha kapsamlı
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
-  
-  // Cache headers ekle
-  res.header('Cache-Control', 'public, max-age=31536000');
-  
-  // OPTIONS request'leri için
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  
-  next();
-}, express.static(path.join(__dirname, 'uploads'), {
-  setHeaders: (res, path) => {
-    // Her dosya için CORS headers ekle
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Cache-Control', 'public, max-age=31536000');
+// uploads klasörünü public yap
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*"); // 👈 burası kritik
   }
 }));
 

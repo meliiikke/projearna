@@ -26,14 +26,13 @@ export const normalizeImageUrl = (imageUrl) => {
     return imageUrl;
   }
   
-  // Eğer /uploads ile başlıyorsa, proxy endpoint kullan
+  // Eğer /uploads ile başlıyorsa, backend base URL ile birleştir
   if (imageUrl.startsWith('/uploads')) {
-    const filename = imageUrl.split('/').pop();
-    return `${API_BASE_URL}/upload/proxy/${filename}`;
+    return `${BACKEND_BASE_URL}${imageUrl}`;
   }
   
-  // Diğer durumlarda da proxy endpoint kullan
-  return `${API_BASE_URL}/upload/proxy/${imageUrl}`;
+  // Diğer durumlarda da backend base URL ile birleştir
+  return `${BACKEND_BASE_URL}${imageUrl}`;
 };
 
 // Axios instance with base URL
