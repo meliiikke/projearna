@@ -17,10 +17,13 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'projearna_uploads', // Cloudinary'de klasör ismi
+    folder: 'projearna_uploads',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'],
     resource_type: 'image',
-    transformation: [{ width: 1920, height: 1080, crop: 'limit' }]
+    transformation: [{ width: 1920, height: 1080, crop: 'limit' }],
+    use_filename: true,
+    unique_filename: true,
+    upload_preset: 'projearna_uploads' // Upload preset kullan
   }
 });
 
