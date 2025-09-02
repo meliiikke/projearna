@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Footer.css';
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 
 const Footer = () => {
   const [contactInfo, setContactInfo] = useState({});
@@ -11,21 +11,28 @@ const Footer = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Contact info çek
-        const contactRes = await fetch(`${API_BASE}/content/contact`);
-        const contactData = await contactRes.json();
-        setContactInfo(contactData);
-
-        // Mission / About content çek
-        const aboutRes = await fetch(`${API_BASE}/content/about`);
-        const aboutData = await aboutRes.json();
-        setMissionContent(aboutData);
-
-        console.log('Contact info:', contactData);
-        console.log('Mission content:', aboutData);
-
+        // Use fallback data for now
+        const fallbackContact = {
+          phone: '+90-212-000-0000',
+          email: 'info@arna.com',
+          address: 'Istanbul, Turkey',
+          working_hours: 'Mon-Fri: 9:00 AM - 6:00 PM'
+        };
+        
+        const fallbackMission = {
+          content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
+        };
+        
+        setContactInfo(fallbackContact);
+        setMissionContent(fallbackMission);
+        console.log('Contact info:', fallbackContact);
       } catch (error) {
         console.error('Error fetching footer data:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
       } finally {
         setLoading(false);
       }
@@ -35,6 +42,7 @@ const Footer = () => {
 
     // Auto-refresh her 30 saniyede bir
     const interval = setInterval(fetchData, 30000);
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -64,7 +72,7 @@ const Footer = () => {
                 />
               </div>
               <p className="footer-description">
-                {missionContent?.content || 'Leading the way in sustainable energy solutions for a better tomorrow.'}
+                {missionContent?.content || 'Leading the way in sustainable energy solutions for a better tomorrow. We are committed to providing clean, reliable, and affordable energy while protecting our environment.'}
               </p>
             </div>
 
