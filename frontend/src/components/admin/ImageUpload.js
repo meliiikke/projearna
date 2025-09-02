@@ -22,12 +22,15 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
           name: image.name,
           url: image.url, // Cloudinary URL'si zaten tam URL
           cloudinaryId: image.cloudinaryId, // "projearna_uploads/abc123" formatında
-        uploadDate: image.uploadDate,
-        format: image.format,
-        size: image.size
-      }));
-      
-      setImages(cloudinaryImages);
+          uploadDate: image.uploadDate,
+          format: image.format,
+          size: image.size
+        }));
+        
+        setImages(cloudinaryImages);
+      } else {
+        console.error('Error fetching images:', response.error);
+      }
     } catch (error) {
       console.error('Error fetching images:', error);
       if (error.response?.status === 401) {
