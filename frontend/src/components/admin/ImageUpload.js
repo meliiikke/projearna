@@ -20,14 +20,13 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
         withCredentials: false,
         timeout: 30000,
       });
-      // Backend'den gelen resim URL'lerini kullan - CORS sorununu çözmek için base64 endpoint kullan
+      // Backend'den gelen resim URL'lerini kullan - Cloudinary URL'leri
       const imagesWithFullUrl = response.data.map(image => ({
         ...image,
         url: image.fullUrl || normalizeImageUrl(image.url),
         proxyUrl: normalizeImageUrl(image.url),
         serveUrl: normalizeImageUrlServe(image.url),
-        directUrl: normalizeImageUrlDirect(image.url),
-        base64Url: normalizeImageUrlBase64(image.url)
+        directUrl: normalizeImageUrlDirect(image.url)
       }));
       setImages(imagesWithFullUrl);
     } catch (error) {
