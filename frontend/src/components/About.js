@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { normalizeImageUrl } from '../config/api';
+import { normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect } from '../config/api';
 import './About.css';
 
 // API base URL
@@ -121,6 +121,13 @@ const About = () => {
                       backgroundImage: aboutContent?.image_url 
                         ? `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${normalizeImageUrl(aboutContent.image_url)})`
                         : undefined
+                    }}
+                    onError={(e) => {
+                      // Fallback için serve endpoint'i dene
+                      if (aboutContent?.image_url) {
+                        const fallbackUrl = normalizeImageUrlServe(aboutContent.image_url);
+                        e.target.style.backgroundImage = `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${fallbackUrl})`;
+                      }
                     }}
                   ></div>
                 </div>

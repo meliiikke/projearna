@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL, normalizeImageUrl } from '../../config/api';
+import { API_BASE_URL, normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect } from '../../config/api';
 import './ImageUpload.css';
 
 const ImageUpload = ({ onImageSelect, currentImage }) => {
@@ -20,10 +20,13 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
         withCredentials: false,
         timeout: 30000,
       });
-      // Backend'den gelen resim URL'lerini kullan
+      // Backend'den gelen resim URL'lerini kullan - CORS sorununu çözmek için proxy endpoint kullan
       const imagesWithFullUrl = response.data.map(image => ({
         ...image,
-        url: image.fullUrl || normalizeImageUrl(image.url)
+        url: image.fullUrl || normalizeImageUrl(image.url),
+        proxyUrl: normalizeImageUrl(image.url),
+        serveUrl: normalizeImageUrlServe(image.url),
+        directUrl: normalizeImageUrlDirect(image.url)
       }));
       setImages(imagesWithFullUrl);
     } catch (error) {
@@ -120,7 +123,14 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       {selectedImage && (
         <div className="selected-image">
           <h4>Seçili Resim:</h4>
-          <img src={selectedImage} alt="Seçili resim" />
+          <img 
+            src={selectedImage} 
+            alt="Seçili resim" 
+            onError={(e) => {
+              // Fallback placeholder göster
+              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UmVzaW0gWMO8a2xlbmVtaXlvcjwvdGV4dD48L3N2Zz4=';
+            }}
+          />
           <p>{selectedImage}</p>
         </div>
       )}
@@ -139,9 +149,21 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
                 className={`image-item ${selectedImage === image.url ? 'selected' : ''}`}
               >
                 <img 
-                  src={image.url} 
+                  src={image.proxyUrl} 
                   alt={image.name}
-                  onClick={() => handleImageSelect(image.url)}
+                  onClick={() => handleImageSelect(image.proxyUrl)}
+                  onError={(e) => {
+                    // İlk deneme başarısız olursa serve endpoint'i dene
+                    if (e.target.src !== image.serveUrl) {
+                      e.target.src = image.serveUrl;
+                    } else if (e.target.src !== image.directUrl) {
+                      // İkinci deneme de başarısız olursa direkt URL'i dene
+                      e.target.src = image.directUrl;
+                    } else {
+                      // Son çare olarak placeholder göster
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UmVzaW0gWMO8a2xlbmVtaXlvcjwvdGV4dD48L3N2Zz4=';
+                    }
+                  }}
                 />
                 <div className="image-actions">
                   <button 

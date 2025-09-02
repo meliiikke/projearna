@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { normalizeImageUrl, API_BASE_URL } from '../config/api';
+import { normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect, API_BASE_URL } from '../config/api';
 import './Hero.css';
 
 const Hero = () => {
@@ -36,6 +36,8 @@ const Hero = () => {
     if (!imageUrl) return Promise.resolve();
     
     const normalizedUrl = normalizeImageUrl(imageUrl);
+    const serveUrl = normalizeImageUrlServe(imageUrl);
+    const directUrl = normalizeImageUrlDirect(imageUrl);
     
     // Check if image is already loaded
     if (imagesLoaded[normalizedUrl] !== undefined) {
@@ -44,16 +46,30 @@ const Hero = () => {
     
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => {
-        setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: true }));
-        resolve();
+      
+      const tryLoadImage = (url, attempt = 1) => {
+        img.onload = () => {
+          setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: true }));
+          resolve();
+        };
+        img.onerror = () => {
+          console.warn(`Failed to load image (attempt ${attempt}):`, url);
+          if (attempt === 1 && url !== serveUrl) {
+            // İlk deneme başarısız, serve endpoint'i dene
+            tryLoadImage(serveUrl, 2);
+          } else if (attempt === 2 && url !== directUrl) {
+            // İkinci deneme başarısız, direkt URL'i dene
+            tryLoadImage(directUrl, 3);
+          } else {
+            // Tüm denemeler başarısız
+            setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: false }));
+            resolve(); // Resolve anyway to not block loading
+          }
+        };
+        img.src = url;
       };
-      img.onerror = () => {
-        console.warn('Failed to load image:', normalizedUrl);
-        setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: false }));
-        resolve(); // Resolve anyway to not block loading
-      };
-      img.src = normalizedUrl;
+      
+      tryLoadImage(normalizedUrl);
     });
   }, [imagesLoaded]);
 

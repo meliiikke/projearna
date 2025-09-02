@@ -89,7 +89,7 @@ router.get('/debug', (req, res) => {
   }
 });
 
-// Resim proxy endpoint - CORS sorununu çözmek için
+// Resim proxy endpoint - CORS sorununu çözmek için (geliştirilmiş)
 router.get('/proxy/:filename', (req, res) => {
   try {
     const filename = req.params.filename;
@@ -123,17 +123,42 @@ router.get('/proxy/:filename', (req, res) => {
         break;
     }
     
-    // CORS headers ekle
+    // Kapsamlı CORS headers ekle
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Credentials', 'false');
+    res.header('Access-Control-Max-Age', '86400');
     res.header('Cache-Control', 'public, max-age=31536000');
     res.header('Content-Type', contentType);
+    res.header('X-Content-Type-Options', 'nosniff');
     
     // Dosyayı gönder
     res.sendFile(filePath);
   } catch (error) {
     console.error('Proxy error:', error);
+    res.status(500).json({ message: 'Resim yüklenirken hata oluştu' });
+  }
+});
+
+// Alternatif resim serving endpoint - daha basit
+router.get('/serve/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const filePath = path.join(uploadDir, filename);
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'Resim bulunamadı' });
+    }
+    
+    // CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', '*');
+    
+    res.sendFile(filePath);
+  } catch (error) {
+    console.error('Serve error:', error);
     res.status(500).json({ message: 'Resim yüklenirken hata oluştu' });
   }
 });

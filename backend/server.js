@@ -31,11 +31,14 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS ayarları - basit ve etkili
+// CORS ayarları - geliştirilmiş ve kapsamlı
 app.use(cors({
-  origin: "*", // ya da sadece Netlify domainini yaz
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  origin: "*", // Tüm origin'lere izin ver
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  credentials: false,
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 }));
 
 // CORS error handling
@@ -54,22 +57,44 @@ app.use((err, req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// uploads klasörünü public yap
+// uploads klasörünü public yap - CORS sorununu çözmek için geliştirilmiş
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
-  setHeaders: (res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*"); // 👈 burası kritik
+  setHeaders: (res, path) => {
+    // Tüm CORS header'larını ekle
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    res.setHeader("Access-Control-Allow-Credentials", "false");
+    
+    // Cache headers
+    res.setHeader("Cache-Control", "public, max-age=31536000");
+    
+    // Content-Type'ı doğru şekilde ayarla
+    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+      res.setHeader("Content-Type", "image/jpeg");
+    } else if (path.endsWith('.png')) {
+      res.setHeader("Content-Type", "image/png");
+    } else if (path.endsWith('.gif')) {
+      res.setHeader("Content-Type", "image/gif");
+    } else if (path.endsWith('.webp')) {
+      res.setHeader("Content-Type", "image/webp");
+    } else if (path.endsWith('.avif')) {
+      res.setHeader("Content-Type", "image/avif");
+    }
   }
 }));
 
 // Pre-flight OPTIONS requests için
 app.options('*', cors());
 
-// OPTIONS request'leri için özel handling
+// OPTIONS request'leri için özel handling - geliştirilmiş
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Credentials', 'false');
+    res.header('Access-Control-Max-Age', '86400'); // 24 saat
     res.status(200).end();
     return;
   }
