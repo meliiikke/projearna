@@ -169,6 +169,19 @@ const initializeDatabase = async () => {
       )
     `);
 
+    // About stats
+    await promisePool.execute(`
+      CREATE TABLE IF NOT EXISTS about_stats (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        value VARCHAR(50) DEFAULT NULL,
+        icon VARCHAR(50) NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+
     // Default admin kullanıcısı oluştur
     const [adminRows] = await promisePool.execute('SELECT * FROM admins WHERE username = ?', ['admin']);
     

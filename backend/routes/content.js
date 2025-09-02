@@ -339,8 +339,8 @@ router.post('/update-about-stats-table', async (req, res) => {
     await pool.execute(`
       INSERT INTO about_stats (title, value, icon, is_active) VALUES
       ('YILLINDAN BERİ', '2009', '⚡', 1),
-      ('ÜLKEDE FAALİYET', '60', '⚡', 1),
-      ('ÜRÜN SAYISI', '500+', '⚡', 1)
+      ('ÜLKEDE FAALİYET', '60', '🌍', 1),
+      ('ÜRÜN SAYISI', '500+', '📦', 1)
       ON DUPLICATE KEY UPDATE
       title = VALUES(title),
       value = VALUES(value),

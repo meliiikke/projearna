@@ -62,9 +62,9 @@ const AboutStatsManager = () => {
           icon: '⚡', 
           is_active: true 
         };
-        const res = await axios.post(`${API_BASE_URL}/content/admin/about-stats`, payload);
-        const newStat = { ...payload, id: res.data.id };
-        setStats(prev => [...prev, newStat]);
+        await axios.post(`${API_BASE_URL}/content/admin/about-stats`, payload);
+        // Refresh data from server to ensure consistency
+        await fetchItems();
         setMessage('İstatistik eklendi');
       } else if (editingItem) {
         const payload = { 
@@ -74,13 +74,29 @@ const AboutStatsManager = () => {
           is_active: editingItem.is_active !== undefined ? editingItem.is_active : true 
         };
         await axios.put(`${API_BASE_URL}/content/admin/about-stats/${editingItem.id}`, payload);
-        setStats(prev => prev.map(it => it.id === editingItem.id ? { ...it, title: formData.title, value: formData.value, icon: '⚡' } : it));
+        // Refresh data from server to ensure consistency
+        await fetchItems();
         setMessage('İstatistik güncellendi');
       }
       handleCancel();
     } catch (e) {
       console.error('Save error:', e);
-      setMessage(`Hata: ${isCreating ? 'ekleme' : 'güncelleme'} başarısız`);
+      console.error('Error details:', {
+        message: e.message,
+        code: e.code,
+        response: e.response?.data,
+        status: e.response?.status
+      });
+      
+      if (e.code === 'ERR_NETWORK') {
+        setMessage('Network error: Backend server is not responding. Please check if the server is running.');
+      } else if (e.response?.status === 401) {
+        setMessage('Authentication error: Please login again.');
+      } else if (e.response?.status === 500) {
+        setMessage('Server error: Please try again later.');
+      } else {
+        setMessage(`Hata: ${isCreating ? 'ekleme' : 'güncelleme'} başarısız - ${e.message}`);
+      }
     } finally { setSaving(false); }
   };
 
@@ -88,7 +104,8 @@ const AboutStatsManager = () => {
     if (!window.confirm('Bu istatistiği silmek istediğinize emin misiniz?')) return;
     try {
       await axios.delete(`${API_BASE_URL}/content/admin/about-stats/${id}`);
-      setStats(prev => prev.filter(it => it.id !== id));
+      // Refresh data from server to ensure consistency
+      await fetchItems();
       setMessage('İstatistik silindi');
     } catch (e) {
       console.error('Delete error:', e);
