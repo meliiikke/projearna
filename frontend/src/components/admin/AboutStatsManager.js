@@ -17,7 +17,12 @@ const AboutStatsManager = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/content/admin/about-stats`);
+      const token = localStorage.getItem('adminToken');
+      const res = await axios.get(`${API_BASE_URL}/content/admin/about-stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setStats(res.data);
     } catch (e) {
       console.error('Error fetching about-stats:', e);
@@ -62,7 +67,12 @@ const AboutStatsManager = () => {
           icon: '⚡', 
           is_active: true 
         };
-        await axios.post(`${API_BASE_URL}/content/admin/about-stats`, payload);
+        const token = localStorage.getItem('adminToken');
+        await axios.post(`${API_BASE_URL}/content/admin/about-stats`, payload, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         // Refresh data from server to ensure consistency
         await fetchItems();
         setMessage('İstatistik eklendi');
@@ -73,7 +83,12 @@ const AboutStatsManager = () => {
           icon: '⚡', 
           is_active: editingItem.is_active !== undefined ? editingItem.is_active : true 
         };
-        await axios.put(`${API_BASE_URL}/content/admin/about-stats/${editingItem.id}`, payload);
+        const token = localStorage.getItem('adminToken');
+        await axios.put(`${API_BASE_URL}/content/admin/about-stats/${editingItem.id}`, payload, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         // Refresh data from server to ensure consistency
         await fetchItems();
         setMessage('İstatistik güncellendi');
@@ -103,7 +118,12 @@ const AboutStatsManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu istatistiği silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/content/admin/about-stats/${id}`);
+      const token = localStorage.getItem('adminToken');
+      await axios.delete(`${API_BASE_URL}/content/admin/about-stats/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       // Refresh data from server to ensure consistency
       await fetchItems();
       setMessage('İstatistik silindi');

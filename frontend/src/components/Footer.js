@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 import './Footer.css';
 
 
@@ -11,21 +12,30 @@ const Footer = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Use fallback data for now
-        const fallbackContact = {
-          phone: '+90-212-000-0000',
-          email: 'info@arna.com',
-          address: 'Istanbul, Turkey',
-          working_hours: 'Mon-Fri: 9:00 AM - 6:00 PM'
-        };
+        // Fetch contact info from API
+        const contactResponse = await fetch(`${API_BASE_URL}/content/contact`);
+        if (contactResponse.ok) {
+          const contactData = await contactResponse.json();
+          setContactInfo(contactData);
+          console.log('Contact info loaded from API:', contactData);
+        } else {
+          console.warn('Failed to fetch contact info, using fallback');
+          // Use fallback data if API fails
+          const fallbackContact = {
+            phone: '+90-212-000-0000',
+            email: 'info@arna.com',
+            address: 'Istanbul, Turkey',
+            working_hours: 'Mon-Fri: 9:00 AM - 6:00 PM'
+          };
+          setContactInfo(fallbackContact);
+        }
         
+        // Use fallback mission content for now
         const fallbackMission = {
           content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
         };
-        
-        setContactInfo(fallbackContact);
         setMissionContent(fallbackMission);
-        console.log('Contact info:', fallbackContact);
+        
       } catch (error) {
         console.error('Error fetching footer data:', error);
         console.error('Error details:', {
@@ -33,6 +43,15 @@ const Footer = () => {
           response: error.response?.data,
           status: error.response?.status
         });
+        
+        // Use fallback data on error
+        const fallbackContact = {
+          phone: '+90-212-000-0000',
+          email: 'info@arna.com',
+          address: 'Istanbul, Turkey',
+          working_hours: 'Mon-Fri: 9:00 AM - 6:00 PM'
+        };
+        setContactInfo(fallbackContact);
       } finally {
         setLoading(false);
       }
