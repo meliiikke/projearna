@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "ARNA Energy Company Website with Admin Panel",
   "main": "server.js",
-
   "engines": {
     "node": "18.x"
   },
@@ -17,19 +16,26 @@
     "build:check": "npm run build:backend && npm run build:frontend",
     "postinstall": "echo 'Dependencies installed successfully'"
   },
-  "keywords": ["energy", "industrial", "website", "admin-panel"],
+  "keywords": [
+    "energy",
+    "industrial",
+    "website",
+    "admin-panel"
+  ],
   "author": "ARNA Energy",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "mysql2": "^3.6.5",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "1.4.4",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5"
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.4",
+    "multer-storage-cloudinary": "^4.0.0",
+    "mysql2": "^3.6.5"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

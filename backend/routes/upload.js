@@ -1,74 +1,53 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const cloudinary = require('cloudinary').v2;
+const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Cloudinary config
+// 🔧 Cloudinary config
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Cloudinary storage ayarı
+// 🔧 Cloudinary storage ayarı
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
-    folder: 'projearna_uploads', // Cloudinary'de klasör ismi
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif', 'avif'],
-    transformation: [{ width: 1920, height: 1080, crop: 'limit' }] // Resim boyutunu optimize et
+    folder: 'projearna_uploads',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'],
+    resource_type: 'image',
+    transformation: [{ width: 1920, height: 1080, crop: 'limit' }]
   }
 });
 
-// Cloudinary kullandığımız için local upload klasörüne ihtiyacımız yok
-
-// Multer konfigürasyonu - Cloudinary için
-const fileFilter = (req, file, cb) => {
-  // Sadece resim dosyalarına izin ver
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Sadece resim dosyaları yüklenebilir!'), false);
-  }
-};
-
+// 🔧 Multer config
 const upload = multer({
-  storage: storage, // Cloudinary storage kullan
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit (Cloudinary'de daha büyük)
-  },
-  fileFilter: fileFilter
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Sadece resim dosyaları yüklenebilir!'), false);
+  }
 });
 
-// Resim yükleme endpoint'i (Admin only) - Cloudinary ile
+// 📌 Resim yükleme (Admin only)
 router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'Dosya yüklenmedi' });
     }
 
-    // Cloudinary'den gelen URL
-    const cloudinaryUrl = req.file.path;
-    
-    // Ultra agresif CORS headers
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Expose-Headers', '*');
-    res.header('Access-Control-Allow-Credentials', 'false');
-    res.header('Access-Control-Max-Age', '86400');
-    
+
     res.json({
       message: 'Resim başarıyla Cloudinary\'ye yüklendi',
-      imageUrl: cloudinaryUrl,
-      fullUrl: cloudinaryUrl,
-      fileName: req.file.filename,
-      cloudinaryId: req.file.public_id
+      imageUrl: req.file.path,      // Cloudinary URL
+      fileName: req.file.filename,  // Cloudinary public_id
+      cloudinaryId: req.file.filename
     });
   } catch (error) {
     console.error('Cloudinary upload error:', error);
@@ -76,48 +55,25 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
   }
 });
 
-// Debug endpoint - Cloudinary durumunu kontrol et
-router.get('/debug', (req, res) => {
-  try {
-    res.json({
-      message: 'Cloudinary Upload Service',
-      cloudinaryConfigured: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY),
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-      folder: 'projearna_uploads'
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Yüklenen resimleri listele (Admin only) - Cloudinary'den
+// 📌 Yüklenen resimleri listele (Admin only)
 router.get('/images', authMiddleware, async (req, res) => {
   try {
-    // Cloudinary'den resimleri listele
     const result = await cloudinary.search
       .expression('folder:projearna_uploads')
-      .sort_by([['created_at', 'desc']])
+      .sort_by('created_at', 'desc')
       .max_results(50)
       .execute();
 
-    const images = result.resources.map(resource => ({
-      name: resource.public_id.split('/').pop(),
-      url: resource.secure_url,
-      fullUrl: resource.secure_url,
-      uploadDate: resource.created_at,
-      cloudinaryId: resource.public_id,
-      format: resource.format,
-      size: resource.bytes
+    const images = result.resources.map(r => ({
+      name: r.public_id.split('/').pop(),
+      url: r.secure_url,
+      cloudinaryId: r.public_id,
+      uploadDate: r.created_at,
+      format: r.format,
+      size: r.bytes
     }));
 
-    // Ultra agresif CORS headers
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Expose-Headers', '*');
-    res.header('Access-Control-Allow-Credentials', 'false');
-    res.header('Access-Control-Max-Age', '86400');
-
     res.json(images);
   } catch (error) {
     console.error('Error listing Cloudinary images:', error);
@@ -125,26 +81,16 @@ router.get('/images', authMiddleware, async (req, res) => {
   }
 });
 
-// Base64 endpoint'i kaldırıldı - Cloudinary kullanıyoruz
-
-// Resim silme (Admin only) - Cloudinary'den
+// 📌 Resim silme (Admin only)
 router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
   try {
     const cloudinaryId = req.params.cloudinaryId;
-    
-    // Cloudinary'den resmi sil
     const result = await cloudinary.uploader.destroy(cloudinaryId);
-    
+
+    res.header('Access-Control-Allow-Origin', '*');
+
     if (result.result === 'ok') {
-      // Ultra agresif CORS headers
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', '*');
-      res.header('Access-Control-Allow-Headers', '*');
-      res.header('Access-Control-Expose-Headers', '*');
-      res.header('Access-Control-Allow-Credentials', 'false');
-      res.header('Access-Control-Max-Age', '86400');
-      
-      res.json({ message: 'Resim başarıyla Cloudinary\'den silindi' });
+      res.json({ message: 'Resim başarıyla silindi' });
     } else {
       res.status(404).json({ message: 'Resim bulunamadı veya silinemedi' });
     }
@@ -152,6 +98,16 @@ router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
     console.error('Cloudinary delete error:', error);
     res.status(500).json({ message: 'Resim silinirken hata oluştu', error: error.message });
   }
+});
+
+// 📌 Debug endpoint
+router.get('/debug', (req, res) => {
+  res.json({
+    message: 'Cloudinary Upload Service',
+    cloudinaryConfigured: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY),
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    folder: 'projearna_uploads'
+  });
 });
 
 module.exports = router;
