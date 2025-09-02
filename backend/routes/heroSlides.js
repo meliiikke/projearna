@@ -115,7 +115,7 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
         title || '',
         subtitle || '',
         content || '',
-        image_url || '',
+        image_url || null, // Cloudinary URL'si direkt kaydet
         button_text || '',
         button_link || '',
         slide_order || 0,
@@ -127,10 +127,10 @@ router.post('/admin/hero-slides', authMiddleware, async (req, res) => {
       result.insertId,
     ]);
 
-    // Clean image URL to prevent CORS errors
+    // Cloudinary URL'si direkt döndür
     const slide = {
       ...newSlide[0],
-      image_url: cleanImageUrl(newSlide[0].image_url)
+      image_url: newSlide[0].image_url
     };
 
     res.status(201).json({
@@ -168,7 +168,7 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
         title || '',
         subtitle || '',
         content || '',
-        image_url || '',
+        image_url || null, // Cloudinary URL'si direkt kaydet
         button_text || '',
         button_link || '',
         slide_order || 0,
@@ -183,10 +183,10 @@ router.put('/admin/hero-slides/:id', authMiddleware, async (req, res) => {
 
     const [updatedSlide] = await pool.execute('SELECT * FROM hero_slides WHERE id = ?', [id]);
 
-    // Clean image URL to prevent CORS errors
+    // Cloudinary URL'si direkt döndür
     const slide = {
       ...updatedSlide[0],
-      image_url: cleanImageUrl(updatedSlide[0].image_url)
+      image_url: updatedSlide[0].image_url
     };
 
     res.json({
