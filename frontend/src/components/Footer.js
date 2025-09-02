@@ -7,6 +7,7 @@ import './Footer.css';
 const Footer = () => {
   const [contactInfo, setContactInfo] = useState({});
   const [missionContent, setMissionContent] = useState(null);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,11 +31,52 @@ const Footer = () => {
           setContactInfo(fallbackContact);
         }
         
-        // Use fallback mission content for now
-        const fallbackMission = {
-          content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
-        };
-        setMissionContent(fallbackMission);
+        // Fetch mission content from content sections
+        try {
+          const missionResponse = await fetch(`${API_BASE_URL}/content/sections/mission`);
+          if (missionResponse.ok) {
+            const missionData = await missionResponse.json();
+            setMissionContent(missionData);
+            console.log('Mission content loaded from API:', missionData);
+          } else {
+            console.warn('Failed to fetch mission content, using fallback');
+            const fallbackMission = {
+              content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
+            };
+            setMissionContent(fallbackMission);
+          }
+        } catch (missionError) {
+          console.warn('Mission content fetch error:', missionError);
+          const fallbackMission = {
+            content: 'Leading the way in sustainable energy solutions for a better tomorrow.'
+          };
+          setMissionContent(fallbackMission);
+        }
+
+        // Fetch services for footer
+        try {
+          const servicesResponse = await fetch(`${API_BASE_URL}/content/services`);
+          if (servicesResponse.ok) {
+            const servicesData = await servicesResponse.json();
+            // Take first 3 services for footer
+            setServices(servicesData.slice(0, 3));
+            console.log('Services loaded from API:', servicesData.slice(0, 3));
+          } else {
+            console.warn('Failed to fetch services, using fallback');
+            setServices([
+              { title: 'Clean Energy', description: 'Sustainable energy solutions' },
+              { title: 'Solar Power', description: 'Renewable solar energy' },
+              { title: 'Wind Energy', description: 'Clean wind power solutions' }
+            ]);
+          }
+        } catch (servicesError) {
+          console.warn('Services fetch error:', servicesError);
+          setServices([
+            { title: 'Clean Energy', description: 'Sustainable energy solutions' },
+            { title: 'Solar Power', description: 'Renewable solar energy' },
+            { title: 'Wind Energy', description: 'Clean wind power solutions' }
+          ]);
+        }
         
       } catch (error) {
         console.error('Error fetching footer data:', error);
@@ -91,7 +133,7 @@ const Footer = () => {
                 />
               </div>
               <p className="footer-description">
-                {missionContent?.content || 'Leading the way in sustainable energy solutions for a better tomorrow. We are committed to providing clean, reliable, and affordable energy while protecting our environment.'}
+                {missionContent?.content || missionContent?.description || 'Leading the way in sustainable energy solutions for a better tomorrow. We are committed to providing clean, reliable, and affordable energy while protecting our environment.'}
               </p>
             </div>
 
@@ -108,9 +150,18 @@ const Footer = () => {
             <div className="footer-section">
               <h3 className="footer-title">Services</h3>
               <ul className="footer-links">
-                <li><a href="#services">Clean Energy</a></li>
-                <li><a href="#about">Sustainable Development</a></li>
-                <li><a href="#services">Energy Transition</a></li>
+                {services.map((service, index) => (
+                  <li key={index}>
+                    <a href="#services">{service.title}</a>
+                  </li>
+                ))}
+                {services.length === 0 && (
+                  <>
+                    <li><a href="#services">Clean Energy</a></li>
+                    <li><a href="#about">Sustainable Development</a></li>
+                    <li><a href="#services">Energy Transition</a></li>
+                  </>
+                )}
               </ul>
             </div>
 

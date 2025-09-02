@@ -33,6 +33,12 @@ const ContactManager = () => {
       });
     } catch (error) {
       console.error('Error fetching contact info:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       setMessage('Error fetching contact information');
     } finally {
       setLoading(false);
@@ -53,11 +59,31 @@ const ContactManager = () => {
     setMessage('');
 
     try {
-      await axios.put(`${API_BASE_URL}/content/admin/contact`, contactInfo);
+      const token = localStorage.getItem('adminToken');
+      await axios.put(`${API_BASE_URL}/content/admin/contact`, contactInfo, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setMessage('Contact information updated successfully!');
     } catch (error) {
       console.error('Error updating contact info:', error);
-      setMessage('Error updating contact information');
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      if (error.code === 'ERR_NETWORK') {
+        setMessage('Network error: Backend server is not responding. Please check if the server is running.');
+      } else if (error.response?.status === 401) {
+        setMessage('Authentication error: Please login again.');
+      } else if (error.response?.status === 500) {
+        setMessage('Server error: Please try again later.');
+      } else {
+        setMessage(`Error updating contact information: ${error.message}`);
+      }
     } finally {
       setSaving(false);
     }

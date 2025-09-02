@@ -902,7 +902,14 @@ router.delete('/admin/statistics/:id', authMiddleware, async (req, res) => {
 // Update contact info
 router.put('/admin/contact', authMiddleware, async (req, res) => {
   try {
+    // CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     const contactData = req.body;
+    console.log('Contact info update request:', contactData);
 
     for (const [fieldName, fieldValue] of Object.entries(contactData)) {
       await pool.execute(
@@ -913,8 +920,8 @@ router.put('/admin/contact', authMiddleware, async (req, res) => {
 
     res.json({ message: 'Contact information updated successfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Contact info update error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

@@ -9,6 +9,12 @@ const router = express.Router();
 // Admin login
 router.post('/login', async (req, res) => {
   try {
+    // CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     console.log('🔐 Login attempt from origin:', req.headers.origin);
     console.log('🔐 Request headers:', req.headers);
     const { username, password } = req.body;
@@ -56,6 +62,12 @@ router.post('/login', async (req, res) => {
 
 // Get current admin
 router.get('/me', authMiddleware, async (req, res) => {
+  // CORS headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
   res.json(req.user);
 });
 

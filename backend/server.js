@@ -50,16 +50,38 @@ const allowedOrigins = [
 
 // CORS konfigürasyonu - Railway için tamamen açık
 app.use(cors({
-  origin: true, // Tüm origin'lere izin ver
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins for now (Railway production)
+    return callback(null, true);
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token", "Accept", "Origin", "X-Requested-With"],
+  allowedHeaders: [
+    "Content-Type", 
+    "Authorization", 
+    "x-auth-token", 
+    "Accept", 
+    "Origin", 
+    "X-Requested-With",
+    "Access-Control-Allow-Origin",
+    "Access-Control-Allow-Headers",
+    "Access-Control-Allow-Methods"
+  ],
   credentials: true,
   optionsSuccessStatus: 200, // Legacy browser support
   preflightContinue: false
 }));
 
-// Pre-flight OPTIONS
-app.options('*', cors());
+// Pre-flight OPTIONS - Railway için
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token, Accept, Origin, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
