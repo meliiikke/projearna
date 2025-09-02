@@ -3,9 +3,9 @@ import axios from 'axios';
 
 // API Configuration for different environments
 const getApiBaseUrl = () => {
-  // Development: use proxy
+  // Development: use local backend
   if (process.env.NODE_ENV === 'development') {
-    return '';
+    return 'http://localhost:3001/api';
   }
 
   // Production: use environment variable or default - HTTPS zorunlu
