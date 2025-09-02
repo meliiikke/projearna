@@ -211,6 +211,67 @@ router.get('/images', authMiddleware, (req, res) => {
   }
 });
 
+// Base64 resim endpoint - CORS sorununu tamamen bypass eder
+router.get('/base64/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const filePath = path.join(uploadDir, filename);
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'Resim bulunamadı' });
+    }
+    
+    // Dosyayı base64 olarak oku
+    const fileBuffer = fs.readFileSync(filePath);
+    const base64String = fileBuffer.toString('base64');
+    
+    // Dosya türünü belirle
+    const ext = path.extname(filename).toLowerCase();
+    let mimeType = 'image/jpeg'; // default
+    
+    switch (ext) {
+      case '.png':
+        mimeType = 'image/png';
+        break;
+      case '.jpg':
+      case '.jpeg':
+        mimeType = 'image/jpeg';
+        break;
+      case '.gif':
+        mimeType = 'image/gif';
+        break;
+      case '.webp':
+        mimeType = 'image/webp';
+        break;
+      case '.avif':
+        mimeType = 'image/avif';
+        break;
+    }
+    
+    // Base64 data URL oluştur
+    const dataUrl = `data:${mimeType};base64,${base64String}`;
+    
+    // Ultra agresif CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Expose-Headers', '*');
+    res.header('Access-Control-Allow-Credentials', 'false');
+    res.header('Access-Control-Max-Age', '86400');
+    res.header('Content-Type', 'application/json');
+    
+    res.json({
+      success: true,
+      dataUrl: dataUrl,
+      mimeType: mimeType,
+      filename: filename
+    });
+  } catch (error) {
+    console.error('Base64 error:', error);
+    res.status(500).json({ message: 'Resim base64 dönüştürülürken hata oluştu' });
+  }
+});
+
 // Resim silme (Admin only)
 router.delete('/image/:filename', authMiddleware, (req, res) => {
   try {
@@ -220,10 +281,13 @@ router.delete('/image/:filename', authMiddleware, (req, res) => {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
       
-      // CORS headers ekle
+      // Ultra agresif CORS headers
       res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.header('Access-Control-Allow-Methods', '*');
+      res.header('Access-Control-Allow-Headers', '*');
+      res.header('Access-Control-Expose-Headers', '*');
+      res.header('Access-Control-Allow-Credentials', 'false');
+      res.header('Access-Control-Max-Age', '86400');
       
       res.json({ message: 'Resim başarıyla silindi' });
     } else {

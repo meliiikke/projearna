@@ -77,6 +77,46 @@ export const normalizeImageUrlDirect = (imageUrl) => {
   return `${BACKEND_BASE_URL}${imageUrl}`;
 };
 
+// Base64 resim URL fonksiyonu - CORS sorununu tamamen bypass eder
+export const normalizeImageUrlBase64 = (imageUrl) => {
+  if (!imageUrl) return null;
+  
+  // Eğer zaten data URL ise, olduğu gibi döndür
+  if (imageUrl.startsWith('data:')) {
+    return imageUrl;
+  }
+  
+  // Dosya adını çıkar
+  let filename;
+  if (imageUrl.startsWith('/uploads')) {
+    filename = imageUrl.split('/').pop();
+  } else if (imageUrl.startsWith('http')) {
+    filename = imageUrl.split('/').pop();
+  } else {
+    filename = imageUrl;
+  }
+  
+  // Base64 endpoint URL'i döndür
+  return `${API_BASE_URL}/upload/base64/${filename}`;
+};
+
+// Base64 resim yükleme fonksiyonu
+export const loadImageAsBase64 = async (imageUrl) => {
+  try {
+    const base64Url = normalizeImageUrlBase64(imageUrl);
+    const response = await fetch(base64Url);
+    const data = await response.json();
+    
+    if (data.success && data.dataUrl) {
+      return data.dataUrl;
+    }
+    return null;
+  } catch (error) {
+    console.error('Base64 image load error:', error);
+    return null;
+  }
+};
+
 // Axios instance with base URL
 const api = axios.create({
   baseURL: API_BASE_URL,

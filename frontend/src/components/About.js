@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { normalizeImageUrl, normalizeImageUrlServe } from '../config/api';
+import { normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlBase64, loadImageAsBase64 } from '../config/api';
 import './About.css';
 
 // API base URL
@@ -119,12 +119,23 @@ const About = () => {
                     className="industrial-bg"
                     style={{
                       backgroundImage: aboutContent?.image_url 
-                        ? `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${normalizeImageUrl(aboutContent.image_url)})`
+                        ? `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${normalizeImageUrlBase64(aboutContent.image_url)})`
                         : undefined
                     }}
-                    onError={(e) => {
-                      // Fallback için serve endpoint'i dene
+                    onError={async (e) => {
+                      // Fallback için base64 endpoint'i dene
                       if (aboutContent?.image_url) {
+                        try {
+                          const base64Data = await loadImageAsBase64(aboutContent.image_url);
+                          if (base64Data) {
+                            e.target.style.backgroundImage = `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${base64Data})`;
+                            return;
+                          }
+                        } catch (error) {
+                          console.error('Base64 load failed:', error);
+                        }
+                        
+                        // Base64 başarısız olursa serve endpoint'i dene
                         const fallbackUrl = normalizeImageUrlServe(aboutContent.image_url);
                         e.target.style.backgroundImage = `linear-gradient(135deg, rgba(197, 165, 114, 0.8) 0%, rgba(26, 26, 26, 0.6) 50%, rgba(197, 165, 114, 0.8) 100%), url(${fallbackUrl})`;
                       }

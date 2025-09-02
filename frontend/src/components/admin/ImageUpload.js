@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL, normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect } from '../../config/api';
+import { API_BASE_URL, normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect, normalizeImageUrlBase64, loadImageAsBase64 } from '../../config/api';
 import './ImageUpload.css';
 
 const ImageUpload = ({ onImageSelect, currentImage }) => {
@@ -20,13 +20,14 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
         withCredentials: false,
         timeout: 30000,
       });
-      // Backend'den gelen resim URL'lerini kullan - CORS sorununu çözmek için proxy endpoint kullan
+      // Backend'den gelen resim URL'lerini kullan - CORS sorununu çözmek için base64 endpoint kullan
       const imagesWithFullUrl = response.data.map(image => ({
         ...image,
         url: image.fullUrl || normalizeImageUrl(image.url),
         proxyUrl: normalizeImageUrl(image.url),
         serveUrl: normalizeImageUrlServe(image.url),
-        directUrl: normalizeImageUrlDirect(image.url)
+        directUrl: normalizeImageUrlDirect(image.url),
+        base64Url: normalizeImageUrlBase64(image.url)
       }));
       setImages(imagesWithFullUrl);
     } catch (error) {
@@ -149,15 +150,31 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
                 className={`image-item ${selectedImage === image.url ? 'selected' : ''}`}
               >
                 <img 
-                  src={image.proxyUrl} 
+                  src={image.base64Url} 
                   alt={image.name}
-                  onClick={() => handleImageSelect(image.proxyUrl)}
-                  onError={(e) => {
-                    // İlk deneme başarısız olursa serve endpoint'i dene
-                    if (e.target.src !== image.serveUrl) {
+                  onClick={() => handleImageSelect(image.base64Url)}
+                  onError={async (e) => {
+                    // İlk deneme başarısız olursa base64 endpoint'i dene
+                    if (e.target.src !== image.base64Url) {
+                      try {
+                        const base64Data = await loadImageAsBase64(image.url);
+                        if (base64Data) {
+                          e.target.src = base64Data;
+                          return;
+                        }
+                      } catch (error) {
+                        console.error('Base64 load failed:', error);
+                      }
+                    }
+                    
+                    // Base64 başarısız olursa proxy endpoint'i dene
+                    if (e.target.src !== image.proxyUrl) {
+                      e.target.src = image.proxyUrl;
+                    } else if (e.target.src !== image.serveUrl) {
+                      // İkinci deneme de başarısız olursa serve endpoint'i dene
                       e.target.src = image.serveUrl;
                     } else if (e.target.src !== image.directUrl) {
-                      // İkinci deneme de başarısız olursa direkt URL'i dene
+                      // Üçüncü deneme de başarısız olursa direkt URL'i dene
                       e.target.src = image.directUrl;
                     } else {
                       // Son çare olarak placeholder göster
