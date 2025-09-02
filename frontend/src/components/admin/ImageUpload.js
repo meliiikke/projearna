@@ -150,32 +150,16 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
                 className={`image-item ${selectedImage === image.url ? 'selected' : ''}`}
               >
                 <img 
-                  src={image.base64Url} 
+                  src={image.directUrl} 
                   alt={image.name}
-                  onClick={() => handleImageSelect(image.base64Url)}
-                  onError={async (e) => {
-                    // İlk deneme başarısız olursa base64 endpoint'i dene
-                    if (e.target.src !== image.base64Url) {
-                      try {
-                        const base64Data = await loadImageAsBase64(image.url);
-                        if (base64Data) {
-                          e.target.src = base64Data;
-                          return;
-                        }
-                      } catch (error) {
-                        console.error('Base64 load failed:', error);
-                      }
-                    }
-                    
-                    // Base64 başarısız olursa proxy endpoint'i dene
-                    if (e.target.src !== image.proxyUrl) {
-                      e.target.src = image.proxyUrl;
-                    } else if (e.target.src !== image.serveUrl) {
-                      // İkinci deneme de başarısız olursa serve endpoint'i dene
+                  onClick={() => handleImageSelect(image.directUrl)}
+                  onError={(e) => {
+                    // İlk deneme başarısız olursa serve endpoint'i dene
+                    if (e.target.src !== image.serveUrl) {
                       e.target.src = image.serveUrl;
-                    } else if (e.target.src !== image.directUrl) {
-                      // Üçüncü deneme de başarısız olursa direkt URL'i dene
-                      e.target.src = image.directUrl;
+                    } else if (e.target.src !== image.proxyUrl) {
+                      // İkinci deneme de başarısız olursa proxy endpoint'i dene
+                      e.target.src = image.proxyUrl;
                     } else {
                       // Son çare olarak placeholder göster
                       e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UmVzaW0gWMO8a2xlbmVtaXlvcjwvdGV4dD48L3N2Zz4=';

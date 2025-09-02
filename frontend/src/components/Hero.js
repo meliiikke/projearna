@@ -32,48 +32,35 @@ const Hero = () => {
   ]);
 
   // Preload image function - defined before useEffect to avoid "used before defined" error
-  const preloadImage = useCallback(async (imageUrl) => {
+  const preloadImage = useCallback((imageUrl) => {
     if (!imageUrl) return Promise.resolve();
     
     const normalizedUrl = normalizeImageUrl(imageUrl);
     const serveUrl = normalizeImageUrlServe(imageUrl);
     const directUrl = normalizeImageUrlDirect(imageUrl);
-    const base64Url = normalizeImageUrlBase64(imageUrl);
     
     // Check if image is already loaded
     if (imagesLoaded[normalizedUrl] !== undefined) {
       return Promise.resolve();
     }
     
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       
-      const tryLoadImage = async (url, attempt = 1) => {
+      const tryLoadImage = (url, attempt = 1) => {
         img.onload = () => {
           setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: true }));
           resolve();
         };
-        img.onerror = async () => {
+        img.onerror = () => {
           console.warn(`Failed to load image (attempt ${attempt}):`, url);
           
-          if (attempt === 1 && url !== base64Url) {
-            // İlk deneme başarısız, base64 endpoint'i dene
-            try {
-              const base64Data = await loadImageAsBase64(imageUrl);
-              if (base64Data) {
-                img.src = base64Data;
-                return;
-              }
-            } catch (error) {
-              console.error('Base64 load failed:', error);
-            }
-            tryLoadImage(base64Url, 2);
+          if (attempt === 1 && url !== directUrl) {
+            // İlk deneme başarısız, direkt URL'i dene
+            tryLoadImage(directUrl, 2);
           } else if (attempt === 2 && url !== serveUrl) {
             // İkinci deneme başarısız, serve endpoint'i dene
             tryLoadImage(serveUrl, 3);
-          } else if (attempt === 3 && url !== directUrl) {
-            // Üçüncü deneme başarısız, direkt URL'i dene
-            tryLoadImage(directUrl, 4);
           } else {
             // Tüm denemeler başarısız
             setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: false }));

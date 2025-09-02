@@ -117,6 +117,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Debug endpoint - upload routes'ları test et
+app.get('/api/debug/routes', (req, res) => {
+  res.json({
+    message: 'Debug routes',
+    uploadRoutes: uploadRoutes ? 'Loaded' : 'Not loaded',
+    availableRoutes: [
+      'GET /api/upload/images',
+      'POST /api/upload/image',
+      'GET /api/upload/proxy/:filename',
+      'GET /api/upload/serve/:filename',
+      'GET /api/upload/base64/:filename',
+      'DELETE /api/upload/image/:filename'
+    ]
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

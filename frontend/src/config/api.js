@@ -28,15 +28,13 @@ export const normalizeImageUrl = (imageUrl) => {
     return imageUrl.replace(/^http:/, 'https:');
   }
   
-  // Eğer /uploads ile başlıyorsa, proxy endpoint kullan
+  // Eğer /uploads ile başlıyorsa, direkt static serving kullan
   if (imageUrl.startsWith('/uploads')) {
-    const filename = imageUrl.split('/').pop();
-    return `${API_BASE_URL}/upload/proxy/${filename}`;
+    return `${BACKEND_BASE_URL}${imageUrl}`;
   }
   
-  // Diğer durumlarda da proxy endpoint kullan
-  const filename = imageUrl.split('/').pop();
-  return `${API_BASE_URL}/upload/proxy/${filename}`;
+  // Diğer durumlarda da direkt static serving kullan
+  return `${BACKEND_BASE_URL}/uploads/${imageUrl}`;
 };
 
 // Alternatif resim URL fonksiyonu - serve endpoint kullanır
