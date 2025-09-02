@@ -1,22 +1,26 @@
-// Axios'u en üste import etmelisin
+// Axios'u en üste import et
 import axios from 'axios';
 
-// API Configuration for different environments
+// API base URL'ini belirleyen fonksiyon
 const getApiBaseUrl = () => {
-  // Development: use proxy (package.json'da proxy ayarı var)
   if (process.env.NODE_ENV === 'development') {
-    return '/api'; // Proxy kullanıldığında relative path
+    // Development: package.json'da proxy kullanılıyor
+    return '/api';
   }
 
-  // Production: use environment variable or default - HTTPS zorunlu
-  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app/api';
-  // HTTPS kullanımını garanti et
+  // Production: Netlify env'den al veya fallback olarak Railway URL'sini kullan
+  const baseUrl =
+    process.env.REACT_APP_API_BASE_URL ||
+    'https://perfect-caring-production.up.railway.app/api';
+
+  // HTTPS garanti et
   return baseUrl.replace(/^http:/, 'https:');
 };
 
+// Export edilen API base URL
 export const API_BASE_URL = getApiBaseUrl();
 
-// Debug: API URL'sini console'a yazdır
+// Debug logları (Netlify deploy sırasında görmek için)
 console.log('🌐 API_BASE_URL:', API_BASE_URL);
 console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
 console.log('🔧 REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
@@ -24,37 +28,36 @@ console.log('🔧 REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
 // Backend base URL (API olmadan)
 export const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
 
-// Resim URL'lerini normalize eden yardımcı fonksiyon - Cloudinary + eski URL temizliği
+// Resim URL'lerini normalize eden yardımcı fonksiyon
 export const normalizeImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
-  
-  // Eğer Cloudinary URL'si ise, HTTPS kullanımını garanti et
+
+  // Cloudinary için HTTPS garanti et
   if (imageUrl.includes('cloudinary.com')) {
     return imageUrl.replace(/^http:/, 'https:');
   }
-  
-  // Eğer zaten HTTPS URL ise, olduğu gibi döndür
+
+  // Zaten HTTPS ise olduğu gibi döndür
   if (imageUrl.startsWith('https://')) {
     return imageUrl;
   }
-  
-  // Eski local URL'leri tespit et ve null döndür (CORS hatalarını önlemek için)
-  if (imageUrl.startsWith('/uploads/') || 
-      imageUrl.includes('img-') || 
-      imageUrl.includes('uploads/') ||
-      imageUrl.match(/img-\d+-\d+\.(jpg|jpeg|png|webp|gif)/i) ||
-      imageUrl.match(/img-\d+\.(jpg|jpeg|png|webp|gif)/i)) {
-    console.warn('Eski resim URL\'si tespit edildi, Cloudinary kullanın:', imageUrl);
+
+  // Local veya eski URL'leri yakala → null döndür
+  if (
+    imageUrl.startsWith('/uploads/') ||
+    imageUrl.includes('img-') ||
+    imageUrl.includes('uploads/') ||
+    imageUrl.match(/img-\d+-\d+\.(jpg|jpeg|png|webp|gif)/i) ||
+    imageUrl.match(/img-\d+\.(jpg|jpeg|png|webp|gif)/i)
+  ) {
+    console.warn('⚠️ Eski resim URL\'si bulundu, Cloudinary kullanın:', imageUrl);
     return null;
   }
-  
-  // Diğer durumlar için null döndür
+
   return null;
 };
 
-// Eski yöntemler kaldırıldı - sadece Cloudinary kullanıyoruz
-
-// Axios instance with base URL
+// Axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,

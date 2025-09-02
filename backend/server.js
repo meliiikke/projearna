@@ -50,8 +50,11 @@ const allowedOrigins = [
   
   app.use(cors({
     origin: function (origin, callback) {
-      // Eğer Postman / server-to-server gibi origin yoksa da izin verelim
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) return callback(null, true); // Postman vs.
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.netlify.app')
+      ) {
         callback(null, true);
       } else {
         console.log('❌ CORS blocked origin:', origin);
@@ -63,7 +66,10 @@ const allowedOrigins = [
     credentials: true
   }));
 
-// Pre-flight OPTIONS handler - PRODUCTION
+// Pre-flight OPTIONS handle
+// r - PRODUCTION
+
+app.options('*', cors());
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
