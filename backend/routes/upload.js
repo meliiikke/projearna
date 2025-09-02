@@ -45,7 +45,8 @@ router.post('/image', upload.single('image'), (req, res) => {
     console.log('🔑 Cloudinary config check:', {
       cloudName: process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Missing',
       apiKey: process.env.CLOUDINARY_API_KEY ? 'Set' : 'Missing',
-      apiSecret: process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Missing'
+      apiSecret: process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Missing',
+      cloudNameValue: process.env.CLOUDINARY_CLOUD_NAME || 'NOT_SET'
     });
 
     if (!req.file) {
