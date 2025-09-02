@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlBase64, loadImageAsBase64 } from '../config/api';
+import { normalizeImageUrlServe, normalizeImageUrlBase64, loadImageAsBase64 } from '../config/api';
 import './About.css';
 
 // API base URL
