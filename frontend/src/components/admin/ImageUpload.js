@@ -16,7 +16,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
   const fetchImages = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/upload/images`, {
+      const response = await axios.get(`${API_BASE_URL}/images`, {
         headers: {
           'x-auth-token': token
         },
@@ -61,7 +61,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       const token = localStorage.getItem('token');
       console.log('🔑 Token available:', !!token);
       console.log('🔑 Token value:', token ? token.substring(0, 20) + '...' : 'null');
-      console.log('🌐 Upload URL:', `${API_BASE_URL}/upload/image`);
+      console.log('🌐 Upload URL:', `${API_BASE_URL}/image`);
       
       // Token kontrolünü geçici olarak kaldırdık
       // if (!token) {
@@ -69,7 +69,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       //   return;
       // }
       
-      const response = await axios.post(`${API_BASE_URL}/upload/image`, formData, {
+      const response = await axios.post(`${API_BASE_URL}/image`, formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
@@ -141,7 +141,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       
       console.log('Deleting image with param:', deleteParam);
       
-      await axios.delete(`${API_BASE_URL}/upload/image/${encodeURIComponent(deleteParam)}`, {
+      await axios.delete(`${API_BASE_URL}/image/${encodeURIComponent(deleteParam)}`, {
         headers: {
           'x-auth-token': token
         }
