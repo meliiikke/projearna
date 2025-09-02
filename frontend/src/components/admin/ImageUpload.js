@@ -60,10 +60,11 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     try {
       const token = localStorage.getItem('token');
       console.log('🔑 Token available:', !!token);
+      console.log('🔑 Token value:', token ? token.substring(0, 20) + '...' : 'null');
       console.log('🌐 Upload URL:', `${API_BASE_URL}/upload/image`);
       
       if (!token) {
-        alert('Giriş yapmanız gerekiyor! Lütfen admin paneline giriş yapın.');
+        alert('Token bulunamadı! Lütfen sayfayı yenileyin ve tekrar giriş yapın.');
         return;
       }
       
