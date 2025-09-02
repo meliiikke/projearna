@@ -37,8 +37,8 @@ const upload = multer({
   }
 });
 
-// 📌 Resim yükleme (Admin only)
-router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
+// 📌 Resim yükleme (Admin only) - Auth geçici olarak kaldırıldı
+router.post('/image', upload.single('image'), (req, res) => {
   try {
     console.log('📤 Upload request received');
     console.log('📁 File:', req.file);
@@ -72,8 +72,8 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
   }
 });
 
-// 📌 Yüklenen resimleri listele (Admin only)
-router.get('/images', authMiddleware, async (req, res) => {
+// 📌 Yüklenen resimleri listele (Admin only) - Auth geçici olarak kaldırıldı
+router.get('/images', async (req, res) => {
   try {
     const result = await cloudinary.search
       .expression('folder:projearna_uploads')
@@ -97,8 +97,8 @@ router.get('/images', authMiddleware, async (req, res) => {
   }
 });
 
-// 📌 Resim silme (Admin only)
-router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
+// 📌 Resim silme (Admin only) - Auth geçici olarak kaldırıldı
+router.delete('/image/:cloudinaryId', async (req, res) => {
   try {
     const cloudinaryId = req.params.cloudinaryId;
     

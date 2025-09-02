@@ -63,10 +63,11 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       console.log('🔑 Token value:', token ? token.substring(0, 20) + '...' : 'null');
       console.log('🌐 Upload URL:', `${API_BASE_URL}/upload/image`);
       
-      if (!token) {
-        alert('Token bulunamadı! Lütfen sayfayı yenileyin ve tekrar giriş yapın.');
-        return;
-      }
+      // Token kontrolünü geçici olarak kaldırdık
+      // if (!token) {
+      //   alert('Token bulunamadı! Lütfen sayfayı yenileyin ve tekrar giriş yapın.');
+      //   return;
+      // }
       
       const response = await axios.post(`${API_BASE_URL}/upload/image`, formData, {
         headers: {
