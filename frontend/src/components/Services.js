@@ -12,11 +12,31 @@ const Services = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
+        console.log('Fetching services from:', `${API_BASE_URL}/content/services`);
         const response = await fetch(`${API_BASE_URL}/content/services`);
-        const data = await response.json();
-        setServices(data);
+        console.log('Services response - status:', response.status);
+        console.log('Services response - ok:', response.ok);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Services data received:', data);
+          setServices(data);
+        } else {
+          console.error('Services fetch failed:', response.status, response.statusText);
+          // Fallback data
+          setServices([
+            { id: 1, title: 'Clean Energy', description: 'Sustainable energy solutions' },
+            { id: 2, title: 'Solar Power', description: 'Renewable solar energy' },
+            { id: 3, title: 'Wind Energy', description: 'Clean wind power solutions' }
+          ]);
+        }
       } catch (error) {
         console.error('Error fetching services:', error);
+        console.error('Error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        });
         // Fallback data
         setServices([
           { id: 1, title: 'Clean Energy', description: 'Sustainable energy solutions' },

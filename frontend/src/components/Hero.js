@@ -105,34 +105,35 @@ const Hero = () => {
         // Skip hero content for now, focus on features
         
         // Fetch hero features
-        console.log('Requesting hero features from:', '/api/content/hero-features');
-        console.log('Full URL will be:', window.location.origin + '/api/content/hero-features');
+        console.log('Requesting hero features from:', '/content/hero-features');
+        console.log('Full URL will be:', API_BASE_URL + '/content/hero-features');
         
         // Try direct backend URL
         let featuresRes;
         try {
+          console.log('Fetching from URL:', `${API_BASE_URL}/content/hero-features`);
           const featuresResponse = await fetch(`${API_BASE_URL}/content/hero-features`);
-          const featuresData = await featuresResponse.json();
-          featuresRes = { data: featuresData, status: featuresResponse.status };
           console.log('Hero features response - status:', featuresResponse.status);
+          console.log('Hero features response - ok:', featuresResponse.ok);
+          
+          if (!featuresResponse.ok) {
+            throw new Error(`HTTP ${featuresResponse.status}: ${featuresResponse.statusText}`);
+          }
+          
+          const featuresData = await featuresResponse.json();
+          console.log('Hero features data received:', featuresData);
+          featuresRes = { data: featuresData, status: featuresResponse.status };
         } catch (error) {
-          console.log('Hero features endpoint failed:', error);
+          console.error('Hero features endpoint failed:', error);
+          console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+          });
           featuresRes = { data: [], status: 500 };
         }
         
         console.log('Hero features response data:', featuresRes.data);
-        
-        // If no features returned, try fetching all (including inactive)
-        if (!featuresRes.data || featuresRes.data.length === 0) {
-          console.log('No active hero features found, trying admin endpoint...');
-          try {
-            const adminResponse = await fetch(`${API_BASE_URL}/content/admin/hero-features`);
-            const adminData = await adminResponse.json();
-            console.log('Admin hero features response:', adminData);
-          } catch (adminError) {
-            console.log('Admin endpoint failed:', adminError);
-          }
-        }
         
         setHeroFeatures(featuresRes.data || []);
         

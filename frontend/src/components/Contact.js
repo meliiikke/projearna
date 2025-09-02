@@ -34,11 +34,25 @@ const Contact = () => {
 
   const fetchContactInfo = async () => {
     try {
+      console.log('Fetching contact info from:', `${API_BASE_URL}/content/contact`);
       const response = await fetch(`${API_BASE_URL}/content/contact`);
-      const data = await response.json();
-      setContactInfo(data);
+      console.log('Contact info response - status:', response.status);
+      console.log('Contact info response - ok:', response.ok);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Contact info data received:', data);
+        setContactInfo(data);
+      } else {
+        console.error('Contact info fetch failed:', response.status, response.statusText);
+      }
     } catch (error) {
       console.error('Error fetching contact info:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
     }
   };
 

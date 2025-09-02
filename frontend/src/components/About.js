@@ -14,18 +14,38 @@ const About = () => {
     const fetchData = async () => {
       try {
         // Fetch about content
+        console.log('Fetching about content from:', `${API_BASE_URL}/content/sections/about`);
         const contentResponse = await fetch(`${API_BASE_URL}/content/sections/about`);
-        const contentData = await contentResponse.json();
-        setAboutContent(contentData);
+        console.log('About content response - status:', contentResponse.status);
+        
+        if (contentResponse.ok) {
+          const contentData = await contentResponse.json();
+          console.log('About content data received:', contentData);
+          setAboutContent(contentData);
+        } else {
+          console.error('About content fetch failed:', contentResponse.status, contentResponse.statusText);
+        }
         
         // Fetch about features
+        console.log('Fetching about features from:', `${API_BASE_URL}/content/about-features`);
         const featuresResponse = await fetch(`${API_BASE_URL}/content/about-features`);
-        const featuresData = await featuresResponse.json();
-        setAboutFeatures(featuresData);
+        console.log('About features response - status:', featuresResponse.status);
         
+        if (featuresResponse.ok) {
+          const featuresData = await featuresResponse.json();
+          console.log('About features data received:', featuresData);
+          setAboutFeatures(featuresData);
+        } else {
+          console.error('About features fetch failed:', featuresResponse.status, featuresResponse.statusText);
+        }
 
       } catch (error) {
         console.error('Error fetching about data:', error);
+        console.error('Error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        });
       } finally {
         setLoading(false);
       }
