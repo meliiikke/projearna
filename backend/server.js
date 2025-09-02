@@ -48,7 +48,7 @@ const allowedOrigins = [
   'https://perfect-caring-production.up.railway.app' // Backend'in kendi URL'i
 ];
 
-// Geçici olarak CORS'u tamamen aç (güvenlik için daha sonra kısıtlanabilir)
+// CORS konfigürasyonu - Railway için tamamen açık
 app.use(cors({
   origin: true, // Tüm origin'lere izin ver
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -112,18 +112,32 @@ app.use('*', (req, res) => {
 // Initialize database and start server
 const startServer = async () => {
   try {
+    console.log('🚀 Starting ARNA Energy Backend Server...');
+    console.log('📊 Environment:', process.env.NODE_ENV || 'development');
+    console.log('🗄️ Database config:', {
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 3306,
+      database: process.env.DB_NAME || 'arna_energy',
+      user: process.env.DB_USER || 'root'
+    });
+    
     await initializeDatabase();
     
     app.listen(PORT, () => {
-      console.log(`🚀 ARNA Energy Backend Server running on port ${PORT}`);
-      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`✅ ARNA Energy Backend Server running on port ${PORT}`);
       console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
       console.log(`🔑 Default Admin Login: username=admin, password=admin123`);
       console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'Using default'}`);
       console.log(`🗄️ Database: ${process.env.DB_NAME || 'arna_energy'} on ${process.env.DB_HOST || 'localhost'}`);
+      console.log(`🌍 CORS: All origins allowed`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('❌ Failed to start server:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
     process.exit(1);
   }
 };
