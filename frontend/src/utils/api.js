@@ -8,6 +8,7 @@ export const apiRequest = async (endpoint, options = {}) => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
     console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
+    console.log(`🔧 Full URL: ${window.location.origin}${url}`);
     
     const response = await fetch(url, {
       headers: {
@@ -26,6 +27,7 @@ export const apiRequest = async (endpoint, options = {}) => {
 
       const errorText = await response.text();
       console.error(`❌ API Error ${response.status}: ${errorText}`);
+      console.error(`❌ Response URL: ${response.url}`);
       return { 
         error: errorText || `API error: ${response.status}`, 
         status: response.status 
@@ -37,6 +39,14 @@ export const apiRequest = async (endpoint, options = {}) => {
     return data;
   } catch (err) {
     console.error(`❌ API Request failed: ${endpoint}`, err.message);
+    console.error(`❌ Error details:`, err);
+    
+    // Network error durumunda daha detaylı bilgi
+    if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      console.error(`🚨 Network Error: Backend server may not be running`);
+      console.error(`🚨 Expected URL: ${API_BASE_URL}${endpoint}`);
+    }
+    
     return { error: err.message };
   }
 };

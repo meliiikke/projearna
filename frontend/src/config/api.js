@@ -3,18 +3,23 @@ import axios from 'axios';
 
 // API Configuration for different environments
 const getApiBaseUrl = () => {
-  // Development: use local backend
+  // Development: use proxy (package.json'da proxy ayarı var)
   if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3001/api';
+    return '/api'; // Proxy kullanıldığında relative path
   }
 
   // Production: use environment variable or default - HTTPS zorunlu
-  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'https://perfect-caring-production.up.railway.app/api';
+  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app/api';
   // HTTPS kullanımını garanti et
   return baseUrl.replace(/^http:/, 'https:');
 };
 
 export const API_BASE_URL = getApiBaseUrl();
+
+// Debug: API URL'sini console'a yazdır
+console.log('🌐 API_BASE_URL:', API_BASE_URL);
+console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+console.log('🔧 REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
 
 // Backend base URL (API olmadan)
 export const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');

@@ -43,36 +43,25 @@ app.use(limiter);
 
 // ✅ CORS whitelist
 const allowedOrigins = [
-  'http://localhost:3000',
-  'https://arnasitesi.netlify.app',
-  'https://perfect-caring-production.up.railway.app' // Backend'in kendi URL'i
-];
+    'http://localhost:3000',
+    'https://arnasitesi.netlify.app'
+  ];
 
 // CORS konfigürasyonu - Railway için tamamen açık
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow all origins for now (Railway production)
-    return callback(null, true);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: [
-    "Content-Type", 
-    "Authorization", 
-    "x-auth-token", 
-    "Accept", 
-    "Origin", 
-    "X-Requested-With",
-    "Access-Control-Allow-Origin",
-    "Access-Control-Allow-Headers",
-    "Access-Control-Allow-Methods"
-  ],
-  credentials: true,
-  optionsSuccessStatus: 200, // Legacy browser support
-  preflightContinue: false
-}));
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // Postman gibi originsiz istekler için
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
+    credentials: true,
+    optionsSuccessStatus: 200
+  }));
 
 // Pre-flight OPTIONS - Railway için
 app.options('*', (req, res) => {
@@ -98,7 +87,17 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'ARNA Energy API is running',
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString(),
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'Backend connection test successful',
+    timestamp: new Date().toISOString()
   });
 });
 

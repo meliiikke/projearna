@@ -12,10 +12,11 @@ import HeroFeaturesManager from '../components/admin/HeroFeaturesManager';
 import MapPointsManager from '../components/admin/MapPointsManager';
 
 import FooterBottomLinksManager from '../components/admin/FooterBottomLinksManager';
+import BackendTest from '../components/BackendTest';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('content');
+  const [activeTab, setActiveTab] = useState('backend-test');
   const [stats, setStats] = useState({
     totalSections: 0,
     totalServices: 0,
@@ -60,6 +61,7 @@ const AdminDashboard = () => {
   };
 
   const tabs = [
+    { id: 'backend-test', label: 'Backend Test', icon: '🔧' },
     { id: 'content', label: 'Content Sections', icon: '📝' },
     { id: 'hero-slides', label: 'Hero Slides', icon: '🎬' },
     { id: 'hero-features', label: 'Hero Features', icon: '⭐' },
@@ -72,6 +74,8 @@ const AdminDashboard = () => {
 
   const renderActiveTab = () => {
     switch (activeTab) {
+      case 'backend-test':
+        return <BackendTest />;
       case 'content':
         return <ContentManager />;
       case 'hero-slides':
@@ -91,7 +95,7 @@ const AdminDashboard = () => {
       case 'map-points':
         return <MapPointsManager />;
       default:
-        return <ContentManager />;
+        return <BackendTest />;
     }
   };
 
