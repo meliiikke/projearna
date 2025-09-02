@@ -43,16 +43,13 @@ const limiter = rateLimit({
   ];
   
   app.use(cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS not allowed'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    origin: "*", // Tüm origin'lere izin ver
+    credentials: false,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['*'],
+    exposedHeaders: ['*'],
+    optionsSuccessStatus: 200,
+    preflightContinue: false
   }));
   
   // Pre-flight OPTIONS
@@ -63,13 +60,47 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'backend/uploads'), {
-  setHeaders: (res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // frontend erişebilsin
+  setHeaders: (res, filePath) => {
+    // Ultra agresif CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Access-Control-Expose-Headers', '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    
+    // Content-Type'ı doğru şekilde ayarla
+    if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
+    } else if (filePath.endsWith('.webp')) {
+      res.setHeader('Content-Type', 'image/webp');
+    } else if (filePath.endsWith('.avif')) {
+      res.setHeader('Content-Type', 'image/avif');
+    }
   }
 }));
 
 // Pre-flight OPTIONS requests için
 app.options('*', cors());
+
+// OPTIONS request'leri için özel handling
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Expose-Headers', '*');
+    res.header('Access-Control-Allow-Credentials', 'false');
+    res.header('Access-Control-Max-Age', '86400');
+    res.status(200).end();
+    return;
+  }
+  next();
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
