@@ -104,15 +104,22 @@ router.get('/statistics', async (req, res) => {
 // Get contact info (public)
 router.get('/contact', async (req, res) => {
   try {
+    // CORS headers
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
     const [rows] = await pool.execute('SELECT * FROM contact_info');
     const contactInfo = {};
     rows.forEach(row => {
       contactInfo[row.field_name] = row.field_value;
     });
+    console.log('Contact info fetched:', contactInfo);
     res.json(contactInfo);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Contact info fetch error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

@@ -169,6 +169,8 @@ VALUES
 ('email', 'info@arna.com.tr'),
 ('address', 'Levent Mahallesi, Büyükdere Caddesi No:201 Şişli/İSTANBUL'),
 ('working_hours', 'Pazartesi - Cuma: 09:00 - 18:00'),
+('map_lat', '41.0781'),
+('map_lng', '29.0173'),
 ('fax', '+90 212 555 0124'),
 ('website', 'www.arna.com.tr'),
 ('linkedin', 'https://linkedin.com/company/arna-energy'),
