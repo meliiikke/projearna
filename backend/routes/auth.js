@@ -6,15 +6,18 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
+// CORS middleware for auth routes
+const corsMiddleware = (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://arnasitesi.netlify.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+};
+
 // Admin login
-router.post('/login', async (req, res) => {
+router.post('/login', corsMiddleware, async (req, res) => {
   try {
-    // CORS headers
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
     console.log('🔐 Login attempt from origin:', req.headers.origin);
     console.log('🔐 Request headers:', req.headers);
     const { username, password } = req.body;
@@ -61,13 +64,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Get current admin
-router.get('/me', authMiddleware, async (req, res) => {
-  // CORS headers
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
+router.get('/me', corsMiddleware, authMiddleware, async (req, res) => {
   res.json(req.user);
 });
 

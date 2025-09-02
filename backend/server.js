@@ -47,20 +47,9 @@ const allowedOrigins = [
     'https://arnasitesi.netlify.app'
   ];
 
-// CORS konfigürasyonu - Production için
+// CORS konfigürasyonu - EMERGENCY: Allow all origins
 app.use(cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      // Check if origin is in allowed list
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        console.log('CORS blocked origin:', origin);
-        return callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: true, // Allow all origins
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
       "Content-Type", 
@@ -78,17 +67,12 @@ app.use(cors({
     preflightContinue: false
   }));
 
-// Pre-flight OPTIONS handler
+// Pre-flight OPTIONS handler - EMERGENCY: Allow all
 app.options('*', (req, res) => {
   const origin = req.headers.origin;
   
-  // Check if origin is allowed
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  
+  // Allow all origins for emergency fix
+  res.header('Access-Control-Allow-Origin', origin || '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token, Accept, Origin, X-Requested-With');
   res.header('Access-Control-Allow-Credentials', 'true');
