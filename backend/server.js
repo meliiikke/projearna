@@ -47,28 +47,52 @@ const allowedOrigins = [
     'https://arnasitesi.netlify.app'
   ];
 
-// CORS konfigürasyonu - Railway için tamamen açık
+// CORS konfigürasyonu - Production için
 app.use(cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Postman gibi originsiz istekler için
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Check if origin is in allowed list
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
+        console.log('CORS blocked origin:', origin);
         return callback(new Error('Not allowed by CORS'));
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
+    allowedHeaders: [
+      "Content-Type", 
+      "Authorization", 
+      "x-auth-token", 
+      "Accept", 
+      "Origin", 
+      "X-Requested-With",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Allow-Methods"
+    ],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    preflightContinue: false
   }));
 
-// Pre-flight OPTIONS - Railway için
+// Pre-flight OPTIONS handler
 app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  
+  // Check if origin is allowed
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token, Accept, Origin, X-Requested-With');
   res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
   res.sendStatus(200);
 });
 
