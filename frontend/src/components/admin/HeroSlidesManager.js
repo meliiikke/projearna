@@ -31,13 +31,13 @@ const HeroSlidesManager = () => {
       const response = await axios.get(`${API_BASE_URL}/hero-slides/admin/hero-slides`);
       console.log('Hero slides response:', response.data);
       
-      // Backend'den gelen resim URL'lerini tam URL yap
+      // Backend'den gelen resim URL'lerini normalize et
       const slidesWithFullImageUrl = response.data?.map(slide => {
         const normalizedUrl = slide.image_url ? normalizeImageUrl(slide.image_url) : null;
         
-        // Eski resim URL'si tespit edilirse uyarı ver
+        // Eski resim URL'si tespit edilirse uyarı ver ve null yap
         if (slide.image_url && !normalizedUrl) {
-          console.warn(`Hero slide "${slide.title}" eski resim URL'si kullanıyor:`, slide.image_url);
+          console.warn(`Hero slide "${slide.title}" eski resim URL'si kullanıyor, temizleniyor:`, slide.image_url);
         }
         
         return {
@@ -47,7 +47,17 @@ const HeroSlidesManager = () => {
       }) || [];
       
       setSlides(slidesWithFullImageUrl);
-      setMessage(`${slidesWithFullImageUrl.length} hero slides loaded`);
+      
+      // Eski resim URL'leri varsa kullanıcıyı bilgilendir
+      const oldImageCount = response.data?.filter(slide => 
+        slide.image_url && !normalizeImageUrl(slide.image_url)
+      ).length || 0;
+      
+      if (oldImageCount > 0) {
+        setMessage(`${slidesWithFullImageUrl.length} hero slides loaded. ${oldImageCount} slide has old image URLs that need to be updated with new Cloudinary images.`);
+      } else {
+        setMessage(`${slidesWithFullImageUrl.length} hero slides loaded`);
+      }
     } catch (error) {
       console.error('Error fetching hero slides:', error);
       setMessage('Error fetching hero slides: ' + error.message);

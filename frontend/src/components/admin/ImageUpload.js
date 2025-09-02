@@ -104,7 +104,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       const cloudinaryId = image.cloudinaryId;
       
       if (!cloudinaryId) {
-        alert('Resim ID bulunamadı!');
+        alert('Bu eski resim Cloudinary\'de bulunmuyor. Sadece yeni yüklenen resimler silinebilir.');
         return;
       }
       
