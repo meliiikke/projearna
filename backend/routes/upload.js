@@ -22,8 +22,8 @@ const storage = new CloudinaryStorage({
     resource_type: 'image',
     transformation: [{ width: 1920, height: 1080, crop: 'limit' }],
     use_filename: true,
-    unique_filename: true,
-    upload_preset: 'projearna_uploads' // Upload preset kullan
+    unique_filename: true
+    // upload_preset kaldırıldı - Cloudinary'de preset yoksa hata veriyor
   }
 });
 
@@ -40,9 +40,24 @@ const upload = multer({
 // 📌 Resim yükleme (Admin only)
 router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
   try {
+    console.log('📤 Upload request received');
+    console.log('📁 File:', req.file);
+    console.log('🔑 Cloudinary config check:', {
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Missing',
+      apiKey: process.env.CLOUDINARY_API_KEY ? 'Set' : 'Missing',
+      apiSecret: process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Missing'
+    });
+
     if (!req.file) {
+      console.log('❌ No file received');
       return res.status(400).json({ message: 'Dosya yüklenmedi' });
     }
+
+    console.log('✅ File uploaded successfully:', {
+      path: req.file.path,
+      filename: req.file.filename,
+      originalname: req.file.originalname
+    });
 
     res.json({
         message: 'Resim başarıyla Cloudinary\'ye yüklendi',
@@ -52,7 +67,7 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
       });
       
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
+    console.error('❌ Cloudinary upload error:', error);
     res.status(500).json({ message: 'Resim yükleme hatası', error: error.message });
   }
 });
@@ -122,11 +137,16 @@ router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
 
 // 📌 Debug endpoint
 router.get('/debug', (req, res) => {
+  const cloudinaryConfigured = !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+  
   res.json({
     message: 'Cloudinary Upload Service',
-    cloudinaryConfigured: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET),
-    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-    folder: 'projearna_uploads'
+    cloudinaryConfigured,
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || 'NOT_SET',
+    apiKey: process.env.CLOUDINARY_API_KEY ? 'SET' : 'NOT_SET',
+    apiSecret: process.env.CLOUDINARY_API_SECRET ? 'SET' : 'NOT_SET',
+    folder: 'projearna_uploads',
+    status: cloudinaryConfigured ? 'READY' : 'MISSING_CONFIG'
   });
 });
 

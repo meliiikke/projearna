@@ -50,6 +50,8 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    console.log('📤 Starting upload for file:', file.name, file.size, file.type);
+
     const formData = new FormData();
     formData.append('image', file); // Backend'de beklenen key adı
 
@@ -57,6 +59,9 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
 
     try {
       const token = localStorage.getItem('token');
+      console.log('🔑 Token available:', !!token);
+      console.log('🌐 Upload URL:', `${API_BASE_URL}/upload/image`);
+      
       const response = await axios.post(`${API_BASE_URL}/upload/image`, formData, {
         headers: {
           'x-auth-token': token,
@@ -65,8 +70,21 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
         timeout: 30000,
       });
 
+      console.log('✅ Upload response:', response.data);
+
       // Backend'den gelen Cloudinary response'u
       const { imageUrl } = response.data;
+      
+      if (!imageUrl) {
+        throw new Error('Backend did not return imageUrl');
+      }
+      
+      // URL formatını kontrol et
+      if (imageUrl.includes('cloudinary.com')) {
+        console.log('✅ Cloudinary URL received:', imageUrl);
+      } else {
+        console.warn('⚠️ Non-Cloudinary URL received:', imageUrl);
+      }
       
       // Resmi listeye ekle
       await fetchImages();
@@ -76,9 +94,15 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       
       alert('Resim başarıyla Cloudinary\'ye yüklendi!');
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      
       if (error.response?.status === 401) {
         alert('Auth hatası! Lütfen tekrar giriş yapın.');
+      } else if (error.response?.status === 400) {
+        alert(`Dosya hatası: ${error.response.data?.message || error.message}`);
+      } else if (error.response?.status === 500) {
+        alert(`Sunucu hatası: ${error.response.data?.message || error.message}`);
       } else {
         alert(`Resim yüklenirken hata oluştu: ${error.message}`);
       }
