@@ -60,11 +60,21 @@ router.post('/image', upload.single('image'), (req, res) => {
       originalname: req.file.originalname
     });
 
+    // Eğer Cloudinary URL'si değilse, HTTPS yap
+    let imageUrl = req.file.path;
+    if (imageUrl && !imageUrl.includes('cloudinary.com')) {
+      // Local upload ise HTTPS yap
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://projearna-production.up.railway.app' 
+        : 'http://localhost:3001';
+      imageUrl = `${baseUrl}${req.file.path}`;
+    }
+
     res.json({
-        message: 'Resim başarıyla Cloudinary\'ye yüklendi',
-        imageUrl: req.file.path,             // Cloudinary URL
-        fileName: req.file.originalname,     // Orijinal dosya adı
-        cloudinaryId: req.file.filename || req.file.public_id  // Cloudinary public_id
+        message: 'Resim başarıyla yüklendi',
+        imageUrl: imageUrl,
+        fileName: req.file.originalname,
+        cloudinaryId: req.file.filename || req.file.public_id
       });
       
   } catch (error) {
