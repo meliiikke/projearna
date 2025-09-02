@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL, normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect, normalizeImageUrlBase64, loadImageAsBase64 } from '../../config/api';
+import { API_BASE_URL, normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect } from '../../config/api';
 import './ImageUpload.css';
 
 const ImageUpload = ({ onImageSelect, currentImage }) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect, normalizeImageUrlBase64, loadImageAsBase64, API_BASE_URL } from '../config/api';
+import { normalizeImageUrl, normalizeImageUrlServe, normalizeImageUrlDirect, API_BASE_URL } from '../config/api';
 import './Hero.css';
 
 const Hero = () => {
