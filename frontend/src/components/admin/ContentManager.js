@@ -92,7 +92,18 @@ const ContentManager = () => {
     setMessage('');
 
     try {
-      await axios.put(`${API_BASE_URL}/content/admin/sections/${editingSection.id}`, formData);
+      console.log('Updating section:', editingSection.id, 'with data:', formData);
+      console.log('API URL:', `${API_BASE_URL}/content/admin/sections/${editingSection.id}`);
+      
+      const response = await axios.put(`${API_BASE_URL}/content/admin/sections/${editingSection.id}`, formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        timeout: 30000
+      });
+      
+      console.log('Update response:', response.data);
       
       // Update local state
       setSections(prev => prev.map(section => 
@@ -116,7 +127,22 @@ const ContentManager = () => {
       });
     } catch (error) {
       console.error('Error updating section:', error);
-      setMessage('Error updating content section');
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      if (error.code === 'ERR_NETWORK') {
+        setMessage('Network error: Backend server is not responding. Please check if the server is running.');
+      } else if (error.response?.status === 401) {
+        setMessage('Authentication error: Please login again.');
+      } else if (error.response?.status === 500) {
+        setMessage('Server error: Please try again later.');
+      } else {
+        setMessage(`Error updating content section: ${error.message}`);
+      }
     } finally {
       setSaving(false);
     }

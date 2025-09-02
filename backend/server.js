@@ -29,11 +29,15 @@ app.use((req, res, next) => {
   }
 });
 
-// Rate limiting
+// Rate limiting - daha esnek ayarlar
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 1000,
-  skip: (req) => req.ip === '127.0.0.1' || req.ip === '::1'
+  windowMs: 15 * 60 * 1000, // 15 dakika
+  max: 10000, // 15 dakikada 10000 istek (çok daha yüksek)
+  skip: (req) => req.ip === '127.0.0.1' || req.ip === '::1',
+  message: {
+    error: 'Too many requests, please try again later.',
+    retryAfter: '15 minutes'
+  }
 });
 app.use(limiter);
 
@@ -44,24 +48,13 @@ const allowedOrigins = [
   'https://perfect-caring-production.up.railway.app' // Backend'in kendi URL'i
 ];
 
+// Geçici olarak CORS'u tamamen aç (güvenlik için daha sonra kısıtlanabilir)
 app.use(cors({
-  origin: function (origin, callback) {
-    // Development'te origin kontrolü yapma
-    if (process.env.NODE_ENV === 'development') {
-      return callback(null, true);
-    }
-    
-    // Production'da sadece whitelist'teki origin'lere izin ver
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true, // Tüm origin'lere izin ver
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200 // Legacy browser support
 }));
 
 // Pre-flight OPTIONS
@@ -96,10 +89,18 @@ app.use((err, req, res, next) => {
     });
   }
 
-  console.error(err.stack);
+  console.error('❌ Server Error:', err.stack);
+  console.error('Request details:', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body
+  });
+  
   res.status(500).json({ 
     message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
+    timestamp: new Date().toISOString()
   });
 });
 

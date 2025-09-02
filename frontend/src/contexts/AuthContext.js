@@ -21,9 +21,28 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.defaults.timeout = 30000; // 30 saniye timeout
     } else {
       delete axios.defaults.headers.common['Authorization'];
     }
+    
+    // Response interceptor for error handling
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.code === 'ERR_NETWORK') {
+          console.error('Network error: Backend server is not responding');
+        } else if (error.response?.status === 401) {
+          console.error('Authentication error: Token expired or invalid');
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+    
+    return () => {
+      axios.interceptors.response.eject(responseInterceptor);
+    };
   }, [token]);
 
   // Check if admin is logged in on mount
