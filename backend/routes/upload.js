@@ -2,28 +2,36 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Upload klasörünü backend klasöründe tut
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Cloudinary storage ayarı
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'projearna_uploads', // Cloudinary'de klasör ismi
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif', 'avif'],
+    transformation: [{ width: 1920, height: 1080, crop: 'limit' }] // Resim boyutunu optimize et
+  }
+});
+
+// Upload klasörünü backend klasöründe tut (fallback için)
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer konfigürasyonu
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    // Dosya adını unique yapıyoruz
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'img-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
+// Multer konfigürasyonu - Cloudinary için
 const fileFilter = (req, file, cb) => {
   // Sadece resim dosyalarına izin ver
   if (file.mimetype.startsWith('image/')) {
@@ -34,21 +42,22 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  storage: storage,
+  storage: storage, // Cloudinary storage kullan
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit (Cloudinary'de daha büyük)
   },
   fileFilter: fileFilter
 });
 
-// Resim yükleme endpoint'i (Admin only)
+// Resim yükleme endpoint'i (Admin only) - Cloudinary ile
 router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'Dosya yüklenmedi' });
     }
 
-    const imageUrl = `/uploads/${req.file.filename}`;
+    // Cloudinary'den gelen URL
+    const cloudinaryUrl = req.file.path;
     
     // Ultra agresif CORS headers
     res.header('Access-Control-Allow-Origin', '*');
@@ -58,19 +67,16 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
     res.header('Access-Control-Allow-Credentials', 'false');
     res.header('Access-Control-Max-Age', '86400');
     
-    // Railway zaten HTTPS veriyor
-    const protocol = req.protocol;
-    const host = req.get('host');
-    
     res.json({
-      message: 'Resim başarıyla yüklendi',
-      imageUrl: imageUrl,
-      fullUrl: `${protocol}://${host}${imageUrl}`,
-      fileName: req.file.filename
+      message: 'Resim başarıyla Cloudinary\'ye yüklendi',
+      imageUrl: cloudinaryUrl,
+      fullUrl: cloudinaryUrl,
+      fileName: req.file.filename,
+      cloudinaryId: req.file.public_id
     });
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ message: 'Resim yükleme hatası' });
+    console.error('Cloudinary upload error:', error);
+    res.status(500).json({ message: 'Resim yükleme hatası', error: error.message });
   }
 });
 
@@ -178,23 +184,25 @@ router.get('/serve/:filename', (req, res) => {
   }
 });
 
-// Yüklenen resimleri listele (Admin only)
-router.get('/images', authMiddleware, (req, res) => {
+// Yüklenen resimleri listele (Admin only) - Cloudinary'den
+router.get('/images', authMiddleware, async (req, res) => {
   try {
-    const files = fs.readdirSync(uploadDir);
-    // Railway zaten HTTPS veriyor
-    const protocol = req.protocol;
-    const host = req.get('host');
-    
-    const images = files
-      .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
-      .map(file => ({
-        name: file,
-        url: `/uploads/${file}`,
-        fullUrl: `${protocol}://${host}/uploads/${file}`,
-        uploadDate: fs.statSync(path.join(uploadDir, file)).mtime
-      }))
-      .sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+    // Cloudinary'den resimleri listele
+    const result = await cloudinary.search
+      .expression('folder:projearna_uploads')
+      .sort_by([['created_at', 'desc']])
+      .max_results(50)
+      .execute();
+
+    const images = result.resources.map(resource => ({
+      name: resource.public_id.split('/').pop(),
+      url: resource.secure_url,
+      fullUrl: resource.secure_url,
+      uploadDate: resource.created_at,
+      cloudinaryId: resource.public_id,
+      format: resource.format,
+      size: resource.bytes
+    }));
 
     // Ultra agresif CORS headers
     res.header('Access-Control-Allow-Origin', '*');
@@ -206,8 +214,8 @@ router.get('/images', authMiddleware, (req, res) => {
 
     res.json(images);
   } catch (error) {
-    console.error('Error listing images:', error);
-    res.status(500).json({ message: 'Resimler listelenirken hata oluştu' });
+    console.error('Error listing Cloudinary images:', error);
+    res.status(500).json({ message: 'Resimler listelenirken hata oluştu', error: error.message });
   }
 });
 
@@ -272,15 +280,15 @@ router.get('/base64/:filename', (req, res) => {
   }
 });
 
-// Resim silme (Admin only)
-router.delete('/image/:filename', authMiddleware, (req, res) => {
+// Resim silme (Admin only) - Cloudinary'den
+router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
   try {
-    const filename = req.params.filename;
-    const filePath = path.join(uploadDir, filename);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      
+    const cloudinaryId = req.params.cloudinaryId;
+    
+    // Cloudinary'den resmi sil
+    const result = await cloudinary.uploader.destroy(cloudinaryId);
+    
+    if (result.result === 'ok') {
       // Ultra agresif CORS headers
       res.header('Access-Control-Allow-Origin', '*');
       res.header('Access-Control-Allow-Methods', '*');
@@ -289,13 +297,13 @@ router.delete('/image/:filename', authMiddleware, (req, res) => {
       res.header('Access-Control-Allow-Credentials', 'false');
       res.header('Access-Control-Max-Age', '86400');
       
-      res.json({ message: 'Resim başarıyla silindi' });
+      res.json({ message: 'Resim başarıyla Cloudinary\'den silindi' });
     } else {
-      res.status(404).json({ message: 'Resim bulunamadı' });
+      res.status(404).json({ message: 'Resim bulunamadı veya silinemedi' });
     }
   } catch (error) {
-    console.error('Delete error:', error);
-    res.status(500).json({ message: 'Resim silinirken hata oluştu' });
+    console.error('Cloudinary delete error:', error);
+    res.status(500).json({ message: 'Resim silinirken hata oluştu', error: error.message });
   }
 });
 

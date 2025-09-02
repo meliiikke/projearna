@@ -86,14 +86,16 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     onImageSelect(imageUrl);
   };
 
-  const handleImageDelete = async (filename) => {
+  const handleImageDelete = async (image) => {
     if (!window.confirm('Bu resmi silmek istediğinizden emin misiniz?')) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/upload/image/${filename}`);
+      // Cloudinary ID'yi kullan (eğer varsa)
+      const deleteId = image.cloudinaryId || image.name;
+      await axios.delete(`${API_BASE_URL}/upload/image/${deleteId}`);
       await fetchImages();
       
-      if (selectedImage && selectedImage.includes(filename)) {
+      if (selectedImage && selectedImage.includes(image.name)) {
         setSelectedImage('');
         onImageSelect('');
       }
@@ -175,7 +177,7 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
                   </button>
                   <button 
                     className="delete-btn"
-                    onClick={() => handleImageDelete(image.name)}
+                    onClick={() => handleImageDelete(image)}
                   >
                     Sil
                   </button>
