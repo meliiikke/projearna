@@ -1054,6 +1054,82 @@ router.delete('/admin/admins/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Initialize content sections with default data
+router.post('/admin/initialize-sections', authMiddleware, async (req, res) => {
+  try {
+    console.log('🔧 Initializing content sections...');
+    
+    const sections = [
+      {
+        section_name: 'mission',
+        title: 'Our Mission',
+        subtitle: 'Leading the Future of Energy',
+        content: 'We are committed to providing sustainable energy solutions that power the world while protecting our environment for future generations.',
+        is_active: true
+      },
+      {
+        section_name: 'services_header',
+        title: 'Our Services',
+        subtitle: 'Comprehensive Energy Solutions',
+        content: 'We offer a wide range of energy services to meet your business and personal needs.',
+        is_active: true
+      },
+      {
+        section_name: 'statistics',
+        title: 'Our Impact',
+        subtitle: 'Numbers That Matter',
+        content: 'Our commitment to excellence is reflected in our achievements and the trust of our clients worldwide.',
+        is_active: true
+      },
+      {
+        section_name: 'about',
+        title: 'About ARNA Energy',
+        subtitle: 'Your Trusted Energy Partner',
+        content: 'With years of experience in the energy sector, we provide innovative solutions that drive progress and sustainability.',
+        is_active: true
+      },
+      {
+        section_name: 'contact_header',
+        title: 'Get In Touch',
+        subtitle: 'We\'d Love to Hear From You',
+        content: 'Ready to start your energy journey with us? Contact our team today for personalized solutions.',
+        is_active: true
+      }
+    ];
+    
+    let createdCount = 0;
+    let updatedCount = 0;
+    
+    for (const section of sections) {
+      try {
+        const [result] = await pool.execute(
+          'INSERT INTO content_sections (section_name, title, subtitle, content, is_active) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), subtitle = VALUES(subtitle), content = VALUES(content), is_active = VALUES(is_active)',
+          [section.section_name, section.title, section.subtitle, section.content, section.is_active]
+        );
+        
+        if (result.affectedRows === 1) {
+          createdCount++;
+        } else if (result.affectedRows === 2) {
+          updatedCount++;
+        }
+      } catch (error) {
+        console.error(`Error with section ${section.section_name}:`, error);
+      }
+    }
+    
+    console.log(`✅ Content sections initialized: ${createdCount} created, ${updatedCount} updated`);
+    
+    res.json({
+      message: 'Content sections initialized successfully',
+      created: createdCount,
+      updated: updatedCount
+    });
+  } catch (error) {
+    console.error('❌ Content sections initialization error:', error);
+    res.status(500).json({ message: 'Content sections initialization failed', error: error.message });
+  }
+});
+
 // EMERGENCY: Clean old image URLs from database - ULTRA AGGRESSIVE
 router.post('/admin/clean-old-images', authMiddleware, async (req, res) => {
   try {

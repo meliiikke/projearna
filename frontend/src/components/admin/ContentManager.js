@@ -162,6 +162,25 @@ const ContentManager = () => {
     setMessage('');
   };
 
+  const handleInitializeSections = async () => {
+    if (!window.confirm('This will create default content sections. Continue?')) return;
+    
+    setSaving(true);
+    setMessage('');
+    
+    try {
+      const response = await axios.post(`${API_BASE_URL}/content/admin/initialize-sections`);
+      console.log('Initialize response:', response.data);
+      setMessage('Content sections initialized successfully!');
+      fetchSections(); // Refresh the list
+    } catch (error) {
+      console.error('Error initializing sections:', error);
+      setMessage(`Error initializing sections: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-section">
@@ -179,6 +198,13 @@ const ContentManager = () => {
         <p className="section-description">
           Manage the main content sections of your website
         </p>
+        <button 
+          className="btn btn-secondary"
+          onClick={handleInitializeSections}
+          disabled={saving}
+        >
+          {saving ? 'Initializing...' : 'Initialize Default Sections'}
+        </button>
       </div>
 
       {message && (
