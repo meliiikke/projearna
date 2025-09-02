@@ -20,6 +20,16 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disable for development
 }));
 
+// HTTPS enforcement - Railway için
+app.use((req, res, next) => {
+  // Railway'de HTTPS kullanımını zorla
+  if (req.header('x-forwarded-proto') !== 'https' && process.env.NODE_ENV === 'production') {
+    res.redirect(`https://${req.header('host')}${req.url}`);
+  } else {
+    next();
+  }
+});
+
 // Rate limiting (gevşetilmiş development için)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -31,14 +41,19 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS ayarları - geliştirilmiş ve kapsamlı
+// CORS ayarları - Railway için ultra agresif
 app.use(cors({
-  origin: "*", // Tüm origin'lere izin ver
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  origin: function (origin, callback) {
+    // Tüm origin'lere izin ver (Railway için)
+    callback(null, true);
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+  allowedHeaders: ["*"],
+  exposedHeaders: ["*"],
   credentials: false,
   optionsSuccessStatus: 200,
-  preflightContinue: false
+  preflightContinue: false,
+  maxAge: 86400
 }));
 
 // CORS error handling
@@ -57,28 +72,36 @@ app.use((err, req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// uploads klasörünü public yap - CORS sorununu çözmek için geliştirilmiş
+// uploads klasörünü public yap - Railway için ultra agresif CORS
 app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
-  setHeaders: (res, path) => {
-    // Tüm CORS header'larını ekle
+  setHeaders: (res, filePath) => {
+    // Ultra agresif CORS headers
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    res.setHeader("Access-Control-Allow-Methods", "*");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Access-Control-Expose-Headers", "*");
     res.setHeader("Access-Control-Allow-Credentials", "false");
+    res.setHeader("Access-Control-Max-Age", "86400");
+    
+    // Security headers
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     
     // Cache headers
-    res.setHeader("Cache-Control", "public, max-age=31536000");
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    res.setHeader("ETag", `"${Date.now()}"`);
     
     // Content-Type'ı doğru şekilde ayarla
-    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+    if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
       res.setHeader("Content-Type", "image/jpeg");
-    } else if (path.endsWith('.png')) {
+    } else if (filePath.endsWith('.png')) {
       res.setHeader("Content-Type", "image/png");
-    } else if (path.endsWith('.gif')) {
+    } else if (filePath.endsWith('.gif')) {
       res.setHeader("Content-Type", "image/gif");
-    } else if (path.endsWith('.webp')) {
+    } else if (filePath.endsWith('.webp')) {
       res.setHeader("Content-Type", "image/webp");
-    } else if (path.endsWith('.avif')) {
+    } else if (filePath.endsWith('.avif')) {
       res.setHeader("Content-Type", "image/avif");
     }
   }
@@ -87,14 +110,16 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
 // Pre-flight OPTIONS requests için
 app.options('*', cors());
 
-// OPTIONS request'leri için özel handling - geliştirilmiş
+// OPTIONS request'leri için özel handling - Railway için ultra agresif
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Expose-Headers', '*');
     res.header('Access-Control-Allow-Credentials', 'false');
-    res.header('Access-Control-Max-Age', '86400'); // 24 saat
+    res.header('Access-Control-Max-Age', '86400');
+    res.header('Vary', 'Origin');
     res.status(200).end();
     return;
   }

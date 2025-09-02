@@ -8,8 +8,10 @@ const getApiBaseUrl = () => {
     return '';
   }
 
-  // Production: use environment variable or default
-  return process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app/api';
+  // Production: use environment variable or default - HTTPS zorunlu
+  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app/api';
+  // HTTPS kullanımını garanti et
+  return baseUrl.replace(/^http:/, 'https:');
 };
 
 export const API_BASE_URL = getApiBaseUrl();
@@ -21,9 +23,9 @@ export const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
 export const normalizeImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
   
-  // Eğer zaten tam URL ise, olduğu gibi döndür
+  // Eğer zaten tam URL ise, HTTPS kullanımını garanti et
   if (imageUrl.startsWith('http')) {
-    return imageUrl;
+    return imageUrl.replace(/^http:/, 'https:');
   }
   
   // Eğer /uploads ile başlıyorsa, proxy endpoint kullan
@@ -41,9 +43,9 @@ export const normalizeImageUrl = (imageUrl) => {
 export const normalizeImageUrlServe = (imageUrl) => {
   if (!imageUrl) return null;
   
-  // Eğer zaten tam URL ise, olduğu gibi döndür
+  // Eğer zaten tam URL ise, HTTPS kullanımını garanti et
   if (imageUrl.startsWith('http')) {
-    return imageUrl;
+    return imageUrl.replace(/^http:/, 'https:');
   }
   
   // Eğer /uploads ile başlıyorsa, serve endpoint kullan
@@ -61,9 +63,9 @@ export const normalizeImageUrlServe = (imageUrl) => {
 export const normalizeImageUrlDirect = (imageUrl) => {
   if (!imageUrl) return null;
   
-  // Eğer zaten tam URL ise, olduğu gibi döndür
+  // Eğer zaten tam URL ise, HTTPS kullanımını garanti et
   if (imageUrl.startsWith('http')) {
-    return imageUrl;
+    return imageUrl.replace(/^http:/, 'https:');
   }
   
   // Eğer /uploads ile başlıyorsa, direkt backend URL ile birleştir

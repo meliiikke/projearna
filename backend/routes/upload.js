@@ -50,10 +50,13 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
 
     const imageUrl = `/uploads/${req.file.filename}`;
     
-    // CORS headers ekle
+    // Ultra agresif CORS headers
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Expose-Headers', '*');
+    res.header('Access-Control-Allow-Credentials', 'false');
+    res.header('Access-Control-Max-Age', '86400');
     
     // Railway zaten HTTPS veriyor
     const protocol = req.protocol;
@@ -123,15 +126,19 @@ router.get('/proxy/:filename', (req, res) => {
         break;
     }
     
-    // Kapsamlı CORS headers ekle
+    // Ultra agresif CORS headers - Railway için
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Expose-Headers', '*');
     res.header('Access-Control-Allow-Credentials', 'false');
     res.header('Access-Control-Max-Age', '86400');
-    res.header('Cache-Control', 'public, max-age=31536000');
+    res.header('Vary', 'Origin');
+    res.header('Cache-Control', 'public, max-age=31536000, immutable');
     res.header('Content-Type', contentType);
     res.header('X-Content-Type-Options', 'nosniff');
+    res.header('X-Frame-Options', 'SAMEORIGIN');
+    res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     
     // Dosyayı gönder
     res.sendFile(filePath);
@@ -151,10 +158,18 @@ router.get('/serve/:filename', (req, res) => {
       return res.status(404).json({ message: 'Resim bulunamadı' });
     }
     
-    // CORS headers
+    // Ultra agresif CORS headers - Railway için
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Methods', '*');
     res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Expose-Headers', '*');
+    res.header('Access-Control-Allow-Credentials', 'false');
+    res.header('Access-Control-Max-Age', '86400');
+    res.header('Vary', 'Origin');
+    res.header('Cache-Control', 'public, max-age=31536000, immutable');
+    res.header('X-Content-Type-Options', 'nosniff');
+    res.header('X-Frame-Options', 'SAMEORIGIN');
+    res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     
     res.sendFile(filePath);
   } catch (error) {
@@ -181,10 +196,13 @@ router.get('/images', authMiddleware, (req, res) => {
       }))
       .sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
 
-    // CORS headers ekle
+    // Ultra agresif CORS headers
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Expose-Headers', '*');
+    res.header('Access-Control-Allow-Credentials', 'false');
+    res.header('Access-Control-Max-Age', '86400');
 
     res.json(images);
   } catch (error) {
