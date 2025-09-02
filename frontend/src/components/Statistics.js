@@ -87,8 +87,8 @@ const Statistics = () => {
 
     fetchData();
 
-    // Auto-refresh her 30 saniyede bir
-    const interval = setInterval(fetchData, 30000);
+    // Auto-refresh her 1 saatte bir (Railway servis kapanmasını önlemek için)
+    const interval = setInterval(fetchData, 1000 * 60 * 60); // 1 saat
 
     return () => clearInterval(interval);
   }, []);
