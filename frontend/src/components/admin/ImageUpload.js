@@ -100,15 +100,17 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     try {
       const token = localStorage.getItem('token');
       
-      // Cloudinary ID'yi kullan - "projearna_uploads/abc123" formatında
-      const cloudinaryId = image.cloudinaryId;
+      // Önce cloudinaryId'yi dene, yoksa imageUrl'yi kullan
+      const deleteParam = image.cloudinaryId || image.url;
       
-      if (!cloudinaryId) {
-        alert('Bu eski resim Cloudinary\'de bulunmuyor. Sadece yeni yüklenen resimler silinebilir.');
+      if (!deleteParam) {
+        alert('Resim ID bulunamadı!');
         return;
       }
       
-      await axios.delete(`${API_BASE_URL}/upload/image/${cloudinaryId}`, {
+      console.log('Deleting image with param:', deleteParam);
+      
+      await axios.delete(`${API_BASE_URL}/upload/image/${encodeURIComponent(deleteParam)}`, {
         headers: {
           'x-auth-token': token
         }
@@ -129,6 +131,8 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
         alert('Auth hatası! Lütfen tekrar giriş yapın.');
       } else if (error.response?.status === 404) {
         alert('Resim bulunamadı veya zaten silinmiş!');
+      } else if (error.response?.status === 400) {
+        alert('Bu eski resim Cloudinary\'de bulunmuyor. Sadece yeni yüklenen resimler silinebilir.');
       } else {
         alert(`Resim silinirken hata oluştu: ${error.message}`);
       }

@@ -45,11 +45,12 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
     }
 
     res.json({
-      message: 'Resim başarıyla Cloudinary\'ye yüklendi',
-      imageUrl: req.file.path,          // Cloudinary URL
-      fileName: req.file.originalname,  // Orijinal dosya adı
-      cloudinaryId: req.file.filename   // Cloudinary public_id
-    });
+        message: 'Resim başarıyla Cloudinary\'ye yüklendi',
+        imageUrl: req.file.path,             // Cloudinary URL
+        fileName: req.file.originalname,     // Orijinal dosya adı
+        cloudinaryId: req.file.filename || req.file.public_id  // Cloudinary public_id
+      });
+      
   } catch (error) {
     console.error('Cloudinary upload error:', error);
     res.status(500).json({ message: 'Resim yükleme hatası', error: error.message });
@@ -85,7 +86,28 @@ router.get('/images', authMiddleware, async (req, res) => {
 router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
   try {
     const cloudinaryId = req.params.cloudinaryId;
-    const result = await cloudinary.uploader.destroy(cloudinaryId);
+    
+    // Eğer cloudinaryId undefined ise hata döndür
+    if (!cloudinaryId || cloudinaryId === 'undefined') {
+      return res.status(400).json({ message: 'Cloudinary ID bulunamadı' });
+    }
+    
+    // Eğer gelen değer bir URL ise, public_id'yi çıkar
+    let publicId = cloudinaryId;
+    if (cloudinaryId.includes('cloudinary.com')) {
+      // URL'den public_id'yi çıkar: https://res.cloudinary.com/.../projearna_uploads/abc123.jpg -> projearna_uploads/abc123
+      const urlParts = cloudinaryId.split('/');
+      const folderIndex = urlParts.findIndex(part => part === 'projearna_uploads');
+      if (folderIndex !== -1 && urlParts[folderIndex + 1]) {
+        const filename = urlParts[folderIndex + 1];
+        publicId = `projearna_uploads/${filename.split('.')[0]}`;
+      } else {
+        return res.status(400).json({ message: 'Geçersiz Cloudinary URL formatı' });
+      }
+    }
+    
+    console.log('Deleting image with publicId:', publicId);
+    const result = await cloudinary.uploader.destroy(publicId);
 
     if (result.result === 'ok') {
       res.json({ message: 'Resim başarıyla silindi' });
