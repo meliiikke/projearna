@@ -25,11 +25,7 @@ const storage = new CloudinaryStorage({
   }
 });
 
-// Upload klasörünü backend klasöründe tut (fallback için)
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Cloudinary kullandığımız için local upload klasörüne ihtiyacımız yok
 
 // Multer konfigürasyonu - Cloudinary için
 const fileFilter = (req, file, cb) => {
@@ -80,107 +76,17 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
   }
 });
 
-// Debug endpoint - uploads klasörünü kontrol et
+// Debug endpoint - Cloudinary durumunu kontrol et
 router.get('/debug', (req, res) => {
   try {
-    const uploadDirExists = fs.existsSync(uploadDir);
-    const files = uploadDirExists ? fs.readdirSync(uploadDir) : [];
-    
     res.json({
-      uploadDir: uploadDir,
-      uploadDirExists: uploadDirExists,
-      files: files,
-      currentWorkingDir: process.cwd(),
-      __dirname: __dirname
+      message: 'Cloudinary Upload Service',
+      cloudinaryConfigured: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY),
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      folder: 'projearna_uploads'
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
-  }
-});
-
-// Resim proxy endpoint - CORS sorununu çözmek için (geliştirilmiş)
-router.get('/proxy/:filename', (req, res) => {
-  try {
-    const filename = req.params.filename;
-    const filePath = path.join(uploadDir, filename);
-    
-    // Dosya var mı kontrol et
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'Resim bulunamadı' });
-    }
-    
-    // Dosya türünü belirle
-    const ext = path.extname(filename).toLowerCase();
-    let contentType = 'image/jpeg'; // default
-    
-    switch (ext) {
-      case '.png':
-        contentType = 'image/png';
-        break;
-      case '.jpg':
-      case '.jpeg':
-        contentType = 'image/jpeg';
-        break;
-      case '.gif':
-        contentType = 'image/gif';
-        break;
-      case '.webp':
-        contentType = 'image/webp';
-        break;
-      case '.avif':
-        contentType = 'image/avif';
-        break;
-    }
-    
-    // Ultra agresif CORS headers - Railway için
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Expose-Headers', '*');
-    res.header('Access-Control-Allow-Credentials', 'false');
-    res.header('Access-Control-Max-Age', '86400');
-    res.header('Vary', 'Origin');
-    res.header('Cache-Control', 'public, max-age=31536000, immutable');
-    res.header('Content-Type', contentType);
-    res.header('X-Content-Type-Options', 'nosniff');
-    res.header('X-Frame-Options', 'SAMEORIGIN');
-    res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
-    // Dosyayı gönder
-    res.sendFile(filePath);
-  } catch (error) {
-    console.error('Proxy error:', error);
-    res.status(500).json({ message: 'Resim yüklenirken hata oluştu' });
-  }
-});
-
-// Alternatif resim serving endpoint - daha basit
-router.get('/serve/:filename', (req, res) => {
-  try {
-    const filename = req.params.filename;
-    const filePath = path.join(uploadDir, filename);
-    
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'Resim bulunamadı' });
-    }
-    
-    // Ultra agresif CORS headers - Railway için
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Expose-Headers', '*');
-    res.header('Access-Control-Allow-Credentials', 'false');
-    res.header('Access-Control-Max-Age', '86400');
-    res.header('Vary', 'Origin');
-    res.header('Cache-Control', 'public, max-age=31536000, immutable');
-    res.header('X-Content-Type-Options', 'nosniff');
-    res.header('X-Frame-Options', 'SAMEORIGIN');
-    res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
-    res.sendFile(filePath);
-  } catch (error) {
-    console.error('Serve error:', error);
-    res.status(500).json({ message: 'Resim yüklenirken hata oluştu' });
   }
 });
 
@@ -219,66 +125,7 @@ router.get('/images', authMiddleware, async (req, res) => {
   }
 });
 
-// Base64 resim endpoint - CORS sorununu tamamen bypass eder
-router.get('/base64/:filename', (req, res) => {
-  try {
-    const filename = req.params.filename;
-    const filePath = path.join(uploadDir, filename);
-    
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'Resim bulunamadı' });
-    }
-    
-    // Dosyayı base64 olarak oku
-    const fileBuffer = fs.readFileSync(filePath);
-    const base64String = fileBuffer.toString('base64');
-    
-    // Dosya türünü belirle
-    const ext = path.extname(filename).toLowerCase();
-    let mimeType = 'image/jpeg'; // default
-    
-    switch (ext) {
-      case '.png':
-        mimeType = 'image/png';
-        break;
-      case '.jpg':
-      case '.jpeg':
-        mimeType = 'image/jpeg';
-        break;
-      case '.gif':
-        mimeType = 'image/gif';
-        break;
-      case '.webp':
-        mimeType = 'image/webp';
-        break;
-      case '.avif':
-        mimeType = 'image/avif';
-        break;
-    }
-    
-    // Base64 data URL oluştur
-    const dataUrl = `data:${mimeType};base64,${base64String}`;
-    
-    // Ultra agresif CORS headers
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Expose-Headers', '*');
-    res.header('Access-Control-Allow-Credentials', 'false');
-    res.header('Access-Control-Max-Age', '86400');
-    res.header('Content-Type', 'application/json');
-    
-    res.json({
-      success: true,
-      dataUrl: dataUrl,
-      mimeType: mimeType,
-      filename: filename
-    });
-  } catch (error) {
-    console.error('Base64 error:', error);
-    res.status(500).json({ message: 'Resim base64 dönüştürülürken hata oluştu' });
-  }
-});
+// Base64 endpoint'i kaldırıldı - Cloudinary kullanıyoruz
 
 // Resim silme (Admin only) - Cloudinary'den
 router.delete('/image/:cloudinaryId', authMiddleware, async (req, res) => {
