@@ -31,11 +31,17 @@ const Hero = () => {
     }
   ]);
 
-  // Preload image function - Cloudinary için basitleştirildi
+  // Preload image function - Sadece Cloudinary için
   const preloadImage = useCallback((imageUrl) => {
     if (!imageUrl) return Promise.resolve();
     
     const normalizedUrl = normalizeImageUrl(imageUrl);
+    
+    // Eski resim URL'si ise yükleme
+    if (!normalizedUrl) {
+      console.warn('Eski resim URL\'si, yüklenmeyecek:', imageUrl);
+      return Promise.resolve();
+    }
     
     // Check if image is already loaded
     if (imagesLoaded[normalizedUrl] !== undefined) {
@@ -50,7 +56,7 @@ const Hero = () => {
         resolve();
       };
       img.onerror = () => {
-        console.warn('Failed to load image:', normalizedUrl);
+        console.warn('Failed to load Cloudinary image:', normalizedUrl);
         setImagesLoaded(prev => ({ ...prev, [normalizedUrl]: false }));
         resolve(); // Resolve anyway to not block loading
       };
@@ -78,8 +84,19 @@ const Hero = () => {
           const slidesResponse = await fetch(`${API_BASE_URL}/api/hero-slides/slides`);
           const slidesData = await slidesResponse.json();
           if (slidesData && slidesData.length > 0) {
-            setSliderData(slidesData);
-            slidesRes = { data: slidesData };
+            // Eski resimleri filtrele, sadece Cloudinary resimlerini kullan
+            const filteredSlides = slidesData.filter(slide => {
+              const normalizedUrl = normalizeImageUrl(slide.image_url);
+              if (!normalizedUrl && slide.image_url) {
+                console.warn(`Hero slide "${slide.title}" eski resim URL'si kullanıyor, filtrelendi:`, slide.image_url);
+                return false;
+              }
+              return true;
+            });
+            
+            console.log(`Hero slides: ${slidesData.length} toplam, ${filteredSlides.length} geçerli (Cloudinary)`);
+            setSliderData(filteredSlides);
+            slidesRes = { data: filteredSlides };
           }
         } catch (slidesError) {
           console.log('Hero slides endpoint failed, using default data');
@@ -201,9 +218,13 @@ const Hero = () => {
             key={currentSlide}
             className={`hero-image ${currentSlideData?.image_url && imagesLoaded[normalizeImageUrl(currentSlideData.image_url)] ? 'image-loaded' : 'image-placeholder'}`}
             style={{
-              backgroundImage: currentSlideData?.image_url && imagesLoaded[normalizeImageUrl(currentSlideData.image_url)] !== false
-                ? `linear-gradient(135deg, rgba(26, 26, 26, 0.7) 0%, rgba(197, 165, 114, 0.1) 50%, rgba(26, 26, 26, 0.8) 100%), url(${normalizeImageUrl(currentSlideData.image_url)})`
-                : undefined
+              backgroundImage: (() => {
+                if (!currentSlideData?.image_url) return undefined;
+                const normalizedUrl = normalizeImageUrl(currentSlideData.image_url);
+                if (!normalizedUrl) return undefined;
+                if (imagesLoaded[normalizedUrl] === false) return undefined;
+                return `linear-gradient(135deg, rgba(26, 26, 26, 0.7) 0%, rgba(197, 165, 114, 0.1) 50%, rgba(26, 26, 26, 0.8) 100%), url(${normalizedUrl})`;
+              })()
             }}
             initial={{ opacity: 0, scale: 1.02 }}
             animate={{ opacity: 1, scale: 1 }}
