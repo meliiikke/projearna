@@ -89,6 +89,55 @@ router.get('/debug', (req, res) => {
   }
 });
 
+// Resim proxy endpoint - CORS sorununu çözmek için
+router.get('/proxy/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const filePath = path.join(uploadDir, filename);
+    
+    // Dosya var mı kontrol et
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'Resim bulunamadı' });
+    }
+    
+    // Dosya türünü belirle
+    const ext = path.extname(filename).toLowerCase();
+    let contentType = 'image/jpeg'; // default
+    
+    switch (ext) {
+      case '.png':
+        contentType = 'image/png';
+        break;
+      case '.jpg':
+      case '.jpeg':
+        contentType = 'image/jpeg';
+        break;
+      case '.gif':
+        contentType = 'image/gif';
+        break;
+      case '.webp':
+        contentType = 'image/webp';
+        break;
+      case '.avif':
+        contentType = 'image/avif';
+        break;
+    }
+    
+    // CORS headers ekle
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Cache-Control', 'public, max-age=31536000');
+    res.header('Content-Type', contentType);
+    
+    // Dosyayı gönder
+    res.sendFile(filePath);
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({ message: 'Resim yüklenirken hata oluştu' });
+  }
+});
+
 // Yüklenen resimleri listele (Admin only)
 router.get('/images', authMiddleware, (req, res) => {
   try {
