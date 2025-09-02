@@ -100,17 +100,15 @@ const ContentManager = () => {
 
     try {
       console.log('Updating section:', editingSection.id, 'with data:', formData);
-      console.log('API URL:', `${API_BASE_URL}/content/admin/sections/${editingSection.id}`);
+      const data = await apiPutAuth(`/content/admin/sections/${editingSection.id}`, formData);
       
-      const response = await axios.put(`${API_BASE_URL}/content/admin/sections/${editingSection.id}`, formData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        timeout: 30000
-      });
+      if (data.error) {
+        console.error('Failed to update section:', data.error);
+        setMessage(`Error updating content section: ${data.error}`);
+        return;
+      }
       
-      console.log('Update response:', response.data);
+      console.log('Update response:', data);
       
       // Update local state
       setSections(prev => prev.map(section => 
@@ -176,8 +174,15 @@ const ContentManager = () => {
     setMessage('');
     
     try {
-      const response = await axios.post(`${API_BASE_URL}/content/admin/initialize-sections`);
-      console.log('Initialize response:', response.data);
+      const data = await apiPostAuth('/content/admin/initialize-sections');
+      
+      if (data.error) {
+        console.error('Failed to initialize sections:', data.error);
+        setMessage(`Error initializing sections: ${data.error}`);
+        return;
+      }
+      
+      console.log('Initialize response:', data);
       setMessage('Content sections initialized successfully!');
       fetchSections(); // Refresh the list
     } catch (error) {
