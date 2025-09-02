@@ -40,19 +40,27 @@ app.use(limiter);
 // ✅ CORS whitelist
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://arnasitesi.netlify.app'
+  'https://arnasitesi.netlify.app',
+  'https://perfect-caring-production.up.railway.app' // Backend'in kendi URL'i
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
+    // Development'te origin kontrolü yapma
+    if (process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    
+    // Production'da sadece whitelist'teki origin'lere izin ver
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
   credentials: true
 }));
 
