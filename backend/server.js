@@ -20,15 +20,16 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disable for development
 }));
 
-// HTTPS enforcement - Railway için
 app.use((req, res, next) => {
-  if (req.header('x-forwarded-proto') !== 'https' && process.env.NODE_ENV === 'production') {
-    res.redirect(`https://${req.header('host')}${req.url}`);
-  } else {
+    if (
+      req.header('x-forwarded-proto') !== 'https' &&
+      process.env.NODE_ENV === 'production' &&
+      (req.method === 'GET' || req.method === 'HEAD')
+    ) {
+      return res.redirect(`https://${req.header('host')}${req.url}`);
+    }
     next();
-  }
-});
-
+  });
 // Rate limiting - daha esnek ayarlar
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 dakika
@@ -46,39 +47,23 @@ const allowedOrigins = [
     'http://localhost:3000',
     'https://arnasitesi.netlify.app'
   ];
-
-// CORS konfigürasyonu - EMERGENCY: Allow all origins
-app.use(cors({
-    origin: true, // Allow all origins
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: [
-      "Content-Type", 
-      "Authorization", 
-      "x-auth-token", 
-      "Accept", 
-      "Origin", 
-      "X-Requested-With",
-      "Access-Control-Allow-Origin",
-      "Access-Control-Allow-Headers",
-      "Access-Control-Allow-Methods"
-    ],
-    credentials: true,
-    optionsSuccessStatus: 200,
-    preflightContinue: false
+  
+  app.use(cors({
+    origin: function (origin, callback) {
+      // Eğer Postman / server-to-server gibi origin yoksa da izin verelim
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('❌ CORS blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
+    credentials: true
   }));
 
-// Pre-flight OPTIONS handler - EMERGENCY: Allow all
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  
-  // Allow all origins for emergency fix
-  res.header('Access-Control-Allow-Origin', origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token, Accept, Origin, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-  res.sendStatus(200);
-});
+// Pre-flight OPTIONS handler - PRODUCTION
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));

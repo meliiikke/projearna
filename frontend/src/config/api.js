@@ -9,7 +9,7 @@ const getApiBaseUrl = () => {
   }
 
   // Production: use environment variable or default - HTTPS zorunlu
-  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'https://projearna-production.up.railway.app/api';
+  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'https://perfect-caring-production.up.railway.app/api';
   // HTTPS kullanımını garanti et
   return baseUrl.replace(/^http:/, 'https:');
 };

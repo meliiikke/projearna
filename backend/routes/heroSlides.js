@@ -3,14 +3,7 @@ const router = express.Router();
 const { pool } = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 
-// CORS middleware for public routes
-const corsMiddleware = (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://arnasitesi.netlify.app');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-};
+// CORS middleware kaldırıldı - server.js'de global CORS var
 
 // Helper function to clean image URLs - ULTRA AGGRESSIVE
 const cleanImageUrl = (imageUrl) => {
@@ -40,7 +33,7 @@ const cleanImageUrl = (imageUrl) => {
 };
 
 // Get all hero slides (public)
-router.get('/slides', corsMiddleware, async (req, res) => {
+router.get('/slides', async (req, res) => {
   try {
     const [rows] = await pool.execute(
       'SELECT * FROM hero_slides WHERE is_active = 1 ORDER BY slide_order ASC, created_at ASC'

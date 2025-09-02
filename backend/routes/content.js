@@ -4,14 +4,7 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// CORS middleware for public routes
-const corsMiddleware = (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://arnasitesi.netlify.app');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-};
+// CORS middleware kaldırıldı - server.js'de global CORS var
 
 // Helper function to clean image URLs - ULTRA AGGRESSIVE
 const cleanImageUrl = (imageUrl) => {
@@ -41,7 +34,7 @@ const cleanImageUrl = (imageUrl) => {
 };
 
 // Get all content sections (public)
-router.get('/sections', corsMiddleware, async (req, res) => {
+router.get('/sections', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM content_sections WHERE is_active = true ORDER BY section_name');
     
@@ -82,7 +75,7 @@ router.get('/sections/:sectionName', async (req, res) => {
 });
 
 // Get all services (public)
-router.get('/services', corsMiddleware, async (req, res) => {
+router.get('/services', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM services WHERE is_active = true ORDER BY order_index');
     
@@ -133,7 +126,7 @@ router.get('/contact', async (req, res) => {
 });
 
 // Get hero features (public)
-router.get('/hero-features', corsMiddleware, async (req, res) => {
+router.get('/hero-features', async (req, res) => {
   try {
     console.log('PUBLIC: Fetching hero features...');
     const [rows] = await pool.execute('SELECT * FROM hero_features WHERE is_active = true ORDER BY order_index');
@@ -147,7 +140,7 @@ router.get('/hero-features', corsMiddleware, async (req, res) => {
 });
 
 // Get about features (public)
-router.get('/about-features', corsMiddleware, async (req, res) => {
+router.get('/about-features', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM about_features WHERE is_active = true ORDER BY order_index');
     res.json(rows);
@@ -169,7 +162,7 @@ router.get('/about-stats', async (req, res) => {
 });
 
 // Get map points (public)
-router.get('/map-points', corsMiddleware, async (req, res) => {
+router.get('/map-points', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM map_points WHERE is_active = true ORDER BY order_index');
     res.json(rows);

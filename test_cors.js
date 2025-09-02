@@ -3,7 +3,7 @@ const axios = require('axios');
 async function testCORS() {
   console.log('🔍 Testing CORS configuration...');
   
-  const baseUrl = 'https://projearna-production.up.railway.app/api';
+  const baseUrl = 'https://perfect-caring-production.up.railway.app/api';
   const origin = 'https://arnasitesi.netlify.app';
   
   const endpoints = [
