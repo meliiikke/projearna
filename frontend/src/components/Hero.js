@@ -137,7 +137,7 @@ const Hero = () => {
     };
     
     fetchData();
-  }, []); // Empty dependency array - only run once on mount
+  }, [preloadImage, sliderData]); // Include dependencies
 
   // Otomatik slider geçişi
   useEffect(() => {

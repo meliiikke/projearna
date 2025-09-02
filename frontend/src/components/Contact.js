@@ -83,7 +83,7 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      const requestUrl = `${API_BASE_URL}/api/content/contact`;
+      const requestUrl = `${API_BASE_URL}/content/contact`;
       console.log('Sending request to:', requestUrl); // Debug log
       console.log('Request body:', JSON.stringify(formData)); // Debug log
       
