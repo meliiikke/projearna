@@ -61,9 +61,15 @@ router.post('/image', upload.single('image'), (req, res) => {
       originalname: req.file.originalname
     });
 
+    // Cloudinary URL'sini HTTPS olarak garanti et
+    let imageUrl = req.file.path;
+    if (imageUrl && !imageUrl.startsWith('https://')) {
+      imageUrl = imageUrl.replace(/^http:/, 'https:');
+    }
+
     res.json({
       message: 'Resim başarıyla Cloudinary\'ye yüklendi',
-      imageUrl: req.file.path,        // Cloudinary URL
+      imageUrl: imageUrl,        // Cloudinary URL (HTTPS)
       fileName: req.file.originalname,    // Orijinal dosya adı
       cloudinaryId: req.file.filename    // Cloudinary public_id
     });
@@ -152,8 +158,40 @@ router.get('/debug', (req, res) => {
     apiKey: process.env.CLOUDINARY_API_KEY ? 'SET' : 'NOT_SET',
     apiSecret: process.env.CLOUDINARY_API_SECRET ? 'SET' : 'NOT_SET',
     folder: 'projearna_uploads',
-    status: cloudinaryConfigured ? 'READY' : 'MISSING_CONFIG'
+    status: cloudinaryConfigured ? 'READY' : 'MISSING_CONFIG',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
   });
+});
+
+// ✅ Test endpoint for Cloudinary connection
+router.get('/test-cloudinary', async (req, res) => {
+  try {
+    const cloudinaryConfigured = !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+    
+    if (!cloudinaryConfigured) {
+      return res.status(500).json({
+        error: 'Cloudinary not configured',
+        message: 'Missing environment variables'
+      });
+    }
+
+    // Test Cloudinary connection
+    const result = await cloudinary.api.ping();
+    
+    res.json({
+      message: 'Cloudinary connection successful',
+      cloudinary: result,
+      folder: 'projearna_uploads',
+      status: 'READY'
+    });
+  } catch (error) {
+    console.error('Cloudinary test error:', error);
+    res.status(500).json({
+      error: 'Cloudinary connection failed',
+      message: error.message
+    });
+  }
 });
 
 module.exports = router;

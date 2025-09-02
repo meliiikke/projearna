@@ -1,40 +1,39 @@
 @echo off
-echo 🚀 Starting ARNA Energy Build Process...
+echo Building ARNA Energy Project...
 
-REM Install backend dependencies
-echo 📦 Installing backend dependencies...
+echo.
+echo Building Backend...
 cd backend
-call npm install
+npm install
 if %errorlevel% neq 0 (
-    echo ❌ Backend dependencies installation failed
+    echo Backend build failed!
+    pause
     exit /b 1
 )
-echo ✅ Backend dependencies installed successfully
 
-REM Install frontend dependencies
-echo 📦 Installing frontend dependencies...
+echo.
+echo Building Frontend...
 cd ..\frontend
-call npm install
+npm install
 if %errorlevel% neq 0 (
-    echo ❌ Frontend dependencies installation failed
+    echo Frontend build failed!
+    pause
     exit /b 1
 )
-echo ✅ Frontend dependencies installed successfully
 
-REM Build frontend
-echo 🔨 Building frontend...
-call npm run build
+npm run build
 if %errorlevel% neq 0 (
-    echo ❌ Frontend build failed
+    echo Frontend build failed!
+    pause
     exit /b 1
 )
-echo ✅ Frontend build completed successfully
 
-REM Go back to root
-cd ..
-
-echo 🎉 Build process completed successfully!
-echo 📁 Frontend build output: frontend\build\
-echo 🚀 Backend ready to start: cd backend ^&^& npm start
-
+echo.
+echo Build completed successfully!
+echo.
+echo Next steps:
+echo 1. Deploy backend to Railway
+echo 2. Deploy frontend to Netlify
+echo 3. Configure Cloudinary environment variables
+echo.
 pause

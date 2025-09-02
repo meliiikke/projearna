@@ -9,7 +9,6 @@ require('dotenv').config();
 const { initializeDatabase } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const contentRoutes = require('./routes/content');
-const uploadRoutes = require('./routes/upload');
 const imageRoutes = require('./routes/image');
 const heroSlidesRoutes = require('./routes/heroSlides');
 
@@ -98,7 +97,6 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);
-app.use('/api/upload', uploadRoutes);
 app.use('/api', imageRoutes); // Cloudinary image routes at /api/image
 app.use('/api/hero-slides', heroSlidesRoutes);
 

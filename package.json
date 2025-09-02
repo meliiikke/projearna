@@ -2,14 +2,14 @@
   "name": "arna-energy-website",
   "version": "1.0.0",
   "description": "ARNA Energy Company Website with Admin Panel",
-  "main": "server.js",
+  "main": "backend/server.js",
   "engines": {
     "node": "18.x"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "cd backend && npm start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon server.js",
+    "server": "cd backend && nodemon server.js",
     "client": "cd frontend && npm start",
     "install-all": "npm install && cd frontend && npm install",
     "build": "npm install",

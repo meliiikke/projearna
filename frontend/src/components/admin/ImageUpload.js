@@ -50,45 +50,51 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Dosya boyutu kontrolü (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Dosya boyutu 10MB\'dan büyük olamaz!');
+      return;
+    }
+
+    // Dosya tipi kontrolü
+    if (!file.type.startsWith('image/')) {
+      alert('Sadece resim dosyaları yüklenebilir!');
+      return;
+    }
+
     console.log('📤 Starting upload for file:', file.name, file.size, file.type);
 
     const formData = new FormData();
-    formData.append('image', file); // Backend'de beklenen key adı
+    formData.append('image', file);
 
     setUploading(true);
 
     try {
       const token = localStorage.getItem('token');
       console.log('🔑 Token available:', !!token);
-      console.log('🔑 Token value:', token ? token.substring(0, 20) + '...' : 'null');
       console.log('🌐 Upload URL:', `${API_BASE_URL}/image`);
-      
-      // Token kontrolünü geçici olarak kaldırdık
-      // if (!token) {
-      //   alert('Token bulunamadı! Lütfen sayfayı yenileyin ve tekrar giriş yapın.');
-      //   return;
-      // }
       
       const response = await axios.post(`${API_BASE_URL}/image`, formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000,
+        timeout: 60000, // 60 saniye timeout
       });
 
       console.log('✅ Upload response:', response.data);
 
-      // Backend'den gelen Cloudinary response'u
-      const { imageUrl } = response.data;
+      const { imageUrl, message } = response.data;
       
       if (!imageUrl) {
         throw new Error('Backend did not return imageUrl');
       }
       
-      // URL formatını kontrol et
+      // URL formatını kontrol et ve HTTPS garanti et
+      let finalImageUrl = imageUrl;
       if (imageUrl.includes('cloudinary.com')) {
-        console.log('✅ Cloudinary URL received:', imageUrl);
+        finalImageUrl = imageUrl.replace(/^http:/, 'https:');
+        console.log('✅ Cloudinary URL received:', finalImageUrl);
       } else {
         console.warn('⚠️ Non-Cloudinary URL received:', imageUrl);
       }
@@ -96,20 +102,24 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
       // Resmi listeye ekle
       await fetchImages();
       
-      // Yeni yüklenen resmi seç - Cloudinary URL'si
-      handleImageSelect(imageUrl);
+      // Yeni yüklenen resmi seç
+      handleImageSelect(finalImageUrl);
       
-      alert('Resim başarıyla Cloudinary\'ye yüklendi!');
+      alert(message || 'Resim başarıyla yüklendi!');
     } catch (error) {
       console.error('❌ Upload error:', error);
       console.error('❌ Error response:', error.response?.data);
       
-      if (error.response?.status === 401) {
+      if (error.code === 'ECONNABORTED') {
+        alert('Yükleme zaman aşımına uğradı. Lütfen daha küçük bir dosya deneyin.');
+      } else if (error.response?.status === 401) {
         alert('Auth hatası! Lütfen tekrar giriş yapın.');
       } else if (error.response?.status === 400) {
         alert(`Dosya hatası: ${error.response.data?.message || error.message}`);
       } else if (error.response?.status === 500) {
         alert(`Sunucu hatası: ${error.response.data?.message || error.message}`);
+      } else if (error.response?.status === 413) {
+        alert('Dosya çok büyük! Maksimum 10MB yükleyebilirsiniz.');
       } else {
         alert(`Resim yüklenirken hata oluştu: ${error.message}`);
       }
@@ -173,8 +183,8 @@ const ImageUpload = ({ onImageSelect, currentImage }) => {
   return (
     <div className="image-upload-container">
       <div className="upload-section">
-        <label htmlFor="image-upload" className="upload-btn">
-          {uploading ? 'Yükleniyor...' : '+ Yeni Resim Yükle'}
+        <label htmlFor="image-upload" className={`upload-btn ${uploading ? 'disabled' : ''}`}>
+          {uploading ? '⏳ Yükleniyor...' : '📤 Yeni Resim Yükle'}
         </label>
         <input
           id="image-upload"

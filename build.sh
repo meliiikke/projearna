@@ -1,39 +1,36 @@
 #!/bin/bash
 
-echo "🚀 Starting ARNA Energy Build Process..."
+echo "Building ARNA Energy Project..."
 
-# Install backend dependencies
-echo "📦 Installing backend dependencies..."
+echo ""
+echo "Building Backend..."
 cd backend
 npm install
 if [ $? -ne 0 ]; then
-    echo "❌ Backend dependencies installation failed"
+    echo "Backend build failed!"
     exit 1
 fi
-echo "✅ Backend dependencies installed successfully"
 
-# Install frontend dependencies
-echo "📦 Installing frontend dependencies..."
+echo ""
+echo "Building Frontend..."
 cd ../frontend
 npm install
 if [ $? -ne 0 ]; then
-    echo "❌ Frontend dependencies installation failed"
+    echo "Frontend build failed!"
     exit 1
 fi
-echo "✅ Frontend dependencies installed successfully"
 
-# Build frontend
-echo "🔨 Building frontend..."
 npm run build
 if [ $? -ne 0 ]; then
-    echo "❌ Frontend build failed"
+    echo "Frontend build failed!"
     exit 1
 fi
-echo "✅ Frontend build completed successfully"
 
-# Go back to root
-cd ..
-
-echo "🎉 Build process completed successfully!"
-echo "📁 Frontend build output: frontend/build/"
-echo "🚀 Backend ready to start: cd backend && npm start"
+echo ""
+echo "Build completed successfully!"
+echo ""
+echo "Next steps:"
+echo "1. Deploy backend to Railway"
+echo "2. Deploy frontend to Netlify"
+echo "3. Configure Cloudinary environment variables"
+echo ""
