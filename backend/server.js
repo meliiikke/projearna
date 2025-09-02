@@ -94,17 +94,33 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static files middleware with CORS headers
 app.use('/uploads', (req, res, next) => {
-  // CORS headers ekle
+  // CORS headers ekle - daha kapsamlı
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
   
   // Cache headers ekle
   res.header('Cache-Control', 'public, max-age=31536000');
   
+  // OPTIONS request'leri için
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
   next();
-}, express.static(path.join(__dirname, 'uploads')));
+}, express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, path) => {
+    // Her dosya için CORS headers ekle
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+  }
+}));
 
 // Pre-flight OPTIONS requests için
 app.options('*', cors());

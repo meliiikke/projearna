@@ -55,8 +55,8 @@ router.post('/image', authMiddleware, upload.single('image'), (req, res) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     
-    // Production'da HTTPS kullan, development'ta req.protocol kullan
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : req.protocol;
+    // Production'da her zaman HTTPS kullan
+    const protocol = 'https';
     const host = req.get('host');
     
     res.json({
@@ -93,8 +93,8 @@ router.get('/debug', (req, res) => {
 router.get('/images', authMiddleware, (req, res) => {
   try {
     const files = fs.readdirSync(uploadDir);
-    // Production'da HTTPS kullan, development'ta req.protocol kullan
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : req.protocol;
+    // Production'da her zaman HTTPS kullan
+    const protocol = 'https';
     const host = req.get('host');
     
     const images = files
