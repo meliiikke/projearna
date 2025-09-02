@@ -22,7 +22,6 @@ app.use(helmet({
 
 // HTTPS enforcement - Railway için
 app.use((req, res, next) => {
-  // Railway'de HTTPS kullanımını zorla
   if (req.header('x-forwarded-proto') !== 'https' && process.env.NODE_ENV === 'production') {
     res.redirect(`https://${req.header('host')}${req.url}`);
   } else {
@@ -30,77 +29,47 @@ app.use((req, res, next) => {
   }
 });
 
-// Rate limiting (gevşetilmiş development için)
+// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // limit each IP to 1000 requests per windowMs
-  skip: (req) => {
-    // Development'ta localhost'u skip et
-    return req.ip === '127.0.0.1' || req.ip === '::1';
-  }
+  windowMs: 15 * 60 * 1000, 
+  max: 1000,
+  skip: (req) => req.ip === '127.0.0.1' || req.ip === '::1'
 });
 app.use(limiter);
 
-// CORS ayarları - Railway için ultra agresif
+// ✅ CORS whitelist
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://arnasitesi.netlify.app'
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Tüm origin'lere izin ver (Railway için)
-    callback(null, true);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-  allowedHeaders: ["*"],
-  exposedHeaders: ["*"],
-  credentials: false,
-  optionsSuccessStatus: 200,
-  preflightContinue: false,
-  maxAge: 86400
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
 
-// CORS error handling
-app.use((err, req, res, next) => {
-  if (err.message === 'Not allowed by CORS') {
-    return res.status(403).json({
-      error: 'CORS Error',
-      message: 'Origin not allowed',
-      origin: req.headers.origin
-    });
-  }
-  next(err);
-});
+// Pre-flight OPTIONS
+app.options('*', cors());
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// uploads klasörünü public yap - Railway için ultra agresif CORS
-
-
-// Pre-flight OPTIONS requests için
-app.options('*', cors());
-
-// OPTIONS request'leri için özel handling - Railway için ultra agresif
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Expose-Headers', '*');
-    res.header('Access-Control-Allow-Credentials', 'false');
-    res.header('Access-Control-Max-Age', '86400');
-    res.header('Vary', 'Origin');
-    res.status(200).end();
-    return;
-  }
-  next();
-});
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);
-app.use('/api', imageRoutes); // Cloudinary image routes at /api/image
+app.use('/api', imageRoutes); 
 app.use('/api/hero-slides', heroSlidesRoutes);
 
-// Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
@@ -111,6 +80,14 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      error: 'CORS Error',
+      message: 'Origin not allowed',
+      origin: req.headers.origin
+    });
+  }
+
   console.error(err.stack);
   res.status(500).json({ 
     message: 'Something went wrong!',
