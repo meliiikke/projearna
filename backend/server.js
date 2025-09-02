@@ -14,15 +14,16 @@ const heroSlidesRoutes = require('./routes/heroSlides');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ✅ Önce CORS
+// ✅ Allowed Origins
 const allowedOrigins = [
   'http://localhost:3000',
   'https://arnasitesi.netlify.app'
 ];
 
-app.use(cors({
+// ✅ CORS middleware
+const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Postman, curl
+    if (!origin) return callback(null, true); // Postman, curl, server-to-server
     if (
       allowedOrigins.includes(origin) ||
       origin.endsWith('.netlify.app')
@@ -36,7 +37,12 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
+
+// ✅ Preflight (OPTIONS) fix
+app.options('*', cors(corsOptions));
 
 // ✅ Security middleware
 app.use(helmet({
@@ -57,8 +63,8 @@ app.use((req, res, next) => {
 
 // ✅ Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 10000, 
+  windowMs: 15 * 60 * 1000,
+  max: 10000,
   skip: (req) => req.ip === '127.0.0.1' || req.ip === '::1',
   message: {
     error: 'Too many requests, please try again later.',
@@ -74,13 +80,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ✅ API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);
-app.use('/api', imageRoutes); 
+app.use('/api', imageRoutes);
 app.use('/api/hero-slides', heroSlidesRoutes);
 
 // ✅ Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'ARNA Energy API is running',
     timestamp: new Date().toISOString(),
     port: PORT,
@@ -90,7 +96,7 @@ app.get('/api/health', (req, res) => {
 
 // ✅ Test endpoint
 app.get('/api/test', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'Backend connection test successful',
     timestamp: new Date().toISOString()
   });
@@ -107,7 +113,7 @@ app.use((err, req, res, next) => {
   }
 
   console.error('❌ Server Error:', err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
     timestamp: new Date().toISOString()
@@ -124,7 +130,7 @@ const startServer = async () => {
   try {
     console.log('🚀 Starting ARNA Energy Backend Server...');
     await initializeDatabase();
-    
+
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
