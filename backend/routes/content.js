@@ -4,7 +4,7 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Helper function to clean image URLs
+// Helper function to clean image URLs - ULTRA AGGRESSIVE
 const cleanImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
   
@@ -13,8 +13,17 @@ const cleanImageUrl = (imageUrl) => {
     return imageUrl;
   }
   
-  // If it's an old local path, return null to prevent CORS errors
-  if (imageUrl.startsWith('/uploads/') || imageUrl.includes('img-')) {
+  // ULTRA AGGRESSIVE: If it's an old local path or contains old image patterns, return null to prevent CORS errors
+  if (imageUrl.startsWith('/uploads/') || 
+      imageUrl.includes('img-') || 
+      imageUrl.includes('uploads/') ||
+      imageUrl.includes('img-1756') || // Specific problematic images
+      imageUrl.match(/img-\d+-\d+\.(jpg|jpeg|png|webp|gif)/i) ||
+      imageUrl.match(/img-\d+\.(jpg|jpeg|png|webp|gif)/i) ||
+      imageUrl.includes('175667') || // Specific timestamp patterns
+      imageUrl.includes('175672') ||
+      imageUrl.includes('175673') ||
+      imageUrl.includes('175680')) {
     console.warn('Old image URL detected, returning null:', imageUrl);
     return null;
   }
@@ -1045,34 +1054,61 @@ router.delete('/admin/admins/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// EMERGENCY: Clean old image URLs from database
+// EMERGENCY: Clean old image URLs from database - ULTRA AGGRESSIVE
 router.post('/admin/clean-old-images', authMiddleware, async (req, res) => {
   try {
-    console.log('🧹 Cleaning old image URLs from database...');
+    console.log('🧹 ULTRA AGGRESSIVE cleaning old image URLs from database...');
     
-    // Clean hero_slides
+    // ULTRA AGGRESSIVE: Clean hero_slides
     const [heroResult] = await pool.execute(
-      "UPDATE hero_slides SET image_url = NULL WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%'"
+      `UPDATE hero_slides SET image_url = NULL 
+       WHERE image_url LIKE '/uploads/%' 
+          OR image_url LIKE 'img-%' 
+          OR image_url LIKE '%img-%'
+          OR image_url LIKE '%uploads%'
+          OR image_url LIKE '%img-1756%'
+          OR image_url LIKE '%175667%'
+          OR image_url LIKE '%175672%'
+          OR image_url LIKE '%175673%'
+          OR image_url LIKE '%175680%'`
     );
     
-    // Clean content_sections
+    // ULTRA AGGRESSIVE: Clean content_sections
     const [contentResult] = await pool.execute(
-      "UPDATE content_sections SET image_url = NULL WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%'"
+      `UPDATE content_sections SET image_url = NULL 
+       WHERE image_url LIKE '/uploads/%' 
+          OR image_url LIKE 'img-%' 
+          OR image_url LIKE '%img-%'
+          OR image_url LIKE '%uploads%'
+          OR image_url LIKE '%img-1756%'
+          OR image_url LIKE '%175667%'
+          OR image_url LIKE '%175672%'
+          OR image_url LIKE '%175673%'
+          OR image_url LIKE '%175680%'`
     );
     
-    // Clean services
+    // ULTRA AGGRESSIVE: Clean services
     const [servicesResult] = await pool.execute(
-      "UPDATE services SET image_url = NULL WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%'"
+      `UPDATE services SET image_url = NULL 
+       WHERE image_url LIKE '/uploads/%' 
+          OR image_url LIKE 'img-%' 
+          OR image_url LIKE '%img-%'
+          OR image_url LIKE '%uploads%'
+          OR image_url LIKE '%img-1756%'
+          OR image_url LIKE '%175667%'
+          OR image_url LIKE '%175672%'
+          OR image_url LIKE '%175673%'
+          OR image_url LIKE '%175680%'`
     );
     
-    console.log('✅ Cleanup completed:', {
+    console.log('✅ ULTRA AGGRESSIVE cleanup completed:', {
       hero_slides: heroResult.affectedRows,
       content_sections: contentResult.affectedRows,
       services: servicesResult.affectedRows
     });
     
     res.json({
-      message: 'Old image URLs cleaned successfully',
+      message: 'ULTRA AGGRESSIVE cleanup completed successfully',
       affectedRows: {
         hero_slides: heroResult.affectedRows,
         content_sections: contentResult.affectedRows,
@@ -1080,8 +1116,8 @@ router.post('/admin/clean-old-images', authMiddleware, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Cleanup error:', error);
-    res.status(500).json({ message: 'Cleanup failed', error: error.message });
+    console.error('❌ ULTRA AGGRESSIVE cleanup error:', error);
+    res.status(500).json({ message: 'ULTRA AGGRESSIVE cleanup failed', error: error.message });
   }
 });
 

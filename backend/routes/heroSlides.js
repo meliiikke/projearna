@@ -3,7 +3,7 @@ const router = express.Router();
 const { pool } = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 
-// Helper function to clean image URLs
+// Helper function to clean image URLs - ULTRA AGGRESSIVE
 const cleanImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
   
@@ -12,11 +12,17 @@ const cleanImageUrl = (imageUrl) => {
     return imageUrl;
   }
   
-  // If it's an old local path or contains old image patterns, return null to prevent CORS errors
+  // ULTRA AGGRESSIVE: If it's an old local path or contains old image patterns, return null to prevent CORS errors
   if (imageUrl.startsWith('/uploads/') || 
       imageUrl.includes('img-') || 
       imageUrl.includes('uploads/') ||
-      imageUrl.match(/img-\d+-\d+\.(jpg|jpeg|png|webp|gif)/i)) {
+      imageUrl.includes('img-1756') || // Specific problematic images
+      imageUrl.match(/img-\d+-\d+\.(jpg|jpeg|png|webp|gif)/i) ||
+      imageUrl.match(/img-\d+\.(jpg|jpeg|png|webp|gif)/i) ||
+      imageUrl.includes('175667') || // Specific timestamp patterns
+      imageUrl.includes('175672') ||
+      imageUrl.includes('175673') ||
+      imageUrl.includes('175680')) {
     console.warn('Old image URL detected, returning null:', imageUrl);
     return null;
   }

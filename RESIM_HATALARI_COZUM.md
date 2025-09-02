@@ -1,31 +1,62 @@
-# Resim Hataları Çözümü
+# 🚨 ACİL RESİM HATALARI ÇÖZÜMÜ 🚨
 
 ## Sorun
 - Mixed Content hatası (HTTPS/HTTP karışımı)
 - CORS hatası (net::ERR_BLOCKED_BY_RESPONSE.NotSameOrigin)
 - Silinen resimlerin tekrar görünmesi
+- **ÖZELLİKLE:** img-175667, img-175672, img-175673, img-175680 gibi eski resimler
 
-## Çözüm Adımları
+## 🚨 ACİL ÇÖZÜM ADIMLARI
 
-### 1. Veritabanını Temizle (ÖNEMLİ!)
-Aşağıdaki SQL script'ini phpMyAdmin'de çalıştırın:
+### 1. Veritabanını ULTRA AGGRESSIVE Temizle (ÖNEMLİ!)
+`ACIL_TEMIZLIK.sql` dosyasındaki script'i phpMyAdmin'de çalıştırın:
 
 ```sql
--- Eski resim URL'lerini NULL yap (CORS hatalarını durdur)
+-- ULTRA AGGRESSIVE: Tüm eski URL'leri NULL yap
 UPDATE hero_slides 
 SET image_url = NULL 
-WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%' OR image_url LIKE '%img-%';
+WHERE image_url LIKE '/uploads/%' 
+   OR image_url LIKE 'img-%' 
+   OR image_url LIKE '%img-%'
+   OR image_url LIKE '%uploads%'
+   OR image_url LIKE '%img-1756%'
+   OR image_url LIKE '%175667%'
+   OR image_url LIKE '%175672%'
+   OR image_url LIKE '%175673%'
+   OR image_url LIKE '%175680%';
 
 UPDATE content_sections 
 SET image_url = NULL 
-WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%' OR image_url LIKE '%img-%';
+WHERE image_url LIKE '/uploads/%' 
+   OR image_url LIKE 'img-%' 
+   OR image_url LIKE '%img-%'
+   OR image_url LIKE '%uploads%'
+   OR image_url LIKE '%img-1756%'
+   OR image_url LIKE '%175667%'
+   OR image_url LIKE '%175672%'
+   OR image_url LIKE '%175673%'
+   OR image_url LIKE '%175680%';
 
 UPDATE services 
 SET image_url = NULL 
-WHERE image_url LIKE '/uploads/%' OR image_url LIKE 'img-%' OR image_url LIKE '%img-%';
+WHERE image_url LIKE '/uploads/%' 
+   OR image_url LIKE 'img-%' 
+   OR image_url LIKE '%img-%'
+   OR image_url LIKE '%uploads%'
+   OR image_url LIKE '%img-1756%'
+   OR image_url LIKE '%175667%'
+   OR image_url LIKE '%175672%'
+   OR image_url LIKE '%175673%'
+   OR image_url LIKE '%175680%';
 ```
 
-### 2. Backend'i Yeniden Başlat
+### 2. Backend API ile Temizle (Alternatif)
+Admin panelinde şu endpoint'i çağırın:
+```
+POST /api/content/admin/clean-old-images
+```
+
+### 3. Backend'i Yeniden Başlat
 ```bash
 # Backend'i yeniden başlat
 npm run dev
@@ -33,7 +64,7 @@ npm run dev
 node server.js
 ```
 
-### 3. Frontend'i Yeniden Başlat
+### 4. Frontend'i Yeniden Başlat
 ```bash
 # Frontend'i yeniden başlat
 npm start
@@ -46,12 +77,15 @@ npm start
 - Null resim URL'leri için "Resim yok" placeholder'ı eklendi
 - onError handler'ları eklendi
 
-### Backend (heroSlides.js)
-- Daha güçlü eski URL tespit sistemi
+### Backend (heroSlides.js & content.js)
+- **ULTRA AGGRESSIVE** eski URL tespit sistemi
+- Özel timestamp pattern'leri (175667, 175672, 175673, 175680) tespit etme
 - Regex ile eski resim formatlarını yakalama
+- Acil temizleme endpoint'i eklendi
 
 ### API Config (api.js)
-- Gelişmiş URL normalizasyon
+- **ULTRA AGGRESSIVE** URL normalizasyon
+- Özel problematik resim pattern'lerini tespit etme
 - Eski resim formatlarını daha iyi tespit etme
 
 ## Sonuç
