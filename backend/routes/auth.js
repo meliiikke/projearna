@@ -9,6 +9,8 @@ const router = express.Router();
 // Admin login
 router.post('/login', async (req, res) => {
   try {
+    console.log('🔐 Login attempt from origin:', req.headers.origin);
+    console.log('🔐 Request headers:', req.headers);
     const { username, password } = req.body;
 
     if (!username || !password) {

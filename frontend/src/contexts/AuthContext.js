@@ -50,11 +50,29 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       if (token) {
         try {
-          const response = await axios.get(`${API_BASE_URL}/auth/me`);
+          console.log('🔐 Checking auth with token:', token.substring(0, 20) + '...');
+          const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 10000
+          });
+          console.log('🔐 Auth check successful:', response.data);
           setAdmin(response.data);
         } catch (error) {
-          console.error('Auth check failed:', error);
-          logout();
+          console.error('🔐 Auth check failed:', error);
+          console.error('🔐 Error details:', {
+            message: error.message,
+            code: error.code,
+            response: error.response?.data,
+            status: error.response?.status
+          });
+          
+          // Sadece 401 hatası durumunda logout yap
+          if (error.response?.status === 401) {
+            logout();
+          }
         }
       }
       setLoading(false);

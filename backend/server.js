@@ -51,10 +51,11 @@ const allowedOrigins = [
 // CORS konfigürasyonu - Railway için tamamen açık
 app.use(cors({
   origin: true, // Tüm origin'lere izin ver
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token", "Accept", "Origin", "X-Requested-With"],
   credentials: true,
-  optionsSuccessStatus: 200 // Legacy browser support
+  optionsSuccessStatus: 200, // Legacy browser support
+  preflightContinue: false
 }));
 
 // Pre-flight OPTIONS

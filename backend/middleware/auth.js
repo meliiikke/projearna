@@ -3,6 +3,10 @@ const { pool } = require('../config/database');
 
 const authMiddleware = async (req, res, next) => {
   try {
+    console.log('🔐 Auth middleware - Request from origin:', req.headers.origin);
+    console.log('🔐 Auth middleware - Request method:', req.method);
+    console.log('🔐 Auth middleware - Request URL:', req.url);
+    
     // Check both Authorization header and x-auth-token header
     let token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
