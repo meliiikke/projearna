@@ -12,7 +12,7 @@ const Services = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/content/services`);
+        const response = await fetch(`${API_BASE_URL}/content/services`);
         const data = await response.json();
         setServices(data);
       } catch (error) {

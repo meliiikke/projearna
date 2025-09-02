@@ -70,7 +70,7 @@ const Hero = () => {
         // First check if backend is running
         console.log('Checking backend health...');
         try {
-          const healthRes = await fetch(`${API_BASE_URL}/api/health`);
+          const healthRes = await fetch(`${API_BASE_URL}/health`);
           const healthData = await healthRes.json();
           console.log('Backend health check:', healthData);
         } catch (healthError) {
@@ -81,7 +81,7 @@ const Hero = () => {
         // Fetch hero slides (try both endpoints)
         let slidesRes = null;
         try {
-          const slidesResponse = await fetch(`${API_BASE_URL}/api/hero-slides/slides`);
+          const slidesResponse = await fetch(`${API_BASE_URL}/hero-slides/slides`);
           const slidesData = await slidesResponse.json();
           if (slidesData && slidesData.length > 0) {
             // Eski resimleri filtrele, sadece Cloudinary resimlerini kullan
@@ -111,7 +111,7 @@ const Hero = () => {
         // Try direct backend URL
         let featuresRes;
         try {
-          const featuresResponse = await fetch(`${API_BASE_URL}/api/content/hero-features`);
+          const featuresResponse = await fetch(`${API_BASE_URL}/content/hero-features`);
           const featuresData = await featuresResponse.json();
           featuresRes = { data: featuresData, status: featuresResponse.status };
           console.log('Hero features response - status:', featuresResponse.status);
@@ -126,7 +126,7 @@ const Hero = () => {
         if (!featuresRes.data || featuresRes.data.length === 0) {
           console.log('No active hero features found, trying admin endpoint...');
           try {
-            const adminResponse = await fetch(`${API_BASE_URL}/api/content/admin/hero-features`);
+            const adminResponse = await fetch(`${API_BASE_URL}/content/admin/hero-features`);
             const adminData = await adminResponse.json();
             console.log('Admin hero features response:', adminData);
           } catch (adminError) {

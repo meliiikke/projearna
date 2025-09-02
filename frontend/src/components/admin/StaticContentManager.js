@@ -31,10 +31,10 @@ const StaticContentManager = () => {
         footerBottomLinksRes
       ] = await Promise.all([
         axios.get(`${API_BASE_URL}/content/admin/sections`),
-        axios.get(`${API_BASE_URL}/content/hero-features`),
-        axios.get(`${API_BASE_URL}/content/about-features`),
-        axios.get(`${API_BASE_URL}/content/about-stats`),
-        axios.get(`${API_BASE_URL}/content/footer-bottom-links`)
+        axios.get(`${API_BASE_URL}/content/admin/hero-features`),
+        axios.get(`${API_BASE_URL}/content/admin/about-features`),
+        axios.get(`${API_BASE_URL}/content/admin/about-stats`),
+        axios.get(`${API_BASE_URL}/content/admin/footer-bottom-links`)
       ]);
 
       setContentSections(contentSectionsRes.data);

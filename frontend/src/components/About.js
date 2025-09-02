@@ -14,12 +14,12 @@ const About = () => {
     const fetchData = async () => {
       try {
         // Fetch about content
-        const contentResponse = await fetch(`${API_BASE_URL}/api/content/sections/about`);
+        const contentResponse = await fetch(`${API_BASE_URL}/content/sections/about`);
         const contentData = await contentResponse.json();
         setAboutContent(contentData);
         
         // Fetch about features
-        const featuresResponse = await fetch(`${API_BASE_URL}/api/content/about-features`);
+        const featuresResponse = await fetch(`${API_BASE_URL}/content/about-features`);
         const featuresData = await featuresResponse.json();
         setAboutFeatures(featuresData);
         

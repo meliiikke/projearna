@@ -34,7 +34,7 @@ const Contact = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/content/contact`);
+      const response = await fetch(`${API_BASE_URL}/content/contact`);
       const data = await response.json();
       setContactInfo(data);
     } catch (error) {
